@@ -238,6 +238,20 @@ class VIANProject(QObject, IHasName, IClassifiable):
         else:
             return os.path.join(directory, str(entity.unique_id) + file_extension)
 
+    def zip_baked(self, baked_filepath):
+        dir_path = os.path.dirname(baked_filepath)
+        out_dir = os.path.join(dir_path, self.name + "_baked")
+
+        os.makedirs(out_dir)
+        shutil.copytree(os.path.join(dir_path, "bake"), os.path.join(out_dir, "bake"))
+        shutil.copytree(os.path.join(dir_path, "data"), os.path.join(out_dir, "data"))
+        shutil.copy2(baked_filepath, os.path.join(out_dir, os.path.basename(baked_filepath)))
+
+        archive_name = shutil.make_archive(out_dir, "zip", out_dir)
+        shutil.rmtree(out_dir)
+        return archive_name
+
+
     def get_all_containers(self, types = None):
         result = []
         if types is None:

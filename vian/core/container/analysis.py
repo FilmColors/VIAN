@@ -281,7 +281,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         self.parameters = serialization['parameters']
         self.set_target_container(project.get_by_id(serialization['container']))
 
-        if project.is_baked and self.__class__ == IAnalysisJobAnalysis:
+        if project.is_baked and 'data' in serialization and self.__class__ == IAnalysisJobAnalysis:
             self.set_adata(np.array(serialization['data']), raw=True)
         return self
 

@@ -49,6 +49,25 @@ class TestProjectBaking(unittest.TestCase):
                     if a.__class__ == IAnalysisJobAnalysis:
                         assert np.all(np.equal(values_to_compare[a.unique_id], a.get_adata(raw=True)))
 
+            for s in project.screenshots:
+                assert s.get_img_movie_orig_size() is not None
+
+            archive_name = project.zip_baked(self.test_temp_folder + "/data/NETFLIX_VOCABULARY_baked.eext")
+            assert os.path.isfile(archive_name)
+
+        archive_name2 = os.path.join(self.test_temp_folder, os.path.basename(archive_name))
+        shutil.copy2(archive_name, archive_name2)
+        shutil.unpack_archive(archive_name2, self.test_temp_folder + "/unpacked")
+
+        with VIANProject().load_project(self.test_temp_folder + "/unpacked/NETFLIX_VOCABULARY_baked.eext") as project:
+            for a in project.analysis:
+                if not isinstance(a, ColormetryAnalysis):
+                    if a.__class__ == IAnalysisJobAnalysis:
+                        assert np.all(np.equal(values_to_compare[a.unique_id], a.get_adata(raw=True)))
+
+            for s in project.screenshots:
+                assert s.get_img_movie_orig_size() is not None
+
 
 
 

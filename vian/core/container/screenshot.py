@@ -193,8 +193,7 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         frame = cv2.resize(frame, (self.display_width, self.display_height), interpolation=cv2.INTER_CUBIC)
         cap.release()
         if self.project.is_baked:
-            frame = cv2.imread(self.project.get_bake_path(self, "jpg"))
-
+            frame = cv2.imread(self.project.get_bake_path(self, ".jpg"))
         else:
             cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
             cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos)
@@ -280,7 +279,7 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         self.img_blend = None
 
         if self.project.is_baked:
-            img = cv2.imread(self.project.get_bake_path(self, "jpg"))
+            img = cv2.imread(self.project.get_bake_path(self, ".jpg"))
             self.set_img_movie(img)
 
         return self
