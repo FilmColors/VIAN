@@ -16,7 +16,7 @@ Test cases:
 
 class TestVocabularyLibraryMethods(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_temp_folder = os.path.join(os.getcwd(), "temp2")
+        self.test_temp_folder = os.path.join(os.getcwd(), "temp")
 
         if not os.path.exists(self.test_temp_folder):
             os.mkdir(self.test_temp_folder)
