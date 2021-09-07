@@ -125,6 +125,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
         if dispatch:
             self.dispatch_on_changed(item=self)
 
+        word.onVocabularyWordChanged.connect(partial(self.onVocabularyChanged.emit))
         self.onVocabularyWordAdded.emit(word)
         self.onVocabularyChanged.emit(self)
 
@@ -165,6 +166,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
         if dispatch:
             self.dispatch_on_changed(item=self)
 
+        word.onVocabularyWordChanged.disconnect()
         self.onVocabularyWordRemoved.emit(word)
         self.onVocabularyChanged.emit(self)
 
@@ -295,10 +297,64 @@ class Vocabulary(BaseProjectEntity, IHasName):
 
         return self, id_replacing_table
 
-    def update_vocabulary(self, new_voc, compare_by_name = False):
-        for attr in VOC_COMPARE_ATTRS:
-            if hasattr(self, attr):
-                setattr(self, attr, getattr(new_voc, attr))
+    def update_vocabulary2(self, new_voc: "Vocabulary", join_field = "unique_id", update_scheme = "cud"):
+        update_scheme = update_scheme.lower()
+
+        # Update this vocabulary
+        if "u" in update_scheme:
+            for attr in VOC_COMPARE_ATTRS:
+                if hasattr(self, attr):
+                    setattr(self, attr, getattr(new_voc, attr))
+
+        # Update the words in the vocabulary
+        words_to_check = dict()
+        for w in new_voc.words_plain:
+            words_to_check[getattr(w, join_field)] = w
+
+        # We now check all words in this vocabulary and look if it also exists in the new_voc.
+        # If it exists we may update it, if not we may delete it.
+        # At the end, what remains in words_to_check should be added as new
+        words_to_remove = []
+        for w in self.words_plain:
+            join_key = getattr(w, join_field)
+
+            if join_key in words_to_check:
+                other = words_to_check[join_key]
+
+                if "u" in update_scheme:
+                    for attr in WORD_COMPARE_ATTRS:
+                        setattr(w, attr, getattr(other, attr))
+
+                words_to_check.pop(join_key)
+            else:
+                words_to_remove.append(w)
+
+        if "d" in update_scheme:
+            for w in words_to_remove:
+                self.remove_word(w)
+
+        if "c" in update_scheme:
+            for w in words_to_check.values():
+                self.add_word(w)
+
+    def update_vocabulary(self, new_voc, compare_by_name = False, update_scheme = "cud"):
+        """
+        Updates this vocabulary by a another version of the vocabulary.
+
+        :param new_voc:
+        :param compare_by_name:
+        :param update_scheme: a combination of the letters c, u and d indicating the allowed operations.
+        c=create, u=update and d=delete
+
+        Example: "cud" will create new words, update existing words and delete nonexistent words.
+        :return:
+        """
+        update_scheme = update_scheme.lower()
+
+        if "u" in update_scheme:
+            for attr in VOC_COMPARE_ATTRS:
+                if hasattr(self, attr):
+                    setattr(self, attr, getattr(new_voc, attr))
 
         words = dict()
         to_remove = []
@@ -312,8 +368,9 @@ class Vocabulary(BaseProjectEntity, IHasName):
 
             for w in self.words_plain:
                 if w.name in words:
-                    for attr in WORD_COMPARE_ATTRS:
-                        setattr(w, attr, getattr(words[w.name], attr))
+                    if "u" in update_scheme:
+                        for attr in WORD_COMPARE_ATTRS:
+                            setattr(w, attr, getattr(words[w.name], attr))
                     self.project.add_to_id_list(words[w.name], w.unique_id)
 
                     w.unique_id = words[w.name].unique_id
@@ -353,10 +410,13 @@ class Vocabulary(BaseProjectEntity, IHasName):
             print("to_add", [n.name for n in words.values()])
             print("\n")
 
-        for w in to_remove:
-            self.remove_word(w)
-        for w in words.values():
-            self.add_word(w)
+        if "d" in update_scheme:
+            for w in to_remove:
+                self.remove_word(w)
+
+        if "c" in update_scheme:
+            for w in words.values():
+                self.add_word(w)
 
     def get_type(self):
         return VOCABULARY
@@ -557,7 +617,7 @@ class ClassificationObject(BaseProjectEntity, IHasName):
         self.target_container = []
         self.semantic_segmentation_labels = ("", [])
 
-    def add_vocabulary(self, voc: Vocabulary, dispatch = True, external_ids = None, keyword_override = None):
+    def add_vocabulary(self, voc: Vocabulary, dispatch = True, external_ids = None, keyword_override = None) -> 'List[UniqueKeyword]':
         """
         Adds a vocabulary to this classification object and generates the keywords.
 
@@ -569,6 +629,9 @@ class ClassificationObject(BaseProjectEntity, IHasName):
         """
         if voc not in self.classification_vocabularies:
             self.classification_vocabularies.append(voc)
+
+            # add the vocabulary to the project if its not there already
+            self.project.add_vocabulary(voc)
 
             keywords = []
             for i, w in enumerate(voc.words_plain):
@@ -589,7 +652,9 @@ class ClassificationObject(BaseProjectEntity, IHasName):
             print("Vocabulary added", voc.name)
             return keywords
         else:
-            #Check if really there are new words in the vocabulary which are not yet added to the keywords.
+
+            # Check if really there are new words in the vocabulary which are not yet added to the keywords.
+
             keywords = []
             all_words = [w.word_obj for w in self.unique_keywords]
             all_word_uids = [kwd.word_obj.unique_id for kwd in self.unique_keywords]
@@ -1023,6 +1088,9 @@ class Experiment(BaseProjectEntity, IHasName):
         return keywords
 
     def add_classification_object(self, obj: ClassificationObject):
+        if self.project is not None:
+            obj.set_project(self.project)
+
         if obj not in self.classification_objects:
             self.classification_objects.append(obj)
             self.onClassificationObjectAdded.emit(self)
@@ -1093,7 +1161,7 @@ class Experiment(BaseProjectEntity, IHasName):
             self.analyses.remove(obj)
 
     def toggle_tag(self, container: IClassifiable, keyword: UniqueKeyword):
-        tag = [container, keyword]
+        tag = (container, keyword)
         if tag not in self.classification_results:
             self.tag_container(container, keyword)
             return True
@@ -1102,26 +1170,26 @@ class Experiment(BaseProjectEntity, IHasName):
             return False
 
     def has_tag(self, container: IClassifiable, keyword: UniqueKeyword):
-        tag = [container, keyword]
+        tag = (container, keyword)
         if tag in self.classification_results:
             return True
         else:
             return False
 
     def tag_container(self, container: IClassifiable, keyword: UniqueKeyword):
-        tag = [container, keyword]
+        tag = (container, keyword)
         if tag not in self.classification_results:
             self.classification_results.append(tag)
             if container not in keyword.tagged_containers:
                 keyword.tagged_containers.append(container)
-                container.add_word(keyword)
+                container._add_word(keyword)
 
     def remove_tag(self, container: IClassifiable, keyword: UniqueKeyword):
         try:
-            self.classification_results.remove([container, keyword])
+            self.classification_results.remove((container, keyword))
             if container in keyword.tagged_containers:
                 keyword.tagged_containers.remove(container)
-                container.remove_word(keyword)
+                container._remove_word(keyword)
         except Exception as e:
             log_error("Exception in remove_tag", e)
 

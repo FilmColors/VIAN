@@ -121,6 +121,7 @@ class TestVocabularyLibraryMethods(unittest.TestCase):
             segment = p2.segmentation[0].segments[0]
             assert len(segment.tag_keywords) == 2
 
+            (kwd1, kwd2, kwd3) = p2.get_default_experiment().get_unique_keywords()
 
             for kwd in p2.get_default_experiment().get_unique_keywords():
                 segment.add_tag(kwd)
@@ -139,19 +140,17 @@ class TestVocabularyLibraryMethods(unittest.TestCase):
             assert len(p2.get_default_experiment().get_unique_keywords()) == 4
             assert len(p2.segmentation[0].segments[0].tag_keywords) == 3
 
+
         # Use the d flag
         with VIANProject().load_project(p2_path, library=voc_library, vocabulary_update_scheme="cud") as p2:
             assert len(p2.get_default_experiment().get_unique_keywords()) == 3
             assert len(p2.segmentation[0].segments[0].tag_keywords) == 3
+
 
         # Remove another word
         voc.remove_word(voc.words_plain[0])
         with VIANProject().load_project(p2_path, library=voc_library, vocabulary_update_scheme="cud") as p2:
             assert len(p2.get_default_experiment().get_unique_keywords()) == 2
             assert len(p2.segmentation[0].segments[0].tag_keywords) == 2
-
-
-
-
 
 
