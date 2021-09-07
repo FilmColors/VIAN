@@ -21,10 +21,10 @@ dependencies:
   - scikit-learn
   - fastcluster
   - pymediainfo
-  - pytest
-  - openpyxl
   - pip:
       - pysrt
       - python-vlc
       - pymediainfo
+      - XlsxWriter
+      - openpyxl
 
