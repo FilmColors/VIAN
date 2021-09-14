@@ -18,6 +18,7 @@ import os
 # os.environ['VIAN_LIGHT'] = "1"
 
 import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import time
 import logging
