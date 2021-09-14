@@ -19,7 +19,7 @@ dependencies:
   - sqlalchemy
   - matplotlib
   - scikit-learn
-  - fastcluster
+  - fastcluster==1.1.25
   - pymediainfo
   - pip:
       - pysrt
