@@ -17,7 +17,7 @@ from vian.core.data.computation import version_check
 from vian.core.data.settings import UserSettings, Contributor
 from vian.core.data.audio_handler2 import AudioHandler
 from vian.core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
-from flask_server.server import FlaskServer, FlaskWebWidget, VIAN_PORT
+from vian.flask_server.server import FlaskServer, FlaskWebWidget, VIAN_PORT
 
 from vian.core.gui.dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from vian.core.gui.dialogs.export_segmentation_dialog import ExportSegmentationDialog
@@ -55,7 +55,7 @@ from vian.core.gui.misc.filmography_widget import query_initial
 
 from vian.core.node_editor.node_editor import NodeEditorDock
 from vian.core.node_editor.script_results import NodeEditorResults
-from extensions.extension_list import ExtensionList
+from vian.extensions.extension_list import ExtensionList
 
 from vian.core.container.vocabulary_library import VocabularyLibrary
 from vian.core.concurrent.worker import Worker

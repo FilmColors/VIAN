@@ -4,7 +4,7 @@ from vian.core.data.computation import create_icon
 from vian.core.data.corpus_client import CorpusClient
 from vian.core.data.interfaces import IProjectChangeNotify
 from vian.core.gui.ewidgetbase import *
-from extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
+from vian.extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
 from vian.core.gui.misc.filmography_widget import FilmographyWidget2
 from vian.core.container.project import VIANProject
 

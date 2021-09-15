@@ -425,7 +425,7 @@ class MatrixPlot(EGraphicsView, IVIANVisualization):
 
 
 class HistogramVis(EGraphicsView, IVIANVisualization):
-    def __init__(self, parent, cache_file = "data/hilbert.npz", naming_fields=None):
+    def __init__(self, parent, cache_file = "vian/data/hilbert.npz", naming_fields=None):
         EGraphicsView.__init__(self, parent, auto_frame=False)
         IVIANVisualization.__init__(self, naming_fields)
         self.naming_fields['plot_name'] = "color_histogram"
