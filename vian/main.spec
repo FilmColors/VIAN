@@ -48,12 +48,11 @@ data_paths = [
 console = False
 if sys.platform == "win32":
     console = True
-    VLC_ROOT = 'C:/Program Files/VideoLAN/VLC/'
     vlc_dlls = [
-        (VLC_ROOT + '/libvlc.dll', '.'),
-        (VLC_ROOT + '/axvlc.dll', '.'),
-        (VLC_ROOT + '/libvlccore.dll', '.'),
-        (VLC_ROOT + '/npvlc.dll', '.')
+        ('vlc_bin/libvlc.dll', '.'),
+        ('vlc_bin/axvlc.dll', '.'),
+        ('vlc_bin/libvlccore.dll', '.'),
+        ('vlc_bin/npvlc.dll', '.')
     ]
     data_paths += vlc_dlls
     #data_paths += [(os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/astor/"), "astor/")]
