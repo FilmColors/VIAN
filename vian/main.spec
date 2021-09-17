@@ -49,17 +49,17 @@ console = False
 if sys.platform == "win32":
     console = True
     vlc_dlls = [
-        ('vlc_bin/libvlc.dll', '.'),
-        ('vlc_bin/axvlc.dll', '.'),
-        ('vlc_bin/libvlccore.dll', '.'),
-        ('vlc_bin/npvlc.dll', '.')
+        ('bin/libvlc.dll', '.'),
+        ('bin/axvlc.dll', '.'),
+        ('bin/libvlccore.dll', '.'),
+        ('bin/npvlc.dll', '.')
     ]
     data_paths += vlc_dlls
     #data_paths += [(os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/astor/"), "astor/")]
     binaries += [
-        ("vlc_bin\plugins", "plugins"),
-        (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/sklearn/.libs/vcomp140.dll"), "."),
-        (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/cv2/opencv_videoio_ffmpeg453_64.dll"), ".")
+        ("bin\plugins", "plugins"),
+        ("bin/vcomp140.dll", "."),
+        ("bin/opencv_videoio_ffmpeg453_64.dll", ".")
     ]
     icon='qt_ui/images/main_round.ico'
 
