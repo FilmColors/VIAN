@@ -57,7 +57,7 @@ if sys.platform == "win32":
     data_paths += vlc_dlls
     #data_paths += [(os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/astor/"), "astor/")]
     binaries += [
-        (VLC_ROOT + "\plugins", "plugins"),
+        ("vlc_bin\plugins", "plugins"),
         (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/sklearn/.libs/vcomp140.dll"), "."),
         (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/cv2/opencv_videoio_ffmpeg453_64.dll"), ".")
     ]
