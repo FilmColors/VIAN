@@ -3,7 +3,6 @@ keras
 sqlalchemy
 opencv-contrib-python-headless
 requests
-fastcluster
 PyQt5
 PyQtWebEngine
 scikit-learn
