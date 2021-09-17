@@ -2,6 +2,7 @@
 import glob
 import sys
 import json
+import os
 
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files, collect_dynamic_libs
 
@@ -158,7 +159,8 @@ if sys.platform == "darwin":
                 },)
                 
 #make sure that we are not in dev_mode anymore
-with open(r'vian/data/config.json', 'r+') as f:
+config_path = os.path.join(os.getcwd(), 'dist', 'VIAN', 'vian', 'data', 'config.json') 
+with open(config_path, 'r+') as f:
     data = json.load(f)
     data['dev_mode'] = 0
     f.seek(0)
