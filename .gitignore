@@ -9,9 +9,6 @@ venv37/*
 *.pyc
 *.pickle
 VIAN.zip
-*.hdf5
-*.prototxt.txt
-*.caffemodel
 .vs/
 *.pyproj
 *.sln
