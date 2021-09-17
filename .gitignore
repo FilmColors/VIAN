@@ -12,12 +12,9 @@ VIAN.zip
 *.hdf5
 *.prototxt.txt
 *.caffemodel
-user/models/*
 .vs/
 *.pyproj
 *.sln
-data/models/face_identification/shape_predictor_68_face_landmarks.dat
-data/models/
 idea/
 *.vscode/
 .DS_Store
