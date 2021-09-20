@@ -1120,13 +1120,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
 
             try:
                 if bake:
-                    with open(f"{os.path.dirname(project_path)}/{self.name}_baked.eext", 'w') as f:
+                    filepath = f"{os.path.dirname(project_path)}/{self.name}_baked.eext"
+                    with open(filepath, 'w') as f:
                         json.dump(data, f)
+                    return filepath
                 else:
                     if not os.path.isdir(os.path.split(project_path)[0]):
                         os.makedirs(os.path.split(project_path)[0])
                     with open(project_path, 'w') as f:
                         json.dump(data, f)
+                    return project_path
+
             except Exception as e:
                 print("Exception during Storing: ", str(e))
                 raise e
@@ -1349,16 +1353,19 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     raise e
                     print("Exception in Load Analyses", str(e))
 
+        # This is due to a bug which happened in 0.9.3
+        # When a vocabulary was copied, only the vocabulary uuid changed but not the word uuids.
+        # Thus multiple words had the same uuid,
+        # we therefore have to keep resolve those both by vocabulary and word uuid.
+        # Here the last step is done, which means: Creating new uuids for the words.
+        # Search for _contains_voc_dups to find all locations of interest.
         if "_contains_voc_dups" in self.meta_data:
             for voc in set(self.meta_data["_contains_voc_dups"]['all_vocs']):
-                # v_uid = self.create_unique_id()
-                # voc.unique_id = v_uid
-                # self.add_to_id_list(voc, v_uid)
-
                 for w in voc.words_plain:
                     uid = self.create_unique_id()
                     w.unique_id = uid
                     self.add_to_id_list(w, uid)
+
             self.meta_data.pop("_contains_voc_dups")
 
         if self.colormetry_analysis is not None:
