@@ -92,7 +92,6 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         self.onScreenshotChanged.emit(self)
         self.dispatch_on_changed(item=self)
 
-
     def set_project(self, project):
         super(Screenshot, self).set_project(project)
         # self.display_width = self.project.movie_descriptor.display_width
@@ -195,12 +194,6 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         :return:
         """
 
-        cap = cv2.VideoCapture(self.project.movie_descriptor.movie_path)
-        cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_pos)
-
-        ret, frame = cap.read()
-        frame = cv2.resize(frame, (self.display_width, self.display_height), interpolation=cv2.INTER_CUBIC)
-        cap.release()
         if self.project.is_baked:
             frame = cv2.imread(self.project.get_bake_path(self, ".jpg"))
         else:
