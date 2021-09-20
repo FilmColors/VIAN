@@ -1308,7 +1308,8 @@ class Experiment(BaseProjectEntity, IHasName):
                 if c is not None and k is not None:
                     self.tag_container(c, k)
                 else:
-                    log_error("Loading Classification mapping failed: ", c, k)
+                    log_error(f"Loading Classification mapping failed: {c}({target_uuid}), {k}({keyword_uuid})")
+
         except Exception as e:
             log_error("Exeption during Experiment.deserialize:", e)
             pass
