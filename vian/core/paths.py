@@ -1,8 +1,16 @@
-import os
+import os, sys
+
+
+# If 'frozen' is set, this is a PyInstaller version, else we are in python source code
+# In PyInstaller, this file does nto exist anymore, we thus have to define the source from the executable
+if getattr(sys, 'frozen', False):
+    _application_path = os.path.dirname(sys.executable)
+elif __file__:
+    _application_path = os.path.abspath(os.path.dirname(__file__) + "/../")
 
 
 def get_root_dir():
-    return os.path.abspath(os.path.split(__file__)[0] + "/../") + "/"
+    return _application_path
 
 
 def get_vian_data(append = None) -> str:

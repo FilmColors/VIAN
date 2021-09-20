@@ -32,3 +32,8 @@ vian/flask_server/static/three/*
 venv2/*
 projects/*
 videos/*
+
+vian/dist/*
+vian/build/*
+
+vianenv39
