@@ -1,4 +1,5 @@
 import os
+import sys
 import cv2
 from functools import partial
 import json
@@ -19,7 +20,14 @@ from vian.core.analysis.analysis_import import ColorFeatureAnalysis, ColorPalett
 from vian.core.data.computation import lab_to_lch, lab_to_sat, ms2datetime
 
 app = Flask(__name__)
-app.root_path = os.path.split(__file__)[0]
+
+
+if getattr(sys, 'frozen', False):
+    app.root_path = os.path.dirname(sys.executable)
+elif __file__:
+    app.root_path = os.path.dirname(__file__)
+
+# app.root_path = os.path.split(__file__)[0]
 log_info("FLASK ROOT", app.root_path)
 # app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 

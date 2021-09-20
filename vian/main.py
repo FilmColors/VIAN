@@ -18,8 +18,12 @@ import os
 # os.environ['VIAN_LIGHT'] = "1"
 
 import sys
+from vian.core.paths import get_root_dir
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-os.chdir(os.path.dirname(__file__))
+
+application_path = get_root_dir()
+os.chdir(application_path)
 
 import time
 import logging

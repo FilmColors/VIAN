@@ -8,10 +8,6 @@ from PyInstaller.utils.hooks import collect_submodules, collect_data_files, coll
 
 block_cipher = None
 
-#BUILD_PYTHON_DIR = os.environ['vian_build_dir']
-BUILD_PYTHON_DIR = os.path.join(os.path.dirname(sys.executable),"..")
-print(BUILD_PYTHON_DIR)
-
 if sys.platform.startswith("win"):
     tf_hidden_imports = collect_submodules('tensorflow')
     mp_hidden_imports = collect_submodules('moviepy')
@@ -23,10 +19,11 @@ else:
     flask_hidden_imports = []
     tf_datas = []
 
-
 librosa_data = collect_data_files('librosa')
+
 binaries = []
 binaries += collect_dynamic_libs("pymediainfo")
+
 hiddenimports = [
     'sklearn.utils.sparsetools._graph_validation',
     'sklearn.utils.sparsetools._graph_tools',
@@ -36,12 +33,11 @@ hiddenimports = [
     'sklearn.neighbors._typedefs'
 ] + tf_hidden_imports + mp_hidden_imports + flask_hidden_imports
 
-
 data_paths = [
-    ('data', 'vian/data'),
+    ('data', 'data'),
     ('qt_ui', 'qt_ui'),
-    ('flask_server/static', 'flask_server/static'),
-    ('flask_server/templates', 'flask_server/templates')
+    ('flask_server/static', 'static'),
+    ('flask_server/templates', 'templates')
 ] + tf_datas + librosa_data
 
 
@@ -49,18 +45,19 @@ console = False
 if sys.platform == "win32":
     console = True
     vlc_dlls = [
-        ('import_bin/libvlc.dll', '.'),
-        ('import_bin/axvlc.dll', '.'),
-        ('import_bin/libvlccore.dll', '.'),
-        ('import_bin/npvlc.dll', '.')
+        ('../bin/win64/libvlc.dll', '.'),
+        ('../bin/win64/axvlc.dll', '.'),
+        ('../bin/win64/libvlccore.dll', '.'),
+        ('../bin/win64/npvlc.dll', '.')
     ]
     data_paths += vlc_dlls
-    #data_paths += [(os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/astor/"), "astor/")]
+
     binaries += [
-        ('import_bin/plugins', 'plugins'),
-        ('import_bin/vcomp140.dll', '.'),
-        ('import_bin/opencv_videoio_ffmpeg453_64.dll', '.')
+        ('../bin/win64/plugins', 'plugins'),
+        ('../bin/win64/vcomp140.dll', '.'),
+        ('../bin/win64/opencv_videoio_ffmpeg453_64.dll', '.')
     ]
+
     icon='qt_ui/images/main_round.ico'
 
 elif sys.platform.startswith("linux"):
@@ -75,7 +72,8 @@ else:
      #   print(g)
      #   binaries.append((g, '.'))
     icon='qt_ui/images/main_round.icns'
-    
+
+
 a = Analysis(['main.py'],
              pathex=[],
              binaries=binaries,
@@ -156,9 +154,10 @@ if sys.platform == "darwin":
                         }
                     ]
                 },)
-                
-#make sure that we are not in dev_mode anymore
-config_path = os.path.join(os.getcwd(), 'dist', 'VIAN', 'vian', 'data', 'config.json') 
+
+
+# make sure that we are not in dev_mode anymore
+config_path = os.path.join(os.getcwd(), 'dist', 'VIAN', 'data', 'config.json')
 with open(config_path, 'r+') as f:
     data = json.load(f)
     data['dev_mode'] = 0
