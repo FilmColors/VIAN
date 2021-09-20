@@ -22,7 +22,7 @@ jobs:
         with:
           requirements: requirements.txt
       - run: pip install pyinstaller
-      - run: cd vian
+      - run: cd vian/
       - run: pyinstaller main.spec
       - uses: actions/upload-artifact@v2
         with:
