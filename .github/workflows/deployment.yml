@@ -25,7 +25,7 @@ jobs:
           requirements: requirements.txt
       - run: pip install pyinstaller
       - run: pyinstaller main.spec
-          working-directory: vian
+        working-directory: vian
       - uses: papeloto/action-zip@v1
   	with:
     	  files: vian/dist/
