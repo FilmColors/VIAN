@@ -1,19 +1,26 @@
 # -*- mode: python ; coding: utf-8 -*-
 import glob
 import sys
+import json
+import os
 
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files, collect_dynamic_libs
 
 block_cipher = None
 
-BUILD_PYTHON_DIR = os.environ['vian_build_dir']
+#BUILD_PYTHON_DIR = os.environ['vian_build_dir']
+BUILD_PYTHON_DIR = os.path.join(os.path.dirname(sys.executable),"..")
 print(BUILD_PYTHON_DIR)
 
 if sys.platform.startswith("win"):
-    tf_hidden_imports = collect_submodules('tensorflow_core')
-    tf_datas = collect_data_files('tensorflow_core', subdir=None, include_py_files=True)
+    tf_hidden_imports = collect_submodules('tensorflow')
+    mp_hidden_imports = collect_submodules('moviepy')
+    flask_hidden_imports = collect_submodules('flask_server')
+    tf_datas = collect_data_files('tensorflow', subdir=None, include_py_files=True)
 else:
     tf_hidden_imports = []
+    mp_hidden_imports = []
+    flask_hidden_imports = []
     tf_datas = []
 
 
@@ -24,14 +31,14 @@ hiddenimports = [
     'sklearn.utils.sparsetools._graph_validation',
     'sklearn.utils.sparsetools._graph_tools',
     'sklearn.utils.lgamma',
-    'sklearn.utils.weight_vector'
-    'sklearn.utils.weight_vector'
+    'sklearn.utils.weight_vector',
+    'sklearn.utils.weight_vector',
     'sklearn.neighbors._typedefs'
-] + tf_hidden_imports
+] + tf_hidden_imports + mp_hidden_imports + flask_hidden_imports
 
 
 data_paths = [
-    ('data', 'data'),
+    ('data', 'vian/data'),
     ('qt_ui', 'qt_ui'),
     ('flask_server/static', 'flask_server/static'),
     ('flask_server/templates', 'flask_server/templates')
@@ -41,19 +48,18 @@ data_paths = [
 console = False
 if sys.platform == "win32":
     console = True
-    VLC_ROOT = 'C:/Program Files/VideoLAN/VLC/'
     vlc_dlls = [
-        (VLC_ROOT + '/libvlc.dll', '.'),
-        (VLC_ROOT + '/axvlc.dll', '.'),
-        (VLC_ROOT + '/libvlccore.dll', '.'),
-        (VLC_ROOT + '/npvlc.dll', '.')
+        ('import_bin/libvlc.dll', '.'),
+        ('import_bin/axvlc.dll', '.'),
+        ('import_bin/libvlccore.dll', '.'),
+        ('import_bin/npvlc.dll', '.')
     ]
     data_paths += vlc_dlls
-    data_paths += [(os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/astor/"), "astor/")]
+    #data_paths += [(os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/astor/"), "astor/")]
     binaries += [
-        (VLC_ROOT + "\plugins", "plugins"),
-        (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/sklearn/.libs/vcomp140.dll"), "."),
-        (os.path.join(BUILD_PYTHON_DIR, "Lib/site-packages/cv2/opencv_videoio_ffmpeg440_64.dll"), ".")
+        ('import_bin/plugins', 'plugins'),
+        ('import_bin/vcomp140.dll', '.'),
+        ('import_bin/opencv_videoio_ffmpeg453_64.dll', '.')
     ]
     icon='qt_ui/images/main_round.ico'
 
@@ -71,7 +77,7 @@ else:
     icon='qt_ui/images/main_round.icns'
     
 a = Analysis(['main.py'],
-             pathex=['E:\\Programming\\Git\\visual-movie-annotator'],
+             pathex=[],
              binaries=binaries,
              datas=data_paths,
              hiddenimports=hiddenimports,
@@ -150,3 +156,12 @@ if sys.platform == "darwin":
                         }
                     ]
                 },)
+                
+#make sure that we are not in dev_mode anymore
+config_path = os.path.join(os.getcwd(), 'dist', 'VIAN', 'vian', 'data', 'config.json') 
+with open(config_path, 'r+') as f:
+    data = json.load(f)
+    data['dev_mode'] = 0
+    f.seek(0)
+    json.dump(data, f, indent=4)
+    f.truncate()

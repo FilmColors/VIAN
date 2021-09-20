@@ -17,15 +17,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
       - uses: BSFishy/pip-action@v1
         with:
           requirements: requirements.txt
       - run: pip install pyinstaller
-      - run: pyinstaller --onefile --name exetest123 vian/main.py
+      - run: pyinstaller vian/main.spec
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_executable 
-          path: dist/exetest123
+          path: dist
           if-no-files-found: error
 

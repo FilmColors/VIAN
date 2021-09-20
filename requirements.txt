@@ -3,12 +3,11 @@ keras
 sqlalchemy
 opencv-contrib-python-headless
 requests
-fastcluster
 PyQt5
 PyQtWebEngine
 scikit-learn
 flask
-fastcluster
+fastcluster==1.1.25
 moviepy
 python-vlc
 pandas
