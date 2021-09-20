@@ -22,11 +22,11 @@ jobs:
         with:
           requirements: requirements.txt
       - run: pip install pyinstaller
-      - run: cd vian
       - run: pyinstaller main.spec
+        working-directory: vian
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_executable 
-          path: dist
+          path: vian/dist
           if-no-files-found: error
 
