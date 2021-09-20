@@ -9,36 +9,22 @@ from PyInstaller.utils.hooks import collect_submodules, collect_data_files, coll
 block_cipher = None
 
 if sys.platform.startswith("win"):
-    tf_hidden_imports = collect_submodules('tensorflow')
     mp_hidden_imports = collect_submodules('moviepy')
     flask_hidden_imports = collect_submodules('flask_server')
-    tf_datas = collect_data_files('tensorflow', subdir=None, include_py_files=True)
 else:
-    tf_hidden_imports = []
     mp_hidden_imports = []
     flask_hidden_imports = []
-    tf_datas = []
+
+binaries = collect_dynamic_libs("pymediainfo")
+hiddenimports = mp_hidden_imports + flask_hidden_imports
 
 librosa_data = collect_data_files('librosa')
-
-binaries = []
-binaries += collect_dynamic_libs("pymediainfo")
-
-hiddenimports = [
-    'sklearn.utils.sparsetools._graph_validation',
-    'sklearn.utils.sparsetools._graph_tools',
-    'sklearn.utils.lgamma',
-    'sklearn.utils.weight_vector',
-    'sklearn.utils.weight_vector',
-    'sklearn.neighbors._typedefs'
-] + tf_hidden_imports + mp_hidden_imports + flask_hidden_imports
-
 data_paths = [
-    ('data', 'data'),
+    ('data', 'vian/data'),
     ('qt_ui', 'qt_ui'),
     ('flask_server/static', 'static'),
     ('flask_server/templates', 'templates')
-] + tf_datas + librosa_data
+] + librosa_data
 
 
 console = False
@@ -154,10 +140,9 @@ if sys.platform == "darwin":
                         }
                     ]
                 },)
-
-
-# make sure that we are not in dev_mode anymore
-config_path = os.path.join(os.getcwd(), 'dist', 'VIAN', 'data', 'config.json')
+                
+#make sure that we are not in dev_mode anymore
+config_path = os.path.join(os.getcwd(), 'dist', 'VIAN', 'vian', 'data', 'config.json') 
 with open(config_path, 'r+') as f:
     data = json.load(f)
     data['dev_mode'] = 0
