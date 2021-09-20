@@ -20,7 +20,7 @@ hiddenimports = mp_hidden_imports + flask_hidden_imports
 
 librosa_data = collect_data_files('librosa')
 data_paths = [
-    ('data', 'vian/data'),
+    ('data', 'data'),
     ('qt_ui', 'qt_ui'),
     ('flask_server/static', 'static'),
     ('flask_server/templates', 'templates')
