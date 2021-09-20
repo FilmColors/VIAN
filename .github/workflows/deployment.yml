@@ -27,9 +27,9 @@ jobs:
       - run: pyinstaller main.spec
         working-directory: vian
       - uses: papeloto/action-zip@v1
-  	with:
-    	  files: vian/dist/
-    	  dest: result.zip
+        with:
+          files: vian/dist/
+          dest: result.zip
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
