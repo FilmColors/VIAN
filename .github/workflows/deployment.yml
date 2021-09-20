@@ -22,7 +22,8 @@ jobs:
         with:
           requirements: requirements.txt
       - run: pip install pyinstaller
-      - run: pyinstaller vian/main.spec
+      - run: cd vian
+      - run: pyinstaller main.spec
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_executable 
