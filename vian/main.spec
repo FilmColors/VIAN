@@ -8,41 +8,29 @@ from PyInstaller.utils.hooks import collect_submodules, collect_data_files, coll
 
 block_cipher = None
 
-#BUILD_PYTHON_DIR = os.environ['vian_build_dir']
 BUILD_PYTHON_DIR = os.path.join(os.path.dirname(sys.executable),"..")
 print(BUILD_PYTHON_DIR)
+binaries = []
+hiddenimports = []
+
 
 if sys.platform.startswith("win"):
-    tf_hidden_imports = collect_submodules('tensorflow')
     mp_hidden_imports = collect_submodules('moviepy')
     flask_hidden_imports = collect_submodules('flask_server')
-    tf_datas = collect_data_files('tensorflow', subdir=None, include_py_files=True)
 else:
-    tf_hidden_imports = []
     mp_hidden_imports = []
     flask_hidden_imports = []
-    tf_datas = []
 
+binaries += collect_dynamic_libs("pymediainfo")
+hiddenimports = mp_hidden_imports + flask_hidden_imports
 
 librosa_data = collect_data_files('librosa')
-binaries = []
-binaries += collect_dynamic_libs("pymediainfo")
-hiddenimports = [
-    'sklearn.utils.sparsetools._graph_validation',
-    'sklearn.utils.sparsetools._graph_tools',
-    'sklearn.utils.lgamma',
-    'sklearn.utils.weight_vector',
-    'sklearn.utils.weight_vector',
-    'sklearn.neighbors._typedefs'
-] + tf_hidden_imports + mp_hidden_imports + flask_hidden_imports
-
-
 data_paths = [
     ('data', 'vian/data'),
     ('qt_ui', 'qt_ui'),
     ('flask_server/static', 'flask_server/static'),
     ('flask_server/templates', 'flask_server/templates')
-] + tf_datas + librosa_data
+] + librosa_data
 
 
 console = False
