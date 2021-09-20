@@ -142,7 +142,7 @@ if sys.platform == "darwin":
                 },)
                 
 #make sure that we are not in dev_mode anymore
-config_path = os.path.join(os.getcwd(), 'dist', 'VIAN', 'vian', 'data', 'config.json') 
+config_path = os.path.join(os.getcwd(), 'dist', 'VIAN', 'data', 'config.json')
 with open(config_path, 'r+') as f:
     data = json.load(f)
     data['dev_mode'] = 0
