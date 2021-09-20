@@ -29,10 +29,10 @@ jobs:
       - uses: papeloto/action-zip@v1
         with:
           files: vian/dist/
-          dest: result_${{ matrix.os }}.zip
+          dest: result_.zip
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
-          path: result_${{ matrix.os }}.zip
+          path: result_.zip
           if-no-files-found: error
 
