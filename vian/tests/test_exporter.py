@@ -92,8 +92,8 @@ class TestExporterMethods(unittest.TestCase):
         exporter.export(self.project, self.path)
 
         # assert
-        df1 = pd.read_excel(self.ground_truth_xlsx)
-        df2 = pd.read_excel(self.path)
+        df1 = pd.read_excel(self.ground_truth_xlsx, engine='openpyxl')
+        df2 = pd.read_excel(self.path, engine='openpyxl')
 
         difference = df1[df1 != df2]
         for row in range(difference.shape[0]):
