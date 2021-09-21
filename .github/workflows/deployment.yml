@@ -26,8 +26,7 @@ jobs:
       - run: pip install pyinstaller
       - run: pyinstaller main.spec
         working-directory: vian
-      - name: 'Compress result'
-          run: tar -a -c -f result.zip vian/dist/
+      - run: tar -a -c -f result.zip vian/dist/
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
