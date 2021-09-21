@@ -1,3 +1,2 @@
 vian/data/models/** filter=lfs diff=lfs merge=lfs -text
 bin/** filter=lfs diff=lfs merge=lfs -text
-vian/tests/data/** filter=lfs diff=lfs merge=lfs -text
