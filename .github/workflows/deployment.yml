@@ -26,10 +26,8 @@ jobs:
       - run: pip install pyinstaller
       - run: pyinstaller main.spec
         working-directory: vian
-      - uses: papeloto/action-zip@v1
-        with:
-          files: vian/dist/
-          dest: result.zip
+      - name: 'Compress result'
+          run: tar -a -c -f result.zip vian/dist/
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
