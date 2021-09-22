@@ -1153,7 +1153,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 print("File not Found: ", path)
                 return
 
-            print("Reading From", os.path.abspath(path))
             with open(path) as f:
                 my_dict = json.load(f)
         else:
@@ -1202,7 +1201,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         try:
             version = my_dict['version']
             version = version.split(".")
-            print("Loaded Project Version:", version)
+            log_info("Loaded Project Version:", version)
 
             # We know that versions before 0.2.10 have no folder structure
             if version_check([0,2,10], version):
@@ -1213,7 +1212,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                 move_project_to_directory_project = True
 
         except Exception as e:
-            print("Exception occured during loading:", str(e))
+            log_error("Exception occured during loading:", str(e))
             move_project_to_directory_project = True
 
         # Migrating the Project to the new FileSystem

@@ -434,8 +434,6 @@ class ColormetryAnalysis(AnalysisContainer):
 
         self.analysis_job_class = "Colormetry"
 
-        print("Colormetry Analysis Constructor", resolution)
-
         self.resolution = resolution
         self.has_finished = False
 
