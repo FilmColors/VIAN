@@ -281,7 +281,10 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         self.parameters = serialization['parameters']
         self.set_target_container(project.get_by_id(serialization['container']))
 
+        # TODO is we want to store the baked projects analyses in the JSON Format,
+        # we have to ensure self.project is set during this step
         if project.is_baked and 'data' in serialization and self.__class__ == IAnalysisJobAnalysis:
+            self.project = project
             self.set_adata(np.array(serialization['data']), raw=True)
         return self
 
