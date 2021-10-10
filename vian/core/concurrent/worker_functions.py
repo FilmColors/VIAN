@@ -250,9 +250,8 @@ class CreateScreenshotJob(IConcurrentJob):
                           img_blend=frame_annotated,
                           timestamp=time,
                           frame_pos=frame_pos,
-                          annotation_item_ids=annotation_ids,
-                          display_width=display_width,
-                          display_height=display_height)
+                          annotation_item_ids=annotation_ids)
+
         project.add_screenshot(shot)
         try:
             if project.has_segmentation():

@@ -44,15 +44,16 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
     onImageSet = pyqtSignal(object, object, object)  # Screenshot, ndarray, QPixmap
 
     def __init__(self, title="", image=None,
-                 img_blend=None, timestamp="", scene_id=0, frame_pos=0, display_width = None, display_height = None,
-                 shot_id_global=-1, shot_id_segm=-1, annotation_item_ids=None, unique_id=-1):
+                 img_blend=None, timestamp="", scene_id=0, frame_pos=0,
+                 shot_id_global=-1, shot_id_segm=-1, annotation_item_ids=None,
+                 unique_id=-1):
 
         BaseProjectEntity.__init__(self, unique_id=unique_id)
         IClassifiable.__init__(self)
         Annotatable.__init__(self)
 
         self.title = title
-
+        #
         # self.display_width = display_width
         # self.display_height = display_height
 
@@ -79,12 +80,14 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
 
         self.masked_cache = dict()
 
-    @property
     def display_width(self):
+        if self.project is None:
+            return None
         return self.project.movie_descriptor.display_width
 
-    @property
     def display_height(self):
+        if self.project is None:
+            return None
         return self.project.movie_descriptor.display_height
 
     def set_title(self, title):
@@ -175,8 +178,8 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
             return
 
         # Resize the image to the correct display aspect
-        if self.display_width is not None and self.display_height is not None:
-            img = cv2.resize(img, (self.display_width, self.display_height),
+        if self.display_width() is not None and self.display_height() is not None:
+            img = cv2.resize(img, (self.display_width(), self.display_height()),
                                         interpolation=cv2.INTER_CUBIC)
 
         # Resize the image to the CACHE_WIDTH (250px wide)
@@ -202,7 +205,7 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
 
             ret, frame = cap.read()
             cap.release()
-            frame = cv2.resize(frame, (self.display_width, self.display_height), interpolation=cv2.INTER_CUBIC)
+            frame = cv2.resize(frame, (self.display_width(), self.display_height()), interpolation=cv2.INTER_CUBIC)
         return frame
 
     def get_semantic_segmentations(self, dataset=None):

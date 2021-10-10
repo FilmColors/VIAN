@@ -523,9 +523,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                              img_blend = None,
                              timestamp=time_ms,
                              frame_pos=frame_pos,
-                             unique_id=unique_id,
-                             display_width=self.movie_descriptor.display_width,
-                             display_height=self.movie_descriptor.display_height)
+                             unique_id=unique_id)
             self.add_screenshot(new)
             return new
         return None
