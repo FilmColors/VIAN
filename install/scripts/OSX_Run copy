@@ -1,4 +1,0 @@
-source activate vian-osx
-cd "${0%/*}"
-cd VIAN
-python main.py

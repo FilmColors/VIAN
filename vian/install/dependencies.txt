@@ -1,0 +1,4 @@
+conda install -c anaconda tensorflow keras requests networkx scikit-learn sqlalchemy h5py pyqt
+conda install -c conda-source fastcluster opencv librosa
+pip install python-vlc
+pip install moviepy

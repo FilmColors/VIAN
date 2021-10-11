@@ -1,0 +1,3 @@
+cd "${0%/*}"
+conda env remove --name vian-osx
+conda env create -f VIAN/vian/install/env/env_osx.yml
