@@ -125,7 +125,7 @@ if sys.platform == "darwin":
     app = BUNDLE(coll,
              name='VIAN.app',
              icon=icon,
-             bundle_identifier="com.filmcolors.vian.vian",
+             bundle_identifier=None,
              info_plist={
                 'NSPrincipalClass': 'NSApplication',
                 'NSAppleScriptEnabled': False,
