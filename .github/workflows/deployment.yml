@@ -37,7 +37,7 @@ jobs:
           security create-keychain -p keychain-password build.keychain security default-keychain -s build.keychain
           security unlock-keychain -p keychain-password build.keychain
           security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k keychain-password build.keychain
+          security set-key-partition-list -S "apple-tool:,apple:,codesign:" -s -k keychain-password build.keychain
           /usr/bin/codesign --force -s 86722C39602C7A879EAD0EEFA3D8F5228EB82B56 ./vian/dist/VIAN.app -v
       - run: tar -a -c -f result.zip vian/dist
       - uses: actions/upload-artifact@v2
