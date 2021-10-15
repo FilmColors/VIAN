@@ -32,7 +32,7 @@ jobs:
         env:
           MACOS_CERTIFICATE: ${{ secrets.OSX_SIGNING_CERT }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.OSX_SIGNING_PWD }}
-        run:
+        run: |
           echo $MACOS_CERTIFICATE | base64 —decode > certificate.p12
           security create-keychain -p keychain-password build.keychain security default-keychain -s build.keychain
           security unlock-keychain -p keychain-password build.keychain
