@@ -44,7 +44,7 @@ First we run the build.py file to setup the directory.
 
 ```python build.py```
 
-<b>OSX:</b>
+<b>macOS:</b>
 ```conda env create -f install/env/env_osx_dl.yml``` 
 
 <b>Windows:</b>
@@ -53,7 +53,7 @@ First we run the build.py file to setup the directory.
 After the installation is complete, you can start VIAN by activating the new environment
 and run main.py
 
-<b>OSX:</b>
+<b>macOS:</b>
 ````
 conda activate vian-osx
 python main.py
