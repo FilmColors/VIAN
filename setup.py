@@ -11,15 +11,17 @@ requirements = [
     'PyQtWebEngine==5.14',
     'scikit-learn',
     'flask',
-    'fastcluster',
+    'fastcluster==1.1.25',
     'moviepy',
     'python-vlc',
+    'pandas',
     'librosa',
+    'pysrt',
     'bokeh==2.2.1',
     'matplotlib',
-    'numpy',
     'pymediainfo',
-    'pandas'
+    'XlsxWriter',
+    'openpyxl'
 ]
 
 setup(
