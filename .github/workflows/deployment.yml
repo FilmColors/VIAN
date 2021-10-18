@@ -39,6 +39,7 @@ jobs:
           security unlock-keychain -p keychain-password build.keychain
           security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
           security set-key-partition-list -S "apple-tool:,apple:,codesign:" -s -k keychain-password build.keychain
+          security find-identity
           /usr/bin/codesign --deep --force -s "Gaudenz Halter" ./vian/dist/VIAN.app -v
       - run: tar -a -c -f result.zip vian/dist
       - uses: actions/upload-artifact@v2
