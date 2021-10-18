@@ -30,7 +30,7 @@ jobs:
         working-directory: vian
       - run: |
           pip install macholib
-          python fix_app_qt_folder_names_for_codesign.py vian/dist/VIAN.app
+          python vian/fix_app_qt_folder_names_for_codesign.py vian/dist/VIAN.app
       - name: Codesign executable
         env:
           MACOS_CERTIFICATE: ${{ secrets.OSX_SIGNING_CERT }}
