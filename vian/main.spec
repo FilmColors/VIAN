@@ -8,15 +8,14 @@ from PyInstaller.utils.hooks import collect_submodules, collect_data_files, coll
 
 block_cipher = None
 
-if sys.platform.startswith("win"):
-    mp_hidden_imports = collect_submodules('moviepy')
-    flask_hidden_imports = collect_submodules('flask_server')
-else:
-    mp_hidden_imports = []
-    flask_hidden_imports = []
+mp_hidden_imports =  collect_submodules('moviepy')
+flask_hidden_imports = collect_submodules('flask_server')
+sklearn_hidden_imports = collect_submodules('sklearn')
 
 binaries = collect_dynamic_libs("pymediainfo")
-hiddenimports = mp_hidden_imports + flask_hidden_imports
+hiddenimports = mp_hidden_imports \
+                + flask_hidden_imports \
+                + sklearn_hidden_imports
 
 librosa_data = collect_data_files('librosa')
 data_paths = [
@@ -44,13 +43,13 @@ if sys.platform == "win32":
         ('../bin/win64/opencv_videoio_ffmpeg453_64.dll', '.')
     ]
 
-    icon='qt_ui/images/main_round.ico'
+    icon = 'qt_ui/images/main_round.ico'
 
 elif sys.platform.startswith("linux"):
     hiddenimports += ['pkg_resources.py2_warn']
 
 else:
-    binaries = [
+    binaries += [
         ('/System/Library/Frameworks/Tk.framework/Tk', 'tk'),
         ('/System/Library/Frameworks/Tcl.framework/Tcl','tcl')
         ]

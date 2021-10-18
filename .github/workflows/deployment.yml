@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-latest]
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -20,12 +20,27 @@ jobs:
         with:
           lfs: true
       - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
       - uses: BSFishy/pip-action@v1
         with:
           requirements: requirements.txt
       - run: pip install pyinstaller
       - run: pyinstaller main.spec
         working-directory: vian
+      - name: Codesign executable
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.OSX_SIGNING_CERT }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.OSX_SIGNING_PWD }}
+        run: |
+          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+          security create-keychain -p keychain-password build.keychain 
+          security default-keychain -s build.keychain
+          security unlock-keychain -p keychain-password build.keychain
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S "apple-tool:,apple:,codesign:" -s -k keychain-password build.keychain
+          security find-identity
+          /usr/bin/codesign --deep --force -s MQ5V9J9888 ./vian/dist/VIAN.app -v
       - run: tar -a -c -f result.zip vian/dist
       - uses: actions/upload-artifact@v2
         with:

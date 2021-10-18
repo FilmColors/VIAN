@@ -6,8 +6,7 @@ REPO_DIR = os.path.dirname(__file__)
 os.chdir(os.path.join(REPO_DIR, "vian"))
 
 BUILD_PYTHON_WIN = os.path.join(REPO_DIR, "vianenv39/Scripts/python.exe")
-BUILD_PYTHON_OSX = "/Users/Kris/Documents/Gaudenz/vian_env/bin/python"
-BUILD_PYTHON_OSX = "venv37/bin/python"
+BUILD_PYTHON_OSX = "venv/bin/python"
 
 SPEC_FILE = "main.spec"
 
@@ -22,7 +21,7 @@ if sys.platform.startswith("win"):
 elif sys.platform.startswith("darwin"):
     arguments += ["--windowed"]
     build_python = BUILD_PYTHON_OSX
-    build_archive = "VIAN-OSX"
+    build_archive = "VIAN-macOS"
 
     build_dir = os.path.split(build_python)[0]
     pyinstaller = os.path.join(build_dir, "pyinstaller")
