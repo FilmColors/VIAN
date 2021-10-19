@@ -44,7 +44,7 @@ jobs:
           security set-key-partition-list -S "apple-tool:,apple:,codesign:" -s -k keychain-password build.keychain
           security find-identity
           /usr/bin/codesign --deep --force -s MQ5V9J9888 ./vian/dist/VIAN.app -v
-      - run: tar -a -c -f result.zip vian/dist
+      - run: tar -a -c -f result.zip vian/dist/VIAN.app
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
