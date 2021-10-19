@@ -313,7 +313,7 @@ class IAnalysisJobAnalysis(AnalysisContainer):
         if raw:
             return data
         else:
-            self.a_class().from_hdf5(data)
+            return self.a_class().from_hdf5(data)
 
     def set_adata(self, d:np.ndarray, raw = False):
         """
