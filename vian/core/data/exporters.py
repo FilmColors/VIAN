@@ -152,17 +152,8 @@ class SegmentationExporter(IExportDevice):
         if self.segmentations is None:
             self.segmentations = project.segmentation
 
-        # Make sure we have all bodies in the header
-        bodies = set()
-        for segmentation in self.segmentations:
-            for s in segmentation.segments:
-                for a in s.get_annotations():
-                    bodies.add("annotation_{}".format(a.name))
-        print("All bodies", bodies)
-
         for segmentation in self.segmentations:
             for s in segmentation.segments: # type:Segment
-                bodies_added = set()
                 add(result, "segment_id", s.ID)
                 add(result, "segmentation_name", segmentation.name)
                 if self.export_ms:
@@ -216,13 +207,8 @@ class SegmentationExporter(IExportDevice):
                     if self.t_duration:
                         add(result, "duration_frame", ms_to_frames(s.duration, self.fps))
 
-                for i, b in enumerate(s.get_annotations()):  # type: AnnotationBody
-                    column = "annotation_{i}_{f}".format(i=i, f=b.name)
-                    bodies_added.add(column)
-                    add(result, column, b.content)
-
-                for b in bodies.difference(bodies_added):
-                    add(result, b, "")
+                if self.export_text:
+                    add(result, "annotation", "; ".join([a.content for a in s.get_annotations()]))
 
         if ".xlsx" in path:
             pd.DataFrame(result).to_excel(path)
