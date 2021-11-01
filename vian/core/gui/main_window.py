@@ -64,6 +64,9 @@ from vian.core.gui.toolbar import WidgetsToolbar
 from vian.core.data.log import log_info
 
 from vian.core.paths import get_vian_data
+from pathlib import Path
+import cProfile
+
 try:
     import keras.backend as K
     from vian.core.analysis.semantic_segmentation import *
