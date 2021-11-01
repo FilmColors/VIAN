@@ -21,7 +21,7 @@ jobs:
           lfs: true
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.7.0'
+          python-version: '3.7'
       - uses: BSFishy/pip-action@v1
         with:
           requirements: requirements.txt
