@@ -28,10 +28,9 @@ jobs:
       - run: pip install pyinstaller
       - run: pyinstaller main.spec
         working-directory: vian
-      - run: tar -a -c -f result.zip vian/dist
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
-          path: result.zip
+          path: vian/dist/VIAN
           if-no-files-found: error
 
