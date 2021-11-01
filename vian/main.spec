@@ -40,8 +40,8 @@ if sys.platform == "win32":
     binaries += [
         ('../bin/win64/plugins', 'plugins'),
         ('../bin/win64/vcomp140.dll', '.'),
-        ('../bin/win64/opencv_videoio_ffmpeg453_64.dll', '.')
     ]
+    binaries += collect_dynamic_libs('cv2')
 
     icon = 'qt_ui/images/main_round.ico'
 
