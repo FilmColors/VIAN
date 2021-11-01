@@ -63,7 +63,7 @@ from vian.core.container.hdf5_manager import print_registered_analyses, get_all_
 from vian.core.gui.toolbar import WidgetsToolbar
 from vian.core.data.log import log_info
 
-from vian.core.paths import get_vian_data
+from vian.core.data.settings import get_vian_data
 from pathlib import Path
 import cProfile
 

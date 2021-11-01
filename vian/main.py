@@ -21,10 +21,7 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from vian.core.paths import get_root_dir
-
-application_path = get_root_dir()
-os.chdir(application_path)
+from vian.core.data.settings import *
 
 import time
 import logging
@@ -35,9 +32,8 @@ import PyQt5
 from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox
 from PyQt5.QtCore import Qt, QObject, QEvent
 from PyQt5.QtGui import QPixmap, QIcon
-from vian.core.data.settings import CONFIG
 
-from vian.core.data.settings import UserSettings
+from vian.core.data.settings import CONFIG, UserSettings
 from vian.core.gui.main_window import MainWindow, version
 from vian.core.data.computation import is_gui
 
@@ -46,19 +42,6 @@ os.environ["QT_MAC_WANTS_LAYER"] = "1"
 os.environ["VIAN_GUI"] = "1"
 
 print("IS GUI", is_gui())
-from datetime import datetime
-from threading import Thread
-
-from vian.core.hidden_imports import *
-
-abspath = os.path.abspath(__file__)
-dname = os.path.dirname(abspath)
-print("Directory", dname)
-
-# Check if we are in a pyinstaller release
-if getattr(sys, 'frozen', False):
-    application_path = os.path.dirname(sys.executable)
-    os.chdir(application_path)
 
 logging.getLogger('tensorfyylow').disabled = True
 

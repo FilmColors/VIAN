@@ -4,7 +4,7 @@ from vian.core.analysis.import_tensortflow import tf
 from vian.core.analysis.deep_learning.labels import *
 
 from vian.core.data.log import log_info
-from vian.core.paths import get_root_dir, get_vian_data
+from vian.core.data.settings import get_root_dir, get_vian_data
 DIR_WEIGHTS_BUILT_IN = get_root_dir() + "/data/models/"
 KERAS_LIP_WEIGHTS = get_vian_data("models/semantic_segmentation/LIP_PSPNET50_Weights.hdf5")
 

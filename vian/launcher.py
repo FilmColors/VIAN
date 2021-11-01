@@ -39,11 +39,6 @@ os.environ["QT_MAC_WANTS_LAYER"] = "1"
 os.environ["VIAN_GUI"] = "1"
 print("IS GUI", is_gui())
 
-from datetime import datetime
-from threading import Thread
-
-from vian.core.hidden_imports import *
-
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 print("Directory", dname)

@@ -6,18 +6,13 @@ Everything is serialized to the settings.json file in the UserDirectory/VIAN.
 
 """
 
-import glob
-import json
-import os
-import sys
+import os, sys, json
 from collections import namedtuple
 
 from vian.core.data.log import *
 from vian.core.data.enums import ScreenshotNamingConventionOptions as naming
 from vian.core.container.corpus import Corpus
 from PyQt5.QtGui import QFont, QColor
-from vian.core.paths import get_vian_data
-
 from PyQt5.QtWidgets import QApplication
 
 COLORMAPS_SEQUENTIAL = [
@@ -37,28 +32,44 @@ palette_beach = Palette(palette_name="Ocean", palette_colors=[[3,63,99],[40,102,
 palette_earth = Palette(palette_name="Earth", palette_colors=[[252,170,103],[176,65,62],[255,255,199],[84,134,135],[71,51,53]])
 palette_gray = Palette(palette_name="Gray", palette_colors=[[0,0,0],[50,50,50],[100,100,100],[150,150,150],[200,200,200],[255,255,255]])
 
+def get_root_dir():
+    return _application_path
 
-if "Sphinx" not in os.environ:
-    # determine if application is a script file or frozen exe
-    if getattr(sys, 'frozen', False):
-        application_path = os.path.dirname(sys.executable)
-        os.chdir(application_path)
-    print("Working Dir", os.curdir)
 
-    try:
-        print(os.curdir)
-        print(os.path.abspath(get_vian_data("config.json")))
-        with open(get_vian_data("config.json"), "r") as f:
-            CONFIG = json.load(f)
-    except Exception as e:
-        print(e)
-        try:
-            with open(get_vian_data("config.json"), "r") as f:
-                CONFIG = json.load(f)
-        except Exception as e:
-            raise e
-else:
-    CONFIG = None
+def get_vian_data(append = None) -> str:
+    """
+    Returns the absolut path of the data dir.
+    If append is not none, append is added to the data dir path.
+
+    :param append:
+    :return:
+    """
+    data_root = os.path.join(get_root_dir(), "data")
+    if append is not None:
+        data_root = os.path.join(data_root, append)
+    return data_root
+
+# If 'frozen' is set, this is a PyInstaller version, else we are in python source code
+# In PyInstaller, this file does nto exist anymore, we thus have to define the source from the executable
+is_frozen = getattr(sys, 'frozen', False)
+
+if is_frozen:
+    _application_path = os.path.dirname(sys.executable)
+elif __file__:
+    _application_path = os.path.abspath(os.path.dirname(__file__) + "/../..")
+os.chdir(_application_path)
+
+print("Working Dir", os.curdir)
+
+try:
+    print(os.curdir)
+    print(os.path.abspath(get_vian_data("config.json")))
+    with open(get_vian_data("config.json"), "r") as f:
+        CONFIG = json.load(f)
+        CONFIG["dev_mode"] = CONFIG["dev_mode"] and not is_frozen
+except Exception as e:
+    print(e)
+    raise e
 
 class UserSettings():
     """

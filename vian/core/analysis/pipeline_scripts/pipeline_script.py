@@ -8,7 +8,7 @@ import os
 from uuid import uuid4
 from typing import List
 
-from vian.core.paths import get_vian_data
+from vian.core.data.settings import get_vian_data
 
 
 with open(os.path.join(get_vian_data("default_pipeline.py")), "r") as f:

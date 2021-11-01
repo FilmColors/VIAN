@@ -3,7 +3,7 @@ import os
 import cv2
 import enum
 import numpy as np
-from vian.core.paths import get_vian_data
+from vian.core.data.settings import get_vian_data
 
 
 # from bokeh import colors

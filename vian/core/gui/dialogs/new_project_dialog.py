@@ -10,7 +10,7 @@ from vian.core.data.enums import MovieSource
 from vian.core.gui.ewidgetbase import EDialogWidget
 from vian.core.data.importers import ELANProjectImporter
 from vian.core.data.computation import images_to_movie
-from vian.core.paths import get_vian_data
+from vian.core.data.settings import get_vian_data
 from vian.core.gui.misc.utils import dialog_with_margin
 
 

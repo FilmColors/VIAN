@@ -6,7 +6,7 @@ import csv
 import cv2
 
 import pickle
-from vian.core.paths import get_vian_data
+from vian.core.data.settings import get_vian_data
 import xml.dom.minidom
 
 from vian.core.container.analysis import IAnalysisJobAnalysis

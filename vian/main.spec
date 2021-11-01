@@ -53,9 +53,6 @@ else:
         ('/System/Library/Frameworks/Tk.framework/Tk', 'tk'),
         ('/System/Library/Frameworks/Tcl.framework/Tcl','tcl')
         ]
-     #for g in glob.glob("/Applications/VLC.app/Contents/MacOS/lib/*"):
-     #   print(g)
-     #   binaries.append((g, '.'))
     icon='qt_ui/images/main_round.icns'
 
 
@@ -144,7 +141,7 @@ if sys.platform == "darwin":
 config_path = os.path.join(os.getcwd(), 'dist', 'VIAN', 'data', 'config.json')
 with open(config_path, 'r+') as f:
     data = json.load(f)
-    data['dev_mode'] = 0
+    data['dev_mode'] = "false"
     f.seek(0)
     json.dump(data, f, indent=4)
     f.truncate()

@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QObject, QThread, pyqtSlot, pyqtSignal
 from PyQt5 import uic
 from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePolicy, QWidgetAction, QMessageBox
-from vian.core.paths import get_vian_data
+from vian.core.data.settings import get_vian_data
 from vian.core.data.settings import UserSettings, Contributor, CONFIG
 from vian.core.container.project import VIANProject
 from vian.core.container.analysis import SemanticSegmentationAnalysisContainer, FileAnalysis
