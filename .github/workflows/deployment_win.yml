@@ -21,11 +21,11 @@ jobs:
           lfs: true
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: '3.7.0'
       - uses: BSFishy/pip-action@v1
         with:
           requirements: requirements.txt
-      - run: pip install pyinstaller
+      - run: pip install pyinstaller==4.6
       - run: pyinstaller main.spec
         working-directory: vian
       - uses: actions/upload-artifact@v2
