@@ -320,7 +320,8 @@ class SequenceProtocolExporter(IExportDevice):
             for segmentation in project.segmentation:
                 for segment in segmentation.segments:
                     offset_y = 0
-                    for screenshot in project.segment_screenshot_mapping[segment]:
+                    screenshots = project.segment_screenshot_mapping.get(segment, [])
+                    for screenshot in screenshots:
                         screenshots_exist = True
                         f = screenshot.get_img_movie_orig_size()
                         img_byte_arr = io.BytesIO()
@@ -330,7 +331,10 @@ class SequenceProtocolExporter(IExportDevice):
                                                           'x_scale': scaling_factor, 'y_scale': scaling_factor,
                                                           'y_offset' : offset_y * scaling_factor})
                         offset_y += f.shape[0] + margin
-                    worksheet.set_row_pixels(df_counter, offset_y * scaling_factor) # set row height
+                    if not screenshots: # if list is empty
+                        worksheet.set_row(df_counter, worksheet.default_row_height)
+                    else:
+                        worksheet.set_row_pixels(df_counter, offset_y * scaling_factor) # set row height
                     df_counter += 1
             if screenshots_exist:
                 worksheet.set_column_pixels(screenshots_index, screenshots_index, screenshot_width)  # set column width
