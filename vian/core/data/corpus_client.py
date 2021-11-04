@@ -1,3 +1,5 @@
+import logging
+
 from PyQt5.QtCore import QObject, QThread, pyqtSlot, pyqtSignal
 from PyQt5 import uic
 from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePolicy, QWidgetAction, QMessageBox
@@ -6,10 +8,8 @@ from vian.core.data.settings import UserSettings, Contributor, CONFIG
 from vian.core.container.project import VIANProject
 from vian.core.container.analysis import SemanticSegmentationAnalysisContainer, FileAnalysis
 from vian.core.container.experiment import Experiment, VocabularyWord, Vocabulary
-from vian.core.analysis.analysis_import import SemanticSegmentationAnalysis
-from vian.core.data.log import log_info
-from vian.core.data.importers import ExperimentTemplateUpdater
-
+from vian.core.analysis.analysis_import import SemanticSegmentationAnalysis, ColorPaletteAnalysis, ColorFeatureAnalysis
+from vian.core.analysis.analysis_utils import run_analysis, progress_dummy
 import os
 import json
 import numpy as np
@@ -29,26 +29,10 @@ else:
     EP_ROOT = CONFIG['webapp_root']
 
 
-
-def download_vian_update(version_id):
-    return requests.get(EP_ROOT + "vian/download_vian/" + str(version_id), stream=True)
-
-
-def check_erc_template(project:VIANProject):
-    return
-    uuid = CONFIG['erc_template_uuid']
-    exp = project.get_by_id(uuid)
-    if exp is None:
-        log_info("No ERC Template detected")
-        return
-    log_info("ERC Template detected, updating")
-    r = requests.get("http://ercwebapp.westeurope.cloudapp.azure.com/api/experiments/1")
-    exchange_data = r.json()
-    temporary = get_vian_data("temp.json")
-    with open(temporary, "w") as f:
-        json.dump(exchange_data, f)
-    project.import_(ExperimentTemplateUpdater(), temporary)
-    log_info("ERC Template detected, Done")
+class VianNotLoggedInException(Exception):
+    """
+    Is raised when the user is not logged in.
+    """
 
 
 class CorpusInterfaceSignals(QObject):
@@ -62,7 +46,7 @@ class WebAppCorpusInterface(QObject):
     def __init__(self, ep_root = EP_ROOT):
         super(WebAppCorpusInterface, self).__init__()
         self.ep_root = ep_root
-        self.ep_upload = self.ep_root + "upload"
+        self.ep_upload = self.ep_root + "upload/upload-project"
         self.ep_token = self.ep_root + "get_token"
         self.ep_ping = self.ep_root + "vian/ping"
         self.ep_version = self.ep_root + "vian/version"
@@ -74,9 +58,10 @@ class WebAppCorpusInterface(QObject):
         self.ep_query_countries = self.ep_root + "query/country"
         self.ep_project_hash = self.ep_root + "query/project_hash"
         self.ep_query_corpora = self.ep_root + "query/get_corpora"
-        self.ep_get_user = self.ep_root + "get_user_for_login"
+        self.ep_get_user = self.ep_root + "user/login"
 
         self.signals = CorpusInterfaceSignals()
+        self.token = None
         self.user_id = -1
 
     @pyqtSlot()
@@ -92,31 +77,23 @@ class WebAppCorpusInterface(QObject):
         """
         Checks if a user exists on the WebApp, if so, connects and returns true
         else returns False
+
+        :raise VianNotLoggedInException: If the credentials are incorrect or the server is not reachable
         :param user: The user to login
         :return: If the login was successful returns True, else returns False
         """
         try:
-            print(self.ep_token)
-            # We need to get the identification token
-            a = requests.post(self.ep_token, json=dict(email = user.email, password = user.password))
-            p = json.loads(requests.post(self.ep_get_user, json=dict(email = user.email, password = user.password)).text)
-            print("Server Responded:", a.text, p)
-            success = not "failed" in a.text
+            p = requests.post(self.ep_get_user, json=dict(email = user.email, password = user.password))
+            if p.status_code != 200:
+                raise VianNotLoggedInException
 
-            if success:
-                # We don't want VIAN to see all Projects on the WebAppCorpus, thus returning an empty list
-                all_projects = []
-                user.token = a.text
-                self.user_id = p['id']
-                ret = dict(success = True)
-                #Todo return a good success description object
-                self.signals.onConnected.emit(ret)
-            else:
-                ret = dict(success = False)
-                #Todo return a good faile descirption object
-                self.signals.onConnectionFailed.emit(ret)
+            self.token = p.json()['token']
+
+            ret = dict(success = True, user=p.json()['user'], token=self.token)
+            self.signals.onConnected.emit(dict(success = True, user=p.json()['user'], token=self.token))
+
         except Exception as e:
-            ret = dict(success = False)
+            ret = dict(success = False, user=None, token=None)
             print("Exception in RemoteCorpusClient.connect_user(): ", str(e))
             self.signals.onConnectionFailed.emit(ret)
         return ret
@@ -128,170 +105,64 @@ class WebAppCorpusInterface(QObject):
     def verify_project(self):
         return True
 
-    def _export_project(self, project):
-        try:
-            # region -- PREPARE --
-            if not self.verify_project():
-                return
+    def _export_project(self, project: VIANProject) -> str:
+        bake_path = project.store_project(bake=True)
+        archive_path = project.zip_baked(bake_path)
+        return archive_path
 
-            export_root = project.folder + "/corpus_export/"
-            export_project_dir = export_root + "project/"
-            scr_dir = export_project_dir + "/scr/"
-            mask_dir = export_project_dir + "/masks/"
-            export_hdf5_path = os.path.join(export_project_dir, os.path.split(project.hdf5_path)[1])
+    def _preprocess(self, vian_proj, on_progress=progress_dummy):
+        """
+         Ensure all analyses which the webapp depends on are computed.
+         :param file_path:
+         :return:
+         """
+        global progress_bar
+        global gl_progress
 
-            archive_file = os.path.join(export_root, project.name)
 
-            if os.path.isfile(archive_file + ".zip"):
-                os.remove(archive_file + ".zip")
-            # Create the temporary directories
-            try:
-                if os.path.isdir(export_root):
-                    shutil.rmtree(export_root, ignore_errors=True)
-                if not os.path.isdir(export_root):
-                    os.mkdir(export_root)
-                if not os.path.isdir(export_project_dir):
-                    os.mkdir(export_project_dir)
-            except Exception as e:
-                raise e
-                # QMessageBox.information("Commit Error", "Could not modify \\corpus_export\\ directory."
-                                                        #"\nPlease make sure the Folder is not open in the Explorer/Finder.")
-                return False, None
+        segments = []
+        for s in vian_proj.segmentation:
+            segments.extend(s.segments)
 
-            # -- Create a HDF5 File for the Export -- #
-            shutil.copy2(project.hdf5_path, export_hdf5_path)
-            h5_file = h5py.File(export_hdf5_path, "r+")
+        run_analysis(vian_proj, ColorPaletteAnalysis(coverage=.01), segments,
+                     vian_proj.get_classification_object_global("Global"), progress_callback=on_progress)
 
-            # -- Thumbnail --
-            if len(project.screenshots) > 0:
-                thumb = sample(project.screenshots, 1)[0].get_img_movie(True)
-                cv2.imwrite(export_project_dir + "thumbnail.jpg", thumb)
+        run_analysis(vian_proj, ColorFeatureAnalysis(coverage=.01), segments,
+                     vian_proj.get_classification_object_global("Global"), progress_callback=on_progress)
 
-            # -- Export all Screenshots --
+        run_analysis(vian_proj, SemanticSegmentationAnalysis(),
+                     vian_proj.screenshots,
+                     vian_proj.get_classification_object_global("Global"), progress_callback=on_progress)
+        clobjs = [
+            vian_proj.get_classification_object_global("Global"),
+            vian_proj.get_classification_object_global("Foreground"),
+            vian_proj.get_classification_object_global("Background")
+        ]
 
-            # Maps the unique ID of the screenshot to it's mask path -> dict(key:unique_id, val:dict(scene_id, segm_shot_id, group, path))
-            mask_index = dict()
-            shots_index = dict()
-            file_analyses_index = dict()
+        print("Color Palettes")
+        run_analysis(vian_proj, ColorPaletteAnalysis(), vian_proj.screenshots, clobjs, progress_callback=on_progress)
 
-            for i, scr in enumerate(project.screenshots):
-                sys.stdout.write(
-                    "\r" + str(round(i / len(project.screenshots), 2) * 100).rjust(3) + "%\t Baking Screenshots")
-                self.signals.onCommitProgress.emit(i / len(project.screenshots), "Baking Screenshots")
+        print("Color Features")
+        run_analysis(vian_proj, ColorFeatureAnalysis(), vian_proj.screenshots, clobjs, progress_callback=on_progress)
 
-                img = cv2.cvtColor(scr.get_img_movie(True), cv2.COLOR_BGR2BGRA)
-
-                # Export the Screenshot as extracted from the movie
-                grp_name = scr.screenshot_group.name
-                name = scr_dir + grp_name + "_" \
-                       + str(scr.scene_id) + "_" \
-                       + str(scr.shot_id_segm) + ".jpg"
-                if img.shape[1] > PAL_WIDTH:
-                    fx = PAL_WIDTH / img.shape[1]
-                    img = cv2.resize(img, None, None, fx, fx, cv2.INTER_CUBIC)
-
-                if i == 0:
-                    h5_file.create_dataset("screenshots", shape=(len(project.screenshots),) + img.shape, dtype=np.uint8)
-                # cv2.imwrite(name, img, [cv2.IMWRITE_JPEG_QUALITY, 90])
-                h5_file['screenshots'][i] = img
-                segment = project.get_main_segmentation().get_segment_of_time(scr.movie_timestamp)
-                if segment is None:continue
-
-                shots_index[str(scr.unique_id)] = dict(
-                    scene_id=scr.scene_id,
-                    segment_id = str(segment.unique_id),
-                    shot_id_segm=scr.shot_id_segm,
-                    group=grp_name,
-                    hdf5_idx=i,
-                    path=name
-                )
-
-                # Export the Screenshots with all masks applied
-                for e in project.experiments:
-                    # First we have to find all experiments that have Classification Objects with Mask Labels
-                    masks_to_export = []
-                    for cobj in e.get_classification_objects_plain():
-                        sem_labels = cobj.semantic_segmentation_labels[1]
-                        ds_name = cobj.semantic_segmentation_labels[0]
-                        if ds_name != "":
-                            masks_to_export.append(dict(obj_name=cobj.name, ds_name=ds_name, labels=sem_labels))
-                    masks_to_export_names = [m['ds_name'] for m in masks_to_export]
-
-                    print(masks_to_export)
-                    print(masks_to_export_names)
-                    for counter, entry in enumerate(masks_to_export):
-                        # Find the correct Mask Analysis
-                        for a in scr.connected_analyses:
-                            if isinstance(a, SemanticSegmentationAnalysisContainer) \
-                                    and a.analysis_job_class == SemanticSegmentationAnalysis.__name__:
-                                # table = SQ_TABLE_MASKS
-                                data = a.get_adata()
-                                dataset = a.dataset
-                                mask_idx = project.hdf5_manager._uid_index[str(a.unique_id)]
-                                print("Mask Index", mask_idx)
-                                if dataset in masks_to_export_names:
-                                    mask_path = mask_dir + dataset + "_" + str(scr.scene_id) + "_" + str(
-                                        scr.shot_id_segm) + ".png"
-
-                                    if str(scr.unique_id) not in mask_index:
-                                        mask_index[str(scr.unique_id)] = []
-
-                                    mask_index[str(scr.unique_id)].append((dict(
-                                        scene_id=scr.scene_id,
-                                        dataset=dataset,
-                                        shot_id_segm=scr.shot_id_segm,
-                                        group=grp_name,
-                                        path=mask_path.replace(project.folder, ""),
-                                        hdf5_index=mask_idx,
-                                        scr_region=a.entry_shape)
-                                    ))
-
-            for i, a in enumerate(project.analysis):
-                if isinstance(a, FileAnalysis):
-                    file_path = a.save(os.path.join(export_project_dir, str(a.unique_id)))
-                    file_analyses_index[str(a.unique_id)] = dict(
-                        target = a.target_container,
-                        analysis = a.analysis_job_class,
-                        file_path =file_path
-                    )
-
-            with open(export_project_dir + "image_linker.json", "w") as f:
-                json.dump(dict(masks=mask_index, shots=shots_index), f)
-
-            h5_file.close()
-
-            # -- Creating the Archive --
-            print("Export to:", export_project_dir)
-            project.store_project(os.path.join(export_project_dir, project.name + ".eext"))
-            shutil.make_archive(archive_file, 'zip', export_project_dir)
-
-        except Exception as e:
-            raise e
-            print("Exception in RemoteCorpusClient.commit_project(): ", str(e))
-        return archive_file
+        vian_proj.store_project()
 
     @pyqtSlot(object, object)
-    def commit_project(self, project:VIANProject, contributor:Contributor):
-        """
-           Here we actually commit the project, 
-           this includes to prepare the project, baking screenshots and masks into image files 
-           and upload them to the Server
-           :param user: 
-           :param project: 
-           :return: 
-           """
-        archive_file = self._export_project(project)
+    def commit_project(self, project:VIANProject, user:Contributor):
+        if self.token is None:
+            self.login(user)
+            if self.token is None:
+                raise VianNotLoggedInException("User is not logged in.")
 
-        if contributor is None:
-            self.signals.onCommitFinished.emit(project)
-            return
-
+        self._preprocess(project)
+        archive_path = self._export_project(project)
         # --- Sending the File --
         try:
-            fin = open(archive_file + ".zip", 'rb')
-            files = {'file': fin}
-            print(files, self.ep_upload, dict(type="upload", authorization=contributor.token.encode()))
-            r = requests.post(self.ep_upload, files=files, headers=dict(type="upload", authorization=contributor.token.encode())).text
+            fin = open(archive_path, 'rb')
+            files = {'file': fin,
+                     'json': json.dumps(dict(library="Aleksander", allow_new_keywords = True))}
+            print(files, self.ep_upload, dict(type="upload", Authorization=self.token))
+            r = requests.post(self.ep_upload, files=files, headers=dict(Authorization = self.token)).text
             print("Redceived", r)
         except Exception as e:
             raise e
@@ -299,6 +170,7 @@ class WebAppCorpusInterface(QObject):
 
         finally:
             fin.close()
+        pass
 
     def check_project_exists(self, p:VIANProject):
         try:
@@ -318,12 +190,10 @@ class WebAppCorpusInterface(QObject):
 
     @pyqtSlot()
     def get_corpora(self):
-        print("OK")
         return requests.get(self.ep_query_corpora + "/" + str(self.user_id)).json()
 
     @pyqtSlot()
     def get_movies(self):
-        print("OK")
         return requests.get(self.ep_query_movies).json()
 
     @pyqtSlot()

@@ -19,7 +19,6 @@ def on_progress(v):
     gl_progress.update(progress_bar, completed=v)
 
 
-
 def preprocess(file_path, progress):
     """
     Ensure all analyses which the webapp depends on are computed.
@@ -47,39 +46,38 @@ def preprocess(file_path, progress):
         run_analysis(vian_proj, ColorFeatureAnalysis(coverage=.01), segments,
                      vian_proj.get_classification_object_global("Global"), progress_callback=on_progress)
 
-        if vian_proj is not None:
-            print("Semantic Segmentation")
+        print("Semantic Segmentation")
 
-            progress_bar3 = progress.add_task("[green]Computing SemanticSegmentationAnalysis...", total=1.0)
-            progress_bar = progress_bar3
+        progress_bar3 = progress.add_task("[green]Computing SemanticSegmentationAnalysis...", total=1.0)
+        progress_bar = progress_bar3
 
-            run_analysis(vian_proj, SemanticSegmentationAnalysis(),
-                         vian_proj.screenshots,
-                         vian_proj.get_classification_object_global("Global"), progress_callback=on_progress)
-            clobjs = [
-                vian_proj.get_classification_object_global("Global"),
-                vian_proj.get_classification_object_global("Foreground"),
-                vian_proj.get_classification_object_global("Background")
-            ]
+        run_analysis(vian_proj, SemanticSegmentationAnalysis(),
+                     vian_proj.screenshots,
+                     vian_proj.get_classification_object_global("Global"), progress_callback=on_progress)
+        clobjs = [
+            vian_proj.get_classification_object_global("Global"),
+            vian_proj.get_classification_object_global("Foreground"),
+            vian_proj.get_classification_object_global("Background")
+        ]
 
-            print("Color Palettes")
-            progress_bar4 = progress.add_task("[green]Computing Screenshot ColorPaletteAnalysis...", total=1.0)
-            progress_bar = progress_bar4
+        print("Color Palettes")
+        progress_bar4 = progress.add_task("[green]Computing Screenshot ColorPaletteAnalysis...", total=1.0)
+        progress_bar = progress_bar4
 
-            run_analysis(vian_proj, ColorPaletteAnalysis(), vian_proj.screenshots, clobjs, progress_callback=on_progress)
+        run_analysis(vian_proj, ColorPaletteAnalysis(), vian_proj.screenshots, clobjs, progress_callback=on_progress)
 
-            print("Color Features")
-            progress_bar5 = progress.add_task("[green]Computing Screenshot ColorFeatureAnalysis...", total=1.0)
-            progress_bar = progress_bar5
-            run_analysis(vian_proj, ColorFeatureAnalysis(), vian_proj.screenshots, clobjs, progress_callback=on_progress)
+        print("Color Features")
+        progress_bar5 = progress.add_task("[green]Computing Screenshot ColorFeatureAnalysis...", total=1.0)
+        progress_bar = progress_bar5
+        run_analysis(vian_proj, ColorFeatureAnalysis(), vian_proj.screenshots, clobjs, progress_callback=on_progress)
 
-            progress.remove_task(progress_bar1)
-            progress.remove_task(progress_bar2)
-            progress.remove_task(progress_bar3)
-            progress.remove_task(progress_bar4)
-            progress.remove_task(progress_bar5)
+        progress.remove_task(progress_bar1)
+        progress.remove_task(progress_bar2)
+        progress.remove_task(progress_bar3)
+        progress.remove_task(progress_bar4)
+        progress.remove_task(progress_bar5)
 
-            vian_proj.store_project()
+        vian_proj.store_project()
 
 
 def upload_project(file_path, token=None, url_override = None, email=None, password=None):
