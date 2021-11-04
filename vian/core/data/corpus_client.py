@@ -29,17 +29,6 @@ else:
     EP_ROOT = CONFIG['webapp_root']
 
 
-def get_vian_version():
-    try:
-        q = requests.get(EP_ROOT + "vian/version").json()
-        version = q['version'].split("_")
-        version = [int(i) for i in version]
-        version_id = q['id']
-        return version, version_id
-    except Exception as e:
-        raise e
-        return None
-
 
 def download_vian_update(version_id):
     return requests.get(EP_ROOT + "vian/download_vian/" + str(version_id), stream=True)
@@ -60,88 +49,6 @@ def check_erc_template(project:VIANProject):
         json.dump(exchange_data, f)
     project.import_(ExperimentTemplateUpdater(), temporary)
     log_info("ERC Template detected, Done")
-
-
-class CorpusClient(QObject):
-    onConnectionEstablished = pyqtSignal(object)
-    onConnectionFailed = pyqtSignal(object)
-    onCommitStarted = pyqtSignal(object, object)
-    onCommitProgress = pyqtSignal(float, str)
-    onCommitFinished = pyqtSignal(object)
-    onCommitFailed = pyqtSignal(object)
-    onDisconnect = pyqtSignal(object)
-
-    def __init__(self):
-        super(CorpusClient, self).__init__()
-        self.corpus_interface = None
-        self.execution_thread = None
-        self.is_connected = False
-
-    def mode(self):
-        if isinstance(self.corpus_interface, WebAppCorpusInterface):
-            return "webapp"
-        else:
-            return None
-
-    @pyqtSlot(object)
-    def connect_webapp(self, user: Contributor):
-        try:
-            if self.execution_thread is not None:
-                self.execution_thread.exit()
-            self.corpus_interface = WebAppCorpusInterface()
-            self.execution_thread = QThread()
-            self.corpus_interface.moveToThread(self.execution_thread)
-            self.execution_thread.start()
-            ret = self.corpus_interface.login(user)
-            if ret['success'] == True:
-                self.onCommitStarted.connect(self.corpus_interface.commit_project)
-                self.is_connected = True
-            return ret
-        except Exception as e:
-            print("Exception in connect webapp", e)
-            return False
-
-    @pyqtSlot(object)
-    def on_connect_finished(self, result):
-        if result is not None:
-            r = dict(
-                corpus_name = result['corpus_name']
-            )
-            self.onConnectionEstablished.emit(r)
-        else:
-            self.onConnectionFailed.emit(result)
-
-        pass
-
-    @pyqtSlot(object, object)
-    def commit(self, project:VIANProject, contributor:Contributor):
-        if self.mode() is not None:
-            self.onCommitStarted.emit(project, contributor)
-        else:
-            self.onCommitFailed.emit(None)
-
-    def check_project_exists(self, project:VIANProject):
-        return self.corpus_interface.check_project_exists(project)
-
-    @pyqtSlot(object)
-    def on_commit_finished(self):
-        pass
-
-    @pyqtSlot(object)
-    def download(self, desc):
-        pass
-
-    @pyqtSlot(object)
-    def on_download_finished(self):
-        pass
-
-    def disconnect_corpus(self):
-        if self.corpus_interface is not None:
-            self.corpus_interface.logout()
-            self.is_connected = False
-            self.onDisconnect.emit(dict())
-        pass
-
 
 class CorpusInterfaceSignals(QObject):
     onConnected = pyqtSignal(object)

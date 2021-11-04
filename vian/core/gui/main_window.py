@@ -12,7 +12,7 @@ from vian.core.gui.vian_webapp import *
 from vian.core.data.cache import HDF5Cache
 from vian.core.data.exporters import *
 from vian.core.data.importers import *
-from vian.core.data.corpus_client import WebAppCorpusInterface, get_vian_version
+from vian.core.data.corpus_client import WebAppCorpusInterface
 from vian.core.data.computation import version_check
 from vian.core.data.settings import UserSettings, Contributor
 from vian.core.data.audio_handler2 import AudioHandler
@@ -432,8 +432,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionWelcome.triggered.connect(self.show_welcome)
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
-        self.actionUpdate.triggered.connect(self.check_update)
 
+        self.actionUpdate.triggered.connect(self.check_update)
+        self.actionUpdate.setEnabled(False) # TODO #360
         # self.actionCorpus.triggered.connect(self.corpus_client_toolbar.show)
 
         #TOOLS
@@ -1886,17 +1887,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_summary_dock()
 
     def check_update(self):
-        version, id = get_vian_version()
-        has_update = version_check(version, self.version)
-        if has_update:
-            QMessageBox.information(self, "New Version available", "A new VIAN version is available.\n"
-                                                                   "Go to https://www.vian.app/vian to "
-                                                                   "update to download the newest version.\n"
-                                                                   "Your Version: " + self.version + "\n"
-                                                                   "Newest Version: " + str(version))
-        else:
-            QMessageBox.information(self, "All set", "You have the newest version of VIAN!\n"
-                                                     "Your Version: " + self.version)
+        # TODO #360 Implement a new version check using Github packages
+        pass
+        # version, id = get_vian_version()
+        # has_update = version_check(version, self.version)
+        # if has_update:
+        #     QMessageBox.information(self, "New Version available", "A new VIAN version is available.\n"
+        #                                                            "Go to https://www.vian.app/vian to "
+        #                                                            "update to download the newest version.\n"
+        #                                                            "Your Version: " + self.version + "\n"
+        #                                                            "Newest Version: " + str(version))
+        # else:
+        #     QMessageBox.information(self, "All set", "You have the newest version of VIAN!\n"
+        #                                              "Your Version: " + self.version)
 
     # endregion
 
