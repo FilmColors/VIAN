@@ -1,3 +1,5 @@
+from functools import partial
+
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot
 from PyQt5.QtGui import QFont, QColor
@@ -64,6 +66,9 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
             self.inner.menuBar().hide()
 
         self.m_display = self.inner.menuBar().addMenu("Display")
+        self.a_increase_size = self.m_display.addAction("Increase Size (+)")
+        self.a_decrease_size = self.m_display.addAction("Decrease Size (-)")
+
         self.a_static = self.m_display.addAction("Static")
         self.a_static.setCheckable(True)
         self.a_static.setChecked(True)
@@ -180,7 +185,9 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def set_manager(self, screenshot_manager):
         # self.tab = QTabWidget(self.inner)
         # self.tab.addTab(screenshot_manager, "Screenshot Manager")
-        self.manager_dock = ESimpleDockWidget(self.inner, screenshot_manager, "Screenshots")
+        self.manager_dock = ESimpleDockWidget(self.inner,
+                                              screenshot_manager,
+                                              "Screenshots")
         self.inner.addDockWidget(Qt.TopDockWidgetArea, self.manager_dock, Qt.Horizontal)
         # t = QWidget()
         # t.setMinimumHeight(1)
@@ -239,6 +246,8 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.a_lc_plot.triggered.connect(self.lc_dock.show)
         self.a_dt_plot.triggered.connect(self.dt_dock.show)
 
+        self.a_increase_size.triggered.connect(partial(self.screenshot_manager.modify_image_size, 1.0))
+        self.a_decrease_size.triggered.connect(partial(self.screenshot_manager.modify_image_size, -1.0))
         self.main_window.currentClassificationObjectChanged.connect(self.screenshot_manager.on_classification_object_changed)
 
     def on_toggle_show_current(self):
@@ -476,7 +485,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         if state:
             self.clear_manager()
             lbl = QLabel()
-            movie = QtGui.QMovie(os.path.abspath("qt_ui/icons/loading512.gif"))
+            movie = QtGui.QMovie(os.path.abspath("qt_ui/icons/spinner4.gif"))
             lbl.setMovie(movie)
             lbl.setAttribute(Qt.WA_NoSystemBackground)
             movie.start()
@@ -486,11 +495,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.loading_text = self.scene.addText("Loading Screenshots... please wait.", font)
             self.loading_text.setDefaultTextColor(QColor(255,255,255))
             self.loading_icon.setPos(256, 256)
-            self.loading_text.setPos(100, 786)
+            self.loading_text.setPos(512 - self.loading_text.boundingRect().width() / 2, 786)
             self.scene.removeItem(self.current_segment_frame)
 
-            rect = QRectF(0.0, 0.0, 1280, 1024)
-            self.fitInView(rect, QtCore.Qt.KeepAspectRatio)
+            self.scene.setSceneRect(self.scene.itemsBoundingRect())
+            # self.fitInView(rect, QtCore.Qt.KeepAspectRatio)
         else:
             if self.loading_icon is not None:
                 self.scene.removeItem(self.loading_icon)
@@ -628,8 +637,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         y = self.border_height
         if len(self.images_plain) > 0:
-            img_width = self.images_plain[0].pixmap().width()
-            img_height = self.images_plain[0].pixmap().height()
+            img_width = self.images_plain[0].pixmap().width() * self.curr_image_scale
+            img_height = self.images_plain[0].pixmap().height() * self.curr_image_scale
             x_offset = int(img_width / 7)
             y_offset = self.font_captions.pointSize() * 3
             caption_width = int(img_width / 1.5)
@@ -655,6 +664,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 x_counter = 0
                 x = caption_width - (x_offset + img_width)
                 for i, img in enumerate(segm.segm_images):
+
                     if x_counter == self.n_per_row - 1:
                         x = caption_width
                         x_counter = 1
@@ -664,9 +674,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                         x += (x_offset + img_width)
 
                     img.setPos(x, y + int(img_height/5))
+                    img.setScale(self.curr_image_scale)
                     img.selection_rect = QtCore.QRect(x, y + int(img_height/5), img_width, img_height)
                     segm.scr_captions[i].setPos(img.pos() + segm.scr_caption_offset)
-
 
                 y += (2 * img_height)
         else:
@@ -931,8 +941,19 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         elif event.key() == QtCore.Qt.Key_Shift:
             self.shift_is_pressed = True
+        elif event.key() == QtCore.Qt.Key_Plus:
+            print("Plus",  self.curr_image_scale)
+            self.modify_image_size(1.0)
+        elif event.key() == QtCore.Qt.Key_Minus:
+            print("Minus",  self.curr_image_scale)
+            self.modify_image_size(-1.0)
         else:
             event.ignore()
+
+    @pyqtSlot(float)
+    def modify_image_size(self, val):
+        self.curr_image_scale += val
+        self.arrange_images()
 
     def keyReleaseEvent(self, event):
         if event.key() == QtCore.Qt.Key_Control:
