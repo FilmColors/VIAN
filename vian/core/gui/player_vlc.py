@@ -402,7 +402,7 @@ class Player_VLC(VideoPlayer):
 
         log_info("Opened Movie", self.movie_path)
         self.movieOpened.emit()
-        self.resize(self.size())
+        self.resize(self.size() + QtCore.QSize(1,1))
 
     def play_pause(self):
         if not self.is_playing():
