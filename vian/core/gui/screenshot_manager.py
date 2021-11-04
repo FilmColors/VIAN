@@ -191,7 +191,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         #                                       "Screenshots")
         # self.inner.setCentralWidget(self.screenshot_manager)
         # screenshot_manager.show()
-        self.screenshot_manager.s
         self.inner.setCentralWidget(screenshot_manager)
         # self.inner.addDockWidget(Qt.TopDockWidgetArea, self.manager_dock, Qt.Horizontal)
         # t = QWidget()
