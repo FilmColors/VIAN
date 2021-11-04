@@ -637,7 +637,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.colormetry_running is False:
             job = ColormetryJob2(int(self.project.movie_descriptor.fps / 2), self, self.settings.PROCESSING_WIDTH)
             args = job.prepare(self.project)
-            self.actionColormetry.setText("Pause Colormetry")
+            self.actionColormetry.setText("Pause Colorimetry")
             worker = MinimalThreadWorker(job.run_concurrent, args, True)
             worker.signals.callback.connect(self.on_colormetry_push_back)
             worker.signals.finished.connect(self.on_colormetry_finished)
