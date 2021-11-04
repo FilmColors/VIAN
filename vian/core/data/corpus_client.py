@@ -50,6 +50,7 @@ def check_erc_template(project:VIANProject):
     project.import_(ExperimentTemplateUpdater(), temporary)
     log_info("ERC Template detected, Done")
 
+
 class CorpusInterfaceSignals(QObject):
     onConnected = pyqtSignal(object)
     onConnectionFailed = pyqtSignal(object)

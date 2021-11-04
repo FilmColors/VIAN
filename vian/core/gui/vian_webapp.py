@@ -1,7 +1,7 @@
 import numpy as np
 from vian.core.data.log import log_debug
 from vian.core.data.computation import create_icon
-from vian.core.data.corpus_client import CorpusClient
+# from vian.core.data.corpus_client import CorpusClient
 from vian.core.data.interfaces import IProjectChangeNotify
 from vian.core.gui.ewidgetbase import *
 from vian.extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline

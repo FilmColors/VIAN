@@ -1,5 +1,4 @@
 from vian.core.concurrent.worker_functions import *
-from vian.core.concurrent.update_erc_template import ERCUpdateJob
 from vian.core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 from vian.core.concurrent.worker import WorkerManager, MinimalThreadWorker
 from vian.core.concurrent.image_loader import ClassificationObjectChangedJob
@@ -8,7 +7,7 @@ from vian.core.concurrent.auto_segmentation import DialogAutoSegmentation
 from vian.core.analysis.analysis_import import *
 from vian.core.data.computation import is_vian_light
 
-from vian.core.gui.vian_webapp import *
+# from vian.core.gui.vian_webapp import *
 from vian.core.data.cache import HDF5Cache
 from vian.core.data.exporters import *
 from vian.core.data.importers import *
@@ -2442,10 +2441,6 @@ class MainWindow(QtWidgets.QMainWindow):
         screenshot_annotation_dicts = []
 
         self.has_open_project = True
-
-        job = ERCUpdateJob()
-        worker = MinimalThreadWorker(job.run_concurrent, self.project, True)
-        self.thread_pool.start(worker, QThread.HighPriority)
 
         # Check if the file exists locally
         success = True
