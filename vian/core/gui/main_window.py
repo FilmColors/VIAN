@@ -403,7 +403,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
         self.actionScriptEditor.triggered.connect(self.pipeline_widget.show)
         self.actionClassification.triggered.connect(self.create_vocabulary_matrix)
-        # self.actionWebApp_Upload.triggered.connect(self.create_corpus_client_toolbar)
+        self.actionWebApp_Upload.triggered.connect(self.create_corpus_client_toolbar)
 
         # self.menuBar().actionAnnotationPersp.hide()
 
@@ -433,7 +433,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.actionUpdate.triggered.connect(self.check_update)
         self.actionUpdate.setEnabled(False) # TODO #360
-        # self.actionCorpus.triggered.connect(self.corpus_client_toolbar.show)
+        self.actionCorpus.triggered.connect(self.corpus_client_toolbar.show)
 
         #TOOLS
         self.actionAuto_Segmentation.triggered.connect(self.on_auto_segmentation)
@@ -1468,9 +1468,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer)
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
-            # self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_client_toolbar)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
-            # self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
+            self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_manager)
             if self.settings.USE_PIPELINES:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
@@ -1592,9 +1592,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.show()
             self.inspector.show()
             self.player_dock_widget.show()
-            # self.tabifyDockWidget(self.inspector, self.corpus_client_toolbar)
-            # self.corpus_client_toolbar.show()
-            # self.corpus_client_toolbar.raise_()
+            self.tabifyDockWidget(self.inspector, self.corpus_client_toolbar)
+            self.corpus_client_toolbar.show()
+            self.corpus_client_toolbar.raise_()
 
         self.setCentralWidget(central)
 
@@ -1609,8 +1609,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.annotation_toolbar.hide()
         if self.screenshot_toolbar.isVisible():
             self.screenshot_toolbar.hide()
-        # if self.corpus_client_toolbar.isVisible():
-        #     self.corpus_client_toolbar.hide()
+        if self.corpus_client_toolbar.isVisible():
+            self.corpus_client_toolbar.hide()
 
         # self.create_widget_video_player()
         self.query_widget.hide()
