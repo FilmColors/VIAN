@@ -18,6 +18,7 @@ from vian.core.data.audio_handler2 import AudioHandler
 from vian.core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 from vian.flask_server.server import FlaskServer, FlaskWebWidget, VIAN_PORT
 
+from vian.core.gui.ewidgetbase import EProgressPopup
 from vian.core.gui.dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from vian.core.gui.dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from vian.core.gui.dialogs.export_template_dialog import ExportTemplateDialog
@@ -76,7 +77,6 @@ except Exception as e:
 
 VERSION = "0.8.0"
 
-PROFILE = False
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -108,10 +108,6 @@ class MainWindow(QtWidgets.QMainWindow):
         log_info("VIAN: ", version.__version__)
 
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
-
-        if PROFILE:
-            self.profiler = cProfile.Profile()
-            self.profiler.enable()
 
         self.setAcceptDrops(True)
         self.has_open_project = False
@@ -1262,10 +1258,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         log_info("Closing abortAllConcurrentThreads")
         self.abortAllConcurrentThreads.emit()
-
-        if PROFILE:
-            self.profiler.disable()
-            self.profiler.dump_stats("Profile.prof")
 
         QCoreApplication.quit()
         return True
