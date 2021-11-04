@@ -15,7 +15,8 @@ def run_analysis(project:VIANProject,
                  analysis: IAnalysisJob,
                  targets: List[BaseProjectEntity],
                  class_objs: List[ClassificationObject]=None,
-                 progress_callback=None):
+                 progress_callback=None,
+                 override = True):
 
     if progress_callback is None:
         progress_callback = progress_dummy
@@ -28,7 +29,17 @@ def run_analysis(project:VIANProject,
     n, n_total = 0, len(class_objs) * len(targets)
 
     for clobj in class_objs:
-        args = analysis.prepare(project, targets, fps, clobj)
+
+        if override is False:
+            tgts = []
+            for t in targets:
+                ret = t.get_connected_analysis(analysis.__class__, as_clobj_dict=True)
+                if clobj in ret:
+                    continue
+                tgts.append(t)
+        else:
+            tgts = targets
+        args = analysis.prepare(project, tgts, fps, clobj)
         res = []
         if analysis.multiple_result:
             for i, arg in enumerate(args):

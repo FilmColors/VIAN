@@ -34,7 +34,6 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
         self.btn_Commit = QPushButton("3. Commit Project", self.central)
         self.central.layout().addWidget(self.btn_Commit)
         self.btn_Commit.clicked.connect(partial(self.corpus_widget.on_commit))
-        self.btn_Commit.setEnabled(False)
 
         self.progress_widget.onThresholdReached.connect(self.on_threshold_reached)
         self.corpus_widget.corpus_client.signals.onProcessingProgress.connect(self.progress_widget.on_progress)
@@ -49,11 +48,13 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
         pass
 
     def on_loaded(self, project):
-        self.btn_Commit.setEnabled(False)
+        pass
+        # self.btn_Commit.setEnabled(False)
         # self.progress_widget.btn_RunAll.setEnabled(False)
 
     def on_threshold_reached(self):
-        self.btn_Commit.setEnabled(True)
+        pass
+        # self.btn_Commit.setEnabled(True)
 
 
 class CorpusProgressWidget(QWidget):
@@ -236,6 +237,7 @@ class CorpusClientWidget(QWidget):
         if self.corpus_client is None:
             QMessageBox.information(self, "Not Connected", "Please login to the WebApp first.")
         dialog = CorpusCommitDialog(self.main_window, self.corpus_client)
+        dialog.onCommit.connect(self.corpus_client.commit_project)
         dialog.show()
 
     @pyqtSlot(object)
@@ -274,6 +276,8 @@ class WebAppLoginDialog(EDialogWidget):
 
 
 class CorpusCommitDialog(EDialogWidget):
+    onCommit = pyqtSignal(object, object)
+
     def __init__(self, main_window, corpus_client:WebAppCorpusInterface):
         super(CorpusCommitDialog, self).__init__(main_window, main_window)
         path = os.path.abspath("qt_ui/DialogHLayout.ui")
@@ -327,11 +331,13 @@ class CorpusCommitDialog(EDialogWidget):
         pass
 
     def on_commit(self):
+
         for k, v in self.filmography.get_filmography().items():
             self.main_window.project.movie_descriptor.meta_data[k] = v
         self.main_window.project.movie_descriptor.movie_name = self.lineEditMovieName.text()
         self.main_window.project.meta_data['corpus_name'] = self.lineEdit_Corpus.text()
 
         if self.main_window.project is not None:
-            self.corpus_client.commit(self.main_window.project, self.main_window.settings.CONTRIBUTOR)
+            self.onCommit.emit(self.main_window.project, self.main_window.settings.CONTRIBUTOR)
+
         self.close()

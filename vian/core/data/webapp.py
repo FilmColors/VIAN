@@ -6,7 +6,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePolicy, QWidgetAction, QMessageBox
 from vian.core.paths import get_vian_data
 from vian.core.data.settings import UserSettings, Contributor, CONFIG
-from vian.core.container.project import VIANProject
+from vian.core.container.project import VIANProject, Segment
 from vian.core.container.analysis import SemanticSegmentationAnalysisContainer, FileAnalysis
 from vian.core.container.experiment import Experiment, VocabularyWord, Vocabulary
 from vian.core.analysis.analysis_import import SemanticSegmentationAnalysis, ColorPaletteAnalysis, ColorFeatureAnalysis
@@ -21,7 +21,6 @@ PAL_WIDTH = 720
 #     EP_ROOT = CONFIG['localhost']
 # else:
 EP_ROOT = CONFIG['webapp_root']
-
 
 class VianNotLoggedInException(Exception):
     """
@@ -114,6 +113,7 @@ class WebAppCorpusInterface(QObject):
          :param file_path:
          :return:
          """
+
         # global progress_bar
         # global gl_progress
 
@@ -126,16 +126,16 @@ class WebAppCorpusInterface(QObject):
 
         run_analysis(vian_proj, ColorFeatureAnalysis(coverage=.01), segments,
                      vian_proj.get_classification_object_global("Global"),
-                     progress_callback=partial(on_progress, "Segments: ColorFeatureAnalysis"))
+                     progress_callback=partial(on_progress, "Segments: ColorFeatureAnalysis"), override=False)
 
         run_analysis(vian_proj, ColorPaletteAnalysis(coverage=.01), segments,
                      vian_proj.get_classification_object_global("Global"),
-                     progress_callback=partial(on_progress, "Segments: ColorPaletteAnalysis"))
+                     progress_callback=partial(on_progress, "Segments: ColorPaletteAnalysis"), override=False)
 
         run_analysis(vian_proj, SemanticSegmentationAnalysis(),
                      vian_proj.screenshots,
                      vian_proj.get_classification_object_global("Global"),
-                     progress_callback=partial(on_progress, "Screenshots: SemanticSegmentationAnalysis"))
+                     progress_callback=partial(on_progress, "Screenshots: SemanticSegmentationAnalysis"), override=False)
         clobjs = [
             vian_proj.get_classification_object_global("Global"),
             vian_proj.get_classification_object_global("Foreground"),
@@ -144,11 +144,11 @@ class WebAppCorpusInterface(QObject):
 
         print("Color Palettes")
         run_analysis(vian_proj, ColorPaletteAnalysis(), vian_proj.screenshots, clobjs,
-                     progress_callback=partial(on_progress, "Screenshots: ColorPaletteAnalysis"))
+                     progress_callback=partial(on_progress, "Screenshots: ColorPaletteAnalysis"), override=False)
 
         print("Color Features")
         run_analysis(vian_proj, ColorFeatureAnalysis(), vian_proj.screenshots, clobjs,
-                     progress_callback=partial(on_progress, "Screenshots: ColorFeatureAnalysis"))
+                     progress_callback=partial(on_progress, "Screenshots: ColorFeatureAnalysis"), override=False)
 
         vian_proj.store_project()
 
@@ -165,14 +165,13 @@ class WebAppCorpusInterface(QObject):
         try:
             fin = open(archive_path, 'rb')
             files = {'file': fin,
-                     'json': json.dumps(dict(library="Aleksander", allow_new_keywords = True))}
+                     'json': json.dumps(dict(library=user.full_name, allow_new_keywords = True))}
             print(files, self.ep_upload, dict(type="upload", Authorization=self.token))
             r = requests.post(self.ep_upload, files=files, headers=dict(Authorization = self.token)).text
             print("Redceived", r)
         except Exception as e:
             raise e
             pass
-
         finally:
             fin.close()
         pass
