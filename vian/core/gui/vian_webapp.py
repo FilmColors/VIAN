@@ -1,5 +1,5 @@
 import numpy as np
-from vian.core.data.log import log_debug
+from vian.core.data.log import log_debug, log_info
 from vian.core.data.computation import create_icon
 from vian.core.data.webapp import WebAppCorpusInterface
 from vian.core.data.interfaces import IProjectChangeNotify
@@ -14,6 +14,7 @@ from vian.core.data.log import log_warning, log_info
 class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
     runAllAnalyses = pyqtSignal()
     onRunAnalysis = pyqtSignal(object)
+    onRunAll = pyqtSignal(object, object)
 
     def __init__(self, main_window):
         super(WebAppCorpusDock, self).__init__(main_window, False)
@@ -36,6 +37,11 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
         self.btn_Commit.setEnabled(False)
 
         self.progress_widget.onThresholdReached.connect(self.on_threshold_reached)
+        self.corpus_widget.corpus_client.signals.onProcessingProgress.connect(self.progress_widget.on_progress)
+        self.onRunAll.connect(self.corpus_widget.corpus_client._preprocess)
+
+    def runAll(self):
+        self.onRunAll.emit(self.main_window.project, None)
 
     @pyqtSlot()
     def on_analyses_changed(self):
@@ -52,8 +58,6 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
 
 class CorpusProgressWidget(QWidget):
     onThresholdReached = pyqtSignal()
-    onRunAll = pyqtSignal()
-
 
     def __init__(self, parent, corpus_widget, main_window):
         super(CorpusProgressWidget, self).__init__(parent)
@@ -77,6 +81,7 @@ class CorpusProgressWidget(QWidget):
         self.layout().addWidget(self.spacer)
         self.layout().addWidget(self.btn_runAll)
 
+
         # self.lbl_Instructions = QLabel("The webapp requires a specific set of analyses performed before upload. "
         #                                "Currently these requirements are not met. To perform these analyses do the following:\n "
         #                                "1. Go to the pipeline manager\n"
@@ -89,6 +94,19 @@ class CorpusProgressWidget(QWidget):
         # self.layout().addWidget(self.lbl_Instructions)
         self.items = dict()
         self.missing_analyses = dict()
+
+    def clear_list(self):
+        for k, v in self.items.items():
+            v.deleteLater()
+        self.items = dict()
+
+    @pyqtSlot(str, float)
+    def on_progress(self, name, progress):
+        if name not in self.items:
+            t = ProgressItem(name)
+            self.list_widget.layout().addWidget(t)
+            self.items[name] = t
+        self.items[name].progress_bar.setValue(progress * 100)
 
     @pyqtSlot()
     def update_state(self):
@@ -134,26 +152,28 @@ class CorpusProgressWidget(QWidget):
             QMessageBox.information(self, "No Project loaded.", "You first have to load a project to analyse it.")
 
     def compute_missing(self):
-        missing = self.main_window.project.get_missing_analyses(ERCFilmColorsVIANPipeline.requirements)
-        p = self.main_window.project #type:VIANProject
-
-        for k, (container_type, _, _) in missing.items():
-            for priority, by_priority in container_type.items():
-                for analysis_name, by_cl_obj in by_priority.items():
-                    analysis = self.main_window.eval_class(analysis_name)
-                    for clobj_name, containers in by_cl_obj.items():
-                        clobj = p.get_classification_object_global(clobj_name)
-                        if clobj is None:
-                            log_warning("Classification Object not found")
-                            continue
-                        d = dict(
-                            analysis=analysis(),
-                            targets=containers,
-                            parameters=None,
-                            classification_objs=clobj
-                        )
-                        log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
-                        self.corpus_widget.onRunAnalysis.emit(d)
+        self.clear_list()
+        self.corpus_widget.runAll()
+        # missing = self.main_window.project.get_missing_analyses(ERCFilmColorsVIANPipeline.requirements)
+        # p = self.main_window.project #type:VIANProject
+        #
+        # for k, (container_type, _, _) in missing.items():
+        #     for priority, by_priority in container_type.items():
+        #         for analysis_name, by_cl_obj in by_priority.items():
+        #             analysis = self.main_window.eval_class(analysis_name)
+        #             for clobj_name, containers in by_cl_obj.items():
+        #                 clobj = p.get_classification_object_global(clobj_name)
+        #                 if clobj is None:
+        #                     log_warning("Classification Object not found")
+        #                     continue
+        #                 d = dict(
+        #                     analysis=analysis(),
+        #                     targets=containers,
+        #                     parameters=None,
+        #                     classification_objs=clobj
+        #                 )
+        #                 log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
+        #                 self.corpus_widget.onRunAnalysis.emit(d)
 
 
 class ProgressItem(QWidget):
@@ -172,6 +192,8 @@ class CorpusClientWidget(QWidget):
         uic.loadUi(path, self)
 
         self.corpus_client = WebAppCorpusInterface()
+        self.corpus_client.signals.onLoginFinished.connect(self.on_login_finished)
+
         self.corpus_client_thread = QThread()
         self.corpus_client.moveToThread(self.corpus_client_thread)
         self.corpus_client_thread.start()
@@ -181,8 +203,6 @@ class CorpusClientWidget(QWidget):
         self.dbproject = None
         self.checkout_state = 0
 
-        self.corpus_client.signals.onConnected.connect(self.on_connected)
-        self.corpus_client.signals.onConnectionFailed.connect(self.on_disconnected)
         self.btn_Connect.setIcon(create_icon("qt_ui/icons/icon_webapp_off.png"))
         self.btn_login.clicked.connect(self.on_connect)
         self.btn_Connect.setEnabled(True)
@@ -218,8 +238,20 @@ class CorpusClientWidget(QWidget):
         dialog = CorpusCommitDialog(self.main_window, self.corpus_client)
         dialog.show()
 
+    @pyqtSlot(object)
+    def on_login_finished(self, res):
+        if not res['success']:
+            self.on_disconnected()
+            QMessageBox.warning(self, "Could not Establish Connection",
+                                "It has not been possible to login on the FilmColors Webapp, "
+                                "check your credentials again or create an account.")
+        else:
+            self.on_connected()
+
 
 class WebAppLoginDialog(EDialogWidget):
+    onLogin = pyqtSignal(object)
+
     def __init__(self, main_window, corpus_client:WebAppCorpusInterface):
         super(WebAppLoginDialog, self).__init__(main_window)
         path = os.path.abspath("qt_ui/CorpusLoginDialog.ui")
@@ -230,28 +262,16 @@ class WebAppLoginDialog(EDialogWidget):
         self.lineEdit_Email.setText(self.main_window.settings.CONTRIBUTOR.email)
         self.lineEdit_Password.setText(self.main_window.settings.CONTRIBUTOR.password)
         self.lineEdit_Password.setEchoMode(QLineEdit.Password)
+        self.onLogin.connect(self.corpus_client.login)
 
     def on_ok(self):
         self.main_window.settings.CONTRIBUTOR.email = self.lineEdit_Email.text()
         self.main_window.settings.CONTRIBUTOR.password = self.lineEdit_Password.text()
-        res = self.corpus_client.login(self.main_window.settings.CONTRIBUTOR)
-
-        if not res['success']:
-            QMessageBox.warning(self, "Could not Establish Connection",
-                                "It has not been possible to login on the FilmColors Webapp, "
-                                "check your credentials again or create an account.")
+        self.onLogin.emit(self.main_window.settings.CONTRIBUTOR)
 
     def on_cancel(self):
         self.close()
 
-
-# class CorpusOptionMenu(QMenu):
-#     def __init__(self, parent, corpus_client:CorpusClient):
-#         super(CorpusOptionMenu, self).__init__(parent)
-#         self.corpus_client = corpus_client
-#         self.a_disconnect = self.addAction("Disconnect")
-#         self.a_disconnect.triggered.connect(self.corpus_client.disconnect_corpus)
-#
 
 class CorpusCommitDialog(EDialogWidget):
     def __init__(self, main_window, corpus_client:WebAppCorpusInterface):

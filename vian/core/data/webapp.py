@@ -1,5 +1,6 @@
 import logging
-
+from functools import partial
+from core.data.log import log_info
 from PyQt5.QtCore import QObject, QThread, pyqtSlot, pyqtSignal
 from PyQt5 import uic
 from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePolicy, QWidgetAction, QMessageBox
@@ -29,10 +30,10 @@ class VianNotLoggedInException(Exception):
 
 
 class CorpusInterfaceSignals(QObject):
-    onConnected = pyqtSignal(object)
-    onConnectionFailed = pyqtSignal(object)
+    onLoginFinished = pyqtSignal(object)    # dict(success = True, user=p.json()['user'], token=self.token)
     onCommitFinished = pyqtSignal(object)
     onCommitProgress = pyqtSignal(float, str)
+    onProcessingProgress = pyqtSignal(str, float)
 
 
 class WebAppCorpusInterface(QObject):
@@ -86,12 +87,12 @@ class WebAppCorpusInterface(QObject):
             self.token = p.json()['token']
 
             ret = dict(success = True, user=p.json()['user'], token=self.token)
-            self.signals.onConnected.emit(dict(success = True, user=p.json()['user'], token=self.token))
+            self.signals.onLoginFinished.emit(dict(success = True, user=p.json()['user'], token=self.token))
 
         except Exception as e:
             ret = dict(success = False, user=None, token=None)
             print("Exception in RemoteCorpusClient.connect_user(): ", str(e))
-            self.signals.onConnectionFailed.emit(ret)
+            self.signals.onLoginFinished.emit(ret)
         return ret
 
     @pyqtSlot()
@@ -106,29 +107,35 @@ class WebAppCorpusInterface(QObject):
         archive_path = project.zip_baked(bake_path)
         return archive_path
 
+    @pyqtSlot(object, object)
     def _preprocess(self, vian_proj, on_progress=progress_dummy):
         """
          Ensure all analyses which the webapp depends on are computed.
          :param file_path:
          :return:
          """
-        global progress_bar
-        global gl_progress
-
+        # global progress_bar
+        # global gl_progress
 
         segments = []
         for s in vian_proj.segmentation:
             segments.extend(s.segments)
 
-        run_analysis(vian_proj, ColorPaletteAnalysis(coverage=.01), segments,
-                     vian_proj.get_classification_object_global("Global"), progress_callback=on_progress)
+        def on_progress(name, p):
+            self.signals.onProcessingProgress.emit(name, p)
 
         run_analysis(vian_proj, ColorFeatureAnalysis(coverage=.01), segments,
-                     vian_proj.get_classification_object_global("Global"), progress_callback=on_progress)
+                     vian_proj.get_classification_object_global("Global"),
+                     progress_callback=partial(on_progress, "Segments: ColorFeatureAnalysis"))
+
+        run_analysis(vian_proj, ColorPaletteAnalysis(coverage=.01), segments,
+                     vian_proj.get_classification_object_global("Global"),
+                     progress_callback=partial(on_progress, "Segments: ColorPaletteAnalysis"))
 
         run_analysis(vian_proj, SemanticSegmentationAnalysis(),
                      vian_proj.screenshots,
-                     vian_proj.get_classification_object_global("Global"), progress_callback=on_progress)
+                     vian_proj.get_classification_object_global("Global"),
+                     progress_callback=partial(on_progress, "Screenshots: SemanticSegmentationAnalysis"))
         clobjs = [
             vian_proj.get_classification_object_global("Global"),
             vian_proj.get_classification_object_global("Foreground"),
@@ -136,10 +143,12 @@ class WebAppCorpusInterface(QObject):
         ]
 
         print("Color Palettes")
-        run_analysis(vian_proj, ColorPaletteAnalysis(), vian_proj.screenshots, clobjs, progress_callback=on_progress)
+        run_analysis(vian_proj, ColorPaletteAnalysis(), vian_proj.screenshots, clobjs,
+                     progress_callback=partial(on_progress, "Screenshots: ColorPaletteAnalysis"))
 
         print("Color Features")
-        run_analysis(vian_proj, ColorFeatureAnalysis(), vian_proj.screenshots, clobjs, progress_callback=on_progress)
+        run_analysis(vian_proj, ColorFeatureAnalysis(), vian_proj.screenshots, clobjs,
+                     progress_callback=partial(on_progress, "Screenshots: ColorFeatureAnalysis"))
 
         vian_proj.store_project()
 

@@ -583,7 +583,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pipeline_toolbar.runAll.connect(self.pipeline_widget.pipeline.run_all)
 
         self.corpus_widget.onCorpusChanged.connect(self.outliner.on_corpus_loaded)
-        # self.corpus_client_toolbar.onRunAnalysis.connect(self.on_start_analysis)
+        self.corpus_client_toolbar.onRunAnalysis.connect(self.on_start_analysis)
 
         self.update_recent_menu()
         self.player_controls.setState(False)

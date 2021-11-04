@@ -19,18 +19,22 @@ def run_analysis(project:VIANProject,
 
     if progress_callback is None:
         progress_callback = progress_dummy
+
     fps = project.movie_descriptor.fps
 
     if not isinstance(class_objs, list):
         class_objs = [class_objs]
 
+    n, n_total = 0, len(class_objs) * len(targets)
+
     for clobj in class_objs:
         args = analysis.prepare(project, targets, fps, clobj)
-
         res = []
         if analysis.multiple_result:
             for i, arg in enumerate(args):
-                res.append(analysis.process(arg, progress_callback))
+                progress_callback(n / n_total)
+                res.append(analysis.process(arg, progress_dummy))
+                n += 1
         else:
             res = analysis.process(args, progress_callback)
 
@@ -46,3 +50,4 @@ def run_analysis(project:VIANProject,
                     analysis.modify_project(project, res)
                     project.add_analysis(res)
 
+    progress_callback(1.0)

@@ -16,8 +16,6 @@ import sys
 import inspect
 
 ALL_REGISTERED_PIPELINES = dict()
-
-
 class VIANEventHandler(QObject):
     onCurrentPipelineChanged = pyqtSignal(object)
     onLockPipelineGUIForLoading = pyqtSignal()
@@ -61,7 +59,6 @@ class VIANEventHandler(QObject):
         self.queue = []
         self.queue_running = False
         self.onCurrentPipelineChanged.emit(None)
-
 
     @pyqtSlot(bool, bool, bool)
     def to_compute_changed(self, comp_segments, comp_screenshots, comp_annotations):
