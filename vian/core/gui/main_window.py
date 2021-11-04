@@ -1,5 +1,4 @@
 from vian.core.concurrent.worker_functions import *
-from vian.core.concurrent.update_erc_template import ERCUpdateJob
 from vian.core.concurrent.timestep_update import TimestepUpdateWorkerSingle
 from vian.core.concurrent.worker import WorkerManager, MinimalThreadWorker
 from vian.core.concurrent.image_loader import ClassificationObjectChangedJob
@@ -8,17 +7,18 @@ from vian.core.concurrent.auto_segmentation import DialogAutoSegmentation
 from vian.core.analysis.analysis_import import *
 from vian.core.data.computation import is_vian_light
 
-from vian.core.gui.vian_webapp import *
+from vian.core.gui.vian_webapp import WebAppCorpusDock
 from vian.core.data.cache import HDF5Cache
 from vian.core.data.exporters import *
 from vian.core.data.importers import *
-from vian.core.data.corpus_client import WebAppCorpusInterface, get_vian_version
+from vian.core.data.webapp import WebAppCorpusInterface
 from vian.core.data.computation import version_check
 from vian.core.data.settings import UserSettings, Contributor
 from vian.core.data.audio_handler2 import AudioHandler
 from vian.core.data.creation_events import VIANEventHandler, ALL_REGISTERED_PIPELINES
 from vian.flask_server.server import FlaskServer, FlaskWebWidget, VIAN_PORT
 
+from vian.core.gui.ewidgetbase import EProgressPopup
 from vian.core.gui.dialogs.csv_vocabulary_importer_dialog import CSVVocabularyImportDialog
 from vian.core.gui.dialogs.export_segmentation_dialog import ExportSegmentationDialog
 from vian.core.gui.dialogs.export_template_dialog import ExportTemplateDialog
@@ -80,7 +80,6 @@ except Exception as e:
 
 VERSION = "0.8.0"
 
-PROFILE = False
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -112,10 +111,6 @@ class MainWindow(QtWidgets.QMainWindow):
         log_info("VIAN: ", version.__version__)
 
         loading_screen.setStyleSheet("QWidget{font-family: \"Helvetica\"; font-size: 10pt;}")
-
-        if PROFILE:
-            self.profiler = cProfile.Profile()
-            self.profiler.enable()
 
         self.setAcceptDrops(True)
         self.has_open_project = False
@@ -228,7 +223,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_dock_widget = None
 
         self.project = VIANProject(name="Default Project", path=None)
-        self.corpus_client = CorpusClient()
+        # self.corpus_client = CorpusClient()
 
         self.frame_update_worker = TimestepUpdateWorkerSingle(self.settings)
         self.frame_update_thread = QThread()
@@ -408,7 +403,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
         self.actionScriptEditor.triggered.connect(self.pipeline_widget.show)
         self.actionClassification.triggered.connect(self.create_vocabulary_matrix)
-        self.actionWebApp_Upload.triggered.connect(self.create_corpus_client_toolbar)
+        # self.actionWebApp_Upload.triggered.connect(self.create_corpus_client_toolbar)
 
         # self.menuBar().actionAnnotationPersp.hide()
 
@@ -435,9 +430,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionWelcome.triggered.connect(self.show_welcome)
         self.actionIncreasePlayRate.triggered.connect(self.increase_playrate)
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
-        self.actionUpdate.triggered.connect(self.check_update)
 
-        self.actionCorpus.triggered.connect(self.corpus_client_toolbar.show)
+        self.actionUpdate.triggered.connect(self.check_update)
+        self.actionUpdate.setEnabled(False) # TODO #360
+        # self.actionCorpus.triggered.connect(self.corpus_client_toolbar.show)
 
         #TOOLS
         self.actionAuto_Segmentation.triggered.connect(self.on_auto_segmentation)
@@ -521,7 +517,6 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.colorimetry_live,
                                     self.query_widget,
                                     self.worker_manager,
-                                    self.corpus_client_toolbar,
                                     self.flask_server
                                           ]
 
@@ -594,8 +589,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.corpus_client_toolbar.onRunAnalysis.connect(self.on_start_analysis)
 
         self.update_recent_menu()
-
-
         self.player_controls.setState(False)
 
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
@@ -1044,7 +1037,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def create_corpus_client_toolbar(self):
         if self.corpus_client_toolbar is None:
-            self.corpus_client_toolbar = WebAppCorpusDock(self, self.corpus_client)
+            self.corpus_client_toolbar = WebAppCorpusDock(self)
             self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_client_toolbar)
             self.corpus_client_toolbar.show()
 
@@ -1267,10 +1260,6 @@ class MainWindow(QtWidgets.QMainWindow):
         log_info("Closing abortAllConcurrentThreads")
         self.abortAllConcurrentThreads.emit()
 
-        if PROFILE:
-            self.profiler.disable()
-            self.profiler.dump_stats("Profile.prof")
-
         QCoreApplication.quit()
         return True
 
@@ -1479,9 +1468,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer)
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_client_toolbar)
+            # self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
-            self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
+            # self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_manager)
             if self.settings.USE_PIPELINES:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
@@ -1603,9 +1592,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.show()
             self.inspector.show()
             self.player_dock_widget.show()
-            self.tabifyDockWidget(self.inspector, self.corpus_client_toolbar)
-            self.corpus_client_toolbar.show()
-            self.corpus_client_toolbar.raise_()
+            # self.tabifyDockWidget(self.inspector, self.corpus_client_toolbar)
+            # self.corpus_client_toolbar.show()
+            # self.corpus_client_toolbar.raise_()
 
         self.setCentralWidget(central)
 
@@ -1620,8 +1609,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.annotation_toolbar.hide()
         if self.screenshot_toolbar.isVisible():
             self.screenshot_toolbar.hide()
-        if self.corpus_client_toolbar.isVisible():
-            self.corpus_client_toolbar.hide()
+        # if self.corpus_client_toolbar.isVisible():
+        #     self.corpus_client_toolbar.hide()
 
         # self.create_widget_video_player()
         self.query_widget.hide()
@@ -1890,17 +1879,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_summary_dock()
 
     def check_update(self):
-        version, id = get_vian_version()
-        has_update = version_check(version, self.version)
-        if has_update:
-            QMessageBox.information(self, "New Version available", "A new VIAN version is available.\n"
-                                                                   "Go to https://www.vian.app/vian to "
-                                                                   "update to download the newest version.\n"
-                                                                   "Your Version: " + self.version + "\n"
-                                                                   "Newest Version: " + str(version))
-        else:
-            QMessageBox.information(self, "All set", "You have the newest version of VIAN!\n"
-                                                     "Your Version: " + self.version)
+        # TODO #360 Implement a new version check using Github packages
+        pass
+        # version, id = get_vian_version()
+        # has_update = version_check(version, self.version)
+        # if has_update:
+        #     QMessageBox.information(self, "New Version available", "A new VIAN version is available.\n"
+        #                                                            "Go to https://www.vian.app/vian to "
+        #                                                            "update to download the newest version.\n"
+        #                                                            "Your Version: " + self.version + "\n"
+        #                                                            "Newest Version: " + str(version))
+        # else:
+        #     QMessageBox.information(self, "All set", "You have the newest version of VIAN!\n"
+        #                                              "Your Version: " + self.version)
 
     # endregion
 
@@ -2437,16 +2428,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hdf5_cache.cleanup()
 
         self.vian_event_handler.set_project(self.project)
-        self.project.onAnalysisAdded.connect(self.corpus_client_toolbar.on_analyses_changed)
+        # self.project.onAnalysisAdded.connect(self.corpus_client_toolbar.on_analyses_changed)
 
         screenshot_position = []
         screenshot_annotation_dicts = []
 
         self.has_open_project = True
-
-        job = ERCUpdateJob()
-        worker = MinimalThreadWorker(job.run_concurrent, self.project, True)
-        self.thread_pool.start(worker, QThread.HighPriority)
 
         # Check if the file exists locally
         success = True

@@ -63,32 +63,6 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
-      <widget class="QPushButton" name="btn_Commit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="toolTip">
-        <string>Commit this Project to the Corpus</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>icons/icon_commit.png</normaloff>icons/icon_commit.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -105,7 +79,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_Options">
+      <widget class="QPushButton" name="btn_login">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
@@ -120,7 +94,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>icons/icon_options.png</normaloff>icons/icon_options.png</iconset>
+         <normaloff>icons/login-variant.png</normaloff>icons/login-variant.png</iconset>
        </property>
        <property name="iconSize">
         <size>

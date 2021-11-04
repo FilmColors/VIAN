@@ -203,7 +203,7 @@ class EDialogWidget(QDialog):
         self.setAttribute(Qt.WA_MacOpaqueSizeGrip, True)
         self.help_path = help_path
 
-        # self.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.Dialog)
+        self.setAttribute(Qt.WA_AlwaysStackOnTop)
         self.setWindowFlags(Qt.Dialog)
         self.main_window = main_window
 
