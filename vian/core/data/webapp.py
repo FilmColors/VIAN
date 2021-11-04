@@ -19,6 +19,7 @@ def on_progress(v):
     gl_progress.update(progress_bar, completed=v)
 
 
+
 def preprocess(file_path, progress):
     """
     Ensure all analyses which the webapp depends on are computed.

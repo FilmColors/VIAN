@@ -203,7 +203,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_results_widget = None
         self.analysis_results_widget_dock = None
         self.experiment_dock = None
-        self.corpus_client_toolbar = None
+        # self.corpus_client_toolbar = None
         self.facial_identification_dock = None
         self.pipeline_widget = None
         self.script_editor = None
@@ -225,7 +225,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player_dock_widget = None
 
         self.project = VIANProject(name="Default Project", path=None)
-        self.corpus_client = CorpusClient()
+        # self.corpus_client = CorpusClient()
 
         self.frame_update_worker = TimestepUpdateWorkerSingle(self.settings)
         self.frame_update_thread = QThread()
@@ -293,7 +293,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.search_window = SearchWindow(self)
         self.search_window.hide()
 
-        self.create_corpus_client_toolbar()
+        # self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
         self.script_editor = self.pipeline_widget.editor
 
@@ -405,7 +405,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionToggleStatusBar.triggered.connect(self.toggle_statusbar)
         self.actionScriptEditor.triggered.connect(self.pipeline_widget.show)
         self.actionClassification.triggered.connect(self.create_vocabulary_matrix)
-        self.actionWebApp_Upload.triggered.connect(self.create_corpus_client_toolbar)
+        # self.actionWebApp_Upload.triggered.connect(self.create_corpus_client_toolbar)
 
         # self.menuBar().actionAnnotationPersp.hide()
 
@@ -434,7 +434,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionDecreasePlayRate.triggered.connect(self.decrease_playrate)
         self.actionUpdate.triggered.connect(self.check_update)
 
-        self.actionCorpus.triggered.connect(self.corpus_client_toolbar.show)
+        # self.actionCorpus.triggered.connect(self.corpus_client_toolbar.show)
 
         #TOOLS
         self.actionAuto_Segmentation.triggered.connect(self.on_auto_segmentation)
@@ -518,7 +518,6 @@ class MainWindow(QtWidgets.QMainWindow):
                                     self.colorimetry_live,
                                     self.query_widget,
                                     self.worker_manager,
-                                    self.corpus_client_toolbar,
                                     self.flask_server
                                           ]
 
@@ -588,7 +587,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pipeline_toolbar.runAll.connect(self.pipeline_widget.pipeline.run_all)
 
         self.corpus_widget.onCorpusChanged.connect(self.outliner.on_corpus_loaded)
-        self.corpus_client_toolbar.onRunAnalysis.connect(self.on_start_analysis)
+        # self.corpus_client_toolbar.onRunAnalysis.connect(self.on_start_analysis)
 
         self.update_recent_menu()
 
@@ -1039,19 +1038,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.corpus_widget.raise_()
                 self.corpus_widget.activateWindow()
 
-    def create_corpus_client_toolbar(self):
-        if self.corpus_client_toolbar is None:
-            self.corpus_client_toolbar = WebAppCorpusDock(self, self.corpus_client)
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_client_toolbar)
-            self.corpus_client_toolbar.show()
-
-        else:
-            if not self.corpus_client_toolbar.visibleRegion().isEmpty():
-                self.corpus_client_toolbar.hide()
-            else:
-                self.corpus_client_toolbar.show()
-                self.corpus_client_toolbar.raise_()
-                self.corpus_client_toolbar.activateWindow()
+    # def create_corpus_client_toolbar(self):
+    #     if self.corpus_client_toolbar is None:
+    #         self.corpus_client_toolbar = WebAppCorpusDock(self, self.corpus_client)
+    #         self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_client_toolbar)
+    #         self.corpus_client_toolbar.show()
+    #
+    #     else:
+    #         if not self.corpus_client_toolbar.visibleRegion().isEmpty():
+    #             self.corpus_client_toolbar.hide()
+    #         else:
+    #             self.corpus_client_toolbar.show()
+    #             self.corpus_client_toolbar.raise_()
+    #             self.corpus_client_toolbar.activateWindow()
 
     def create_summary_dock(self):
         if self.summary_dock is None:
@@ -1476,9 +1475,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer)
 
             self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_client_toolbar)
+            # self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
-            self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
+            # self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_manager)
             if self.settings.USE_PIPELINES:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
@@ -1600,9 +1599,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timeline.show()
             self.inspector.show()
             self.player_dock_widget.show()
-            self.tabifyDockWidget(self.inspector, self.corpus_client_toolbar)
-            self.corpus_client_toolbar.show()
-            self.corpus_client_toolbar.raise_()
+            # self.tabifyDockWidget(self.inspector, self.corpus_client_toolbar)
+            # self.corpus_client_toolbar.show()
+            # self.corpus_client_toolbar.raise_()
 
         self.setCentralWidget(central)
 
@@ -1617,8 +1616,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.annotation_toolbar.hide()
         if self.screenshot_toolbar.isVisible():
             self.screenshot_toolbar.hide()
-        if self.corpus_client_toolbar.isVisible():
-            self.corpus_client_toolbar.hide()
+        # if self.corpus_client_toolbar.isVisible():
+        #     self.corpus_client_toolbar.hide()
 
         # self.create_widget_video_player()
         self.query_widget.hide()
@@ -2434,7 +2433,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hdf5_cache.cleanup()
 
         self.vian_event_handler.set_project(self.project)
-        self.project.onAnalysisAdded.connect(self.corpus_client_toolbar.on_analyses_changed)
+        # self.project.onAnalysisAdded.connect(self.corpus_client_toolbar.on_analyses_changed)
 
         screenshot_position = []
         screenshot_annotation_dicts = []

@@ -10,6 +10,7 @@ from vian.core.container.project import VIANProject
 
 from vian.core.data.log import log_warning, log_info
 
+
 class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
     runAllAnalyses = pyqtSignal()
     onRunAnalysis = pyqtSignal(object)
@@ -153,7 +154,6 @@ class CorpusProgressWidget(QWidget):
                         )
                         log_info("Pipeline Analysis: ", priority, analysis_name, clobj_name)
                         self.corpus_widget.onRunAnalysis.emit(d)
-
 
 
 class ProgressItem(QWidget):
