@@ -1,7 +1,7 @@
 import numpy as np
 from vian.core.data.log import log_debug
 from vian.core.data.computation import create_icon
-# from vian.core.data.corpus_client import CorpusClient
+from vian.core.data.webapp import WebAppCorpusInterface
 from vian.core.data.interfaces import IProjectChangeNotify
 from vian.core.gui.ewidgetbase import *
 from vian.extensions.pipelines.ercfilmcolors import ERCFilmColorsVIANPipeline
@@ -15,14 +15,14 @@ class WebAppCorpusDock(EDockWidget, IProjectChangeNotify):
     runAllAnalyses = pyqtSignal()
     onRunAnalysis = pyqtSignal(object)
 
-    def __init__(self, main_window, corpus_client:CorpusClient):
+    def __init__(self, main_window):
         super(WebAppCorpusDock, self).__init__(main_window, False)
         self.setWindowTitle("WebApp")
         self.central = QWidget(self)
         self.setWidget(self.central)
         self.central.setLayout(QVBoxLayout())
-        self.corpus_client = corpus_client
-        self.corpus_widget = CorpusClientWidget(self, corpus_client, main_window)
+
+        self.corpus_widget = CorpusClientWidget(self, main_window)
         self.central.layout().addWidget(self.corpus_widget)
         self.stack = QStackedWidget(self)
         self.central.layout().addWidget(self.stack)
@@ -166,57 +166,50 @@ class ProgressItem(QWidget):
 
 
 class CorpusClientWidget(QWidget):
-    def __init__(self, parent, corpus_client:CorpusClient, main_window):
+    def __init__(self, parent, main_window):
         super(CorpusClientWidget, self).__init__(parent)
         path = os.path.abspath("qt_ui/CorpusClientWidget2.ui")
         uic.loadUi(path, self)
-        self.corpus_client = corpus_client
+
+        self.corpus_client = WebAppCorpusInterface()
+        self.corpus_client_thread = QThread()
+        self.corpus_client.moveToThread(self.corpus_client_thread)
+        self.corpus_client_thread.start()
+
         self.main_window = main_window
         self.btn_Connect.setStyleSheet("QPushButton{background-color: rgb(17, 17, 17);}")
         self.dbproject = None
         self.checkout_state = 0
 
-        self.corpus_client.onConnectionEstablished.connect(self.on_connected)
-        self.corpus_client.onDisconnect.connect(self.on_disconnected)
+        self.corpus_client.signals.onConnected.connect(self.on_connected)
+        self.corpus_client.signals.onConnectionFailed.connect(self.on_disconnected)
         self.btn_Connect.setIcon(create_icon("qt_ui/icons/icon_webapp_off.png"))
-        self.btn_Options.clicked.connect(self.on_options)
-        self.btn_Commit.clicked.connect(self.on_commit)
-        self.btn_Commit.setEnabled(False)
+        self.btn_login.clicked.connect(self.on_connect)
         self.btn_Connect.setEnabled(True)
         self.btn_Connect.clicked.connect(self.on_connect)
 
         self.show()
 
     def on_connect(self):
-        if self.corpus_client.is_connected:
+        if self.corpus_client.connected():
             QMessageBox.information(self, "Already Connected", "You are already connected to the WebApp.")
             self.on_connected()
             return
 
         ret = False
-        if self.main_window.settings.CONTRIBUTOR.token is not None:
-            ret = self.corpus_client.connect_webapp(self.main_window.settings.CONTRIBUTOR)['success']
-            if ret:
-                self.on_connected()
-            else:
-                dialog = WebAppLoginDialog(self.main_window, self.corpus_client)
-                dialog.show()
-        else:
+        if self.main_window.settings.CONTRIBUTOR is not None:
+            ret = self.corpus_client.login(self.main_window.settings.CONTRIBUTOR)['success']
+
+        if ret is False:
             dialog = WebAppLoginDialog(self.main_window, self.corpus_client)
             dialog.show()
 
-    def on_options(self):
-        menu = CorpusOptionMenu(self, self.corpus_client)
-        menu.popup(QCursor.pos())
-
     @pyqtSlot(object)
     def on_connected(self):
-        self.btn_Commit.setEnabled(True)
         self.btn_Connect.setIcon(create_icon("qt_ui/icons/icon_webapp.png"))
 
     @pyqtSlot(object)
     def on_disconnected(self):
-        self.btn_Commit.setEnabled(False)
         self.btn_Connect.setIcon(create_icon("qt_ui/icons/icon_webapp_off.png"))
 
     def on_commit(self):
@@ -224,13 +217,10 @@ class CorpusClientWidget(QWidget):
             QMessageBox.information(self, "Not Connected", "Please login to the WebApp first.")
         dialog = CorpusCommitDialog(self.main_window, self.corpus_client)
         dialog.show()
-        # if self.main_window.project is not None:
-        #     self.corpus_client.commit(self.main_window.project, self.main_window.settings.CONTRIBUTOR)
-        # pass
 
 
 class WebAppLoginDialog(EDialogWidget):
-    def __init__(self, main_window, corpus_client:CorpusClient):
+    def __init__(self, main_window, corpus_client:WebAppCorpusInterface):
         super(WebAppLoginDialog, self).__init__(main_window)
         path = os.path.abspath("qt_ui/CorpusLoginDialog.ui")
         uic.loadUi(path, self)
@@ -244,43 +234,39 @@ class WebAppLoginDialog(EDialogWidget):
     def on_ok(self):
         self.main_window.settings.CONTRIBUTOR.email = self.lineEdit_Email.text()
         self.main_window.settings.CONTRIBUTOR.password = self.lineEdit_Password.text()
-        res = self.corpus_client.connect_webapp(self.main_window.settings.CONTRIBUTOR)['success']
-        if res:
-            self.corpus_client.onConnectionEstablished.emit(dict(success=True))
-            self.close()
-        else:
-            QMessageBox.warning(self, "Could not Establish Connection",
-                                "It has not been possible to login on the FilmColors Webapp, check your credentials again or create an account.")
+        res = self.corpus_client.login(self.main_window.settings.CONTRIBUTOR)
 
-    def on_login_tried(self):
-        pass
+        if not res['success']:
+            QMessageBox.warning(self, "Could not Establish Connection",
+                                "It has not been possible to login on the FilmColors Webapp, "
+                                "check your credentials again or create an account.")
 
     def on_cancel(self):
         self.close()
 
 
-class CorpusOptionMenu(QMenu):
-    def __init__(self, parent, corpus_client:CorpusClient):
-        super(CorpusOptionMenu, self).__init__(parent)
-        self.corpus_client = corpus_client
-        self.a_disconnect = self.addAction("Disconnect")
-        self.a_disconnect.triggered.connect(self.corpus_client.disconnect_corpus)
-
+# class CorpusOptionMenu(QMenu):
+#     def __init__(self, parent, corpus_client:CorpusClient):
+#         super(CorpusOptionMenu, self).__init__(parent)
+#         self.corpus_client = corpus_client
+#         self.a_disconnect = self.addAction("Disconnect")
+#         self.a_disconnect.triggered.connect(self.corpus_client.disconnect_corpus)
+#
 
 class CorpusCommitDialog(EDialogWidget):
-    def __init__(self, main_window, corpus_client:CorpusClient):
+    def __init__(self, main_window, corpus_client:WebAppCorpusInterface):
         super(CorpusCommitDialog, self).__init__(main_window, main_window)
         path = os.path.abspath("qt_ui/DialogHLayout.ui")
         uic.loadUi(path, self)
         self.corpus_client = corpus_client
         try:
-            self.movies = self.corpus_client.corpus_interface.get_movies()
-            self.persons = self.corpus_client.corpus_interface.get_persons()
-            self.processes = self.corpus_client.corpus_interface.get_color_processes()
-            self.genres = self.corpus_client.corpus_interface.get_genres()
-            self.countries = self.corpus_client.corpus_interface.get_countries()
-            self.companies = self.corpus_client.corpus_interface.get_companies()
-            self.corporas = self.corpus_client.corpus_interface.get_corpora()
+            self.movies = self.corpus_client.get_movies()
+            self.persons = self.corpus_client.get_persons()
+            self.processes = self.corpus_client.get_color_processes()
+            self.genres = self.corpus_client.get_genres()
+            self.countries = self.corpus_client.get_countries()
+            self.companies = self.corpus_client.get_companies()
+            self.corporas = self.corpus_client.get_corpora()
         except Exception as e:
             self.persons = []
             self.persons = []

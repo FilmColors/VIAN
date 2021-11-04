@@ -7,11 +7,11 @@ from vian.core.concurrent.auto_segmentation import DialogAutoSegmentation
 from vian.core.analysis.analysis_import import *
 from vian.core.data.computation import is_vian_light
 
-# from vian.core.gui.vian_webapp import *
+from vian.core.gui.vian_webapp import WebAppCorpusDock
 from vian.core.data.cache import HDF5Cache
 from vian.core.data.exporters import *
 from vian.core.data.importers import *
-from vian.core.data.corpus_client import WebAppCorpusInterface
+from vian.core.data.webapp import WebAppCorpusInterface
 from vian.core.data.computation import version_check
 from vian.core.data.settings import UserSettings, Contributor
 from vian.core.data.audio_handler2 import AudioHandler
@@ -198,7 +198,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.analysis_results_widget = None
         self.analysis_results_widget_dock = None
         self.experiment_dock = None
-        # self.corpus_client_toolbar = None
+        self.corpus_client_toolbar = None
         self.facial_identification_dock = None
         self.pipeline_widget = None
         self.script_editor = None
@@ -288,7 +288,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.search_window = SearchWindow(self)
         self.search_window.hide()
 
-        # self.create_corpus_client_toolbar()
+        self.create_corpus_client_toolbar()
         self.create_pipeline_widget()
         self.script_editor = self.pipeline_widget.editor
 
@@ -586,8 +586,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.corpus_client_toolbar.onRunAnalysis.connect(self.on_start_analysis)
 
         self.update_recent_menu()
-
-
         self.player_controls.setState(False)
 
         self.source_status.on_source_changed(self.settings.OPENCV_PER_FRAME)
@@ -1034,19 +1032,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.corpus_widget.raise_()
                 self.corpus_widget.activateWindow()
 
-    # def create_corpus_client_toolbar(self):
-    #     if self.corpus_client_toolbar is None:
-    #         self.corpus_client_toolbar = WebAppCorpusDock(self, self.corpus_client)
-    #         self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_client_toolbar)
-    #         self.corpus_client_toolbar.show()
-    #
-    #     else:
-    #         if not self.corpus_client_toolbar.visibleRegion().isEmpty():
-    #             self.corpus_client_toolbar.hide()
-    #         else:
-    #             self.corpus_client_toolbar.show()
-    #             self.corpus_client_toolbar.raise_()
-    #             self.corpus_client_toolbar.activateWindow()
+    def create_corpus_client_toolbar(self):
+        if self.corpus_client_toolbar is None:
+            self.corpus_client_toolbar = WebAppCorpusDock(self)
+            self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_client_toolbar)
+            self.corpus_client_toolbar.show()
+
+        else:
+            if not self.corpus_client_toolbar.visibleRegion().isEmpty():
+                self.corpus_client_toolbar.hide()
+            else:
+                self.corpus_client_toolbar.show()
+                self.corpus_client_toolbar.raise_()
+                self.corpus_client_toolbar.activateWindow()
 
     def create_summary_dock(self):
         if self.summary_dock is None:

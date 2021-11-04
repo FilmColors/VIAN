@@ -10,6 +10,8 @@ _genres = None
 _countries = None
 _companies = None
 
+
+#TODO Interface
 def query_initial(corpus_client):
     global _persons
     global _processes
@@ -25,7 +27,6 @@ def query_initial(corpus_client):
         _companies = corpus_client.get_companies()
     except Exception as e:
         print(e)
-
 
 
 class FilmographyWidget2(QWidget):

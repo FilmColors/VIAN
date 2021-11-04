@@ -1,6 +1,6 @@
 {
   "localhost": "http://127.0.0.1:5001/api/",
-  "webapp_root": "http://ercwebapp.westeurope.cloudapp.azure.com/api/",
+  "webapp_root": "http://vianweb2.westeurope.cloudapp.azure.com",
   "erc_template_uuid" : "a77a472f-2d4f-458d-acd6-be9fca69cd7f",
   "dev_mode": 1
 }
