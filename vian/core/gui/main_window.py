@@ -1862,11 +1862,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.store_project(bake=True)
 
     def on_export_sequence_protocol(self):
-        p = Path(QFileDialog.getSaveFileName(filter="*.csv *.pdf", caption="Select Save Path", directory=self.project.export_dir)[0])
+        print(self.project.export_dir)
+        p = Path(QFileDialog.getSaveFileName(filter="*.xlsx *.csv", caption="Select Save Path", directory=self.project.export_dir)[0])
+
+        if p == "":
+            return
+
         if ".csv" in p.suffixes:
             self.project.export(SequenceProtocolExporter(export_format="csv"), p)
         else:
-            self.project.export(SequenceProtocolExporter(export_format="pdf"), p)
+            self.project.export(SequenceProtocolExporter(export_format="excel"), p)
 
     def on_browser_visualization(self):
         webbrowser.open("http://127.0.0.1:{p}/screenshot_vis/".format(p=VIAN_PORT))
