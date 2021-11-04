@@ -51,6 +51,7 @@ def auto_screenshot(project:VIANProject, method, distribution, n, segmentation, 
             n_hists = int(np.ceil((idx_end - idx_start) / res))
             hists = np.zeros(shape=(n_hists, 16,16,16))
             frame_indices = []
+
             for h_idx, i in enumerate(range(idx_start, idx_end, res)):
                 cap.set(cv2.CAP_PROP_POS_FRAMES, i)
                 ret, frame = cap.read()
