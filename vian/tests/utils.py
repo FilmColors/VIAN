@@ -38,7 +38,7 @@ def get_VIANProject1_exporter():
     time_elapsed = 0
     for s in range(20):
         segment_duration = (math.sin(s) + 1.1)  * 8000  # arbitrary duration function for varying numbers.
-        t = Segment(ID=s, start=time_elapsed, end=time_elapsed + segment_duration, duration=segment_duration,
+        t = Segment(ID=s, start=time_elapsed, end=time_elapsed + segment_duration,
                     annotation_body=["test123", "test123.1", "test123.2"])
         time_elapsed += segment_duration
         t.add_tag(e.classification_objects[s % 3].unique_keywords[s % 4])
