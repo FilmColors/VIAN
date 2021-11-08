@@ -19,16 +19,27 @@
       aria-controls="nav-profile" aria-selected="false">Color-dT</a>
     <a class="nav-item nav-link" id="nav-3d-palette-tab" data-toggle="tab" href="#nav-contact" role="tab"
       aria-controls="nav-contact" aria-selected="false">Colorspace 3D</a>
-    <a class="nav-item nav-link" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab"
-      aria-controls="nav-settings" aria-selected="false">Settings</a>
   </div>
 </nav>
 <div class="tab-content" id="nav-tabContent" style="position:absolute; top:4rem; bottom: 1rem; width:100%;">
   <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" style="width:100%; height:100%">
-    <div style="padding: 20px; width:100%; height:100%">
-      <div id="ab-color" style="width:100%; height:100%">
+    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+    Settings
+    </button>
+    <div class="collapse" id="collapseExample">
+      <div class="card card-body" style="display: flex;flex-direction: row">
+        <div style="margin-right: 40px"><p>Screenshot Size  </p><input type="range" class="form-range" id="imageSize" min="10" max="100" value="40"></div>
+        <div style="margin-right: 40px"><p>Circle Interval  </p><input type="range" class="form-range" id="circleInterval" min="5" max="20", value="10" step="0.01"></div>
+        <div style="margin-right: 40px">
+          <p>Background  </p>
+          <select id="dropdown-bgcolor-menu">
+            <option value="white">White</option>
+            <option value="gray" selected="selected">Dark Gray</option>
+          </select>
+        </div>
       </div>
     </div>
+    <div id="ab-color" style="width: 100%; height: 100%;padding: 30px"></div>
   </div>
   <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
     <div style="padding: 5px;">
@@ -44,22 +55,9 @@
         {% include "color_3d.tmpl.html" %}
       </div>
     </div>
-    <div class="tab-pane fade" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
-      <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-          aria-haspopup="true" aria-expanded="false">
-          Background Color
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a id="setting-bg-white" class="dropdown-item" href="#">White</a>
-          <a id="setting-bg-black" class="dropdown-item" href="#">Dark Gray</a>
-        </div>
-      </div>
-    </div>
-    <div id="signals">
-    </div>
-  </div>
-  {% endblock %}
+  <div id="signals"></div>
+</div>
+{% endblock %}
 
   {% block script %}
   <script src="/static/color_ab.js"></script>
@@ -79,26 +77,40 @@
       $(document).on("screenshotPollUpdate", function (event, data) {
         color_ab_plot.setData(data.a, data.b, data.urls, data.uuids);
         color_dt_plot.setData(
-          data.time,
-          data.luminance,
-          data.saturation,
-          data.chroma,
-          data.hue,
-          data.a,
-          data.b,
-          data.urls,
-          data.uuids);
+                data.time,
+                data.luminance,
+                data.saturation,
+                data.chroma,
+                data.hue,
+                data.a,
+                data.b,
+                data.urls,
+                data.uuids);
       });
 
-      $("#setting-bg-white").on("click", function () {
-        color_ab_plot.setBackgroundColor(255, 255, 255);
-        color_ab_plot.setBackgroundColor(255, 255, 255);
-      })
+      var e = document.getElementById("imageSize");
+      e.addEventListener("input", function(){
+        color_ab_plot.setImageSize(e.value)
+        console.log("blablabla");
+      }, false);
+      e.dispatchEvent(new Event("input"))
 
-      $("#setting-bg-black").on("click", function () {
-        color_ab_plot.setBackgroundColor(17, 17, 17);
-        color_ab_plot.setBackgroundColor(17, 17, 17);
-      })
+      var e1 = document.getElementById("circleInterval");
+      e1.addEventListener("input", function(){
+        color_ab_plot.setCircleInterval(e1.value)
+      }, false);
+      e1.dispatchEvent(new Event("input"))
+
+      var e2 = document.getElementById("dropdown-bgcolor-menu");
+      e2.addEventListener("change", function(){
+        if(e2.value == "white"){
+          color_ab_plot.setBackgroundColor("255", "17");
+        }else if (e2.value == "gray"){
+          color_ab_plot.setBackgroundColor("17", "255");
+        }
+      }, false);
+      e2.dispatchEvent(new Event("change"));
+
 
       updateScreenshotVis(1000);
     });

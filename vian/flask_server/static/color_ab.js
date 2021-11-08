@@ -2,12 +2,8 @@
 class ColorAB {
     constructor(divName) {
         this.divName = divName;
-        this.grid_col = "rgb(255,255,255)"
-        this.background = "rgb(17,17,17)"
 
         this.selectionCallback = null;
-
-        this.grid_renderer = []
 
         this.source = new Bokeh.ColumnDataSource({
             data: { x: [], y: [], image: [], uuids: [] }
@@ -25,59 +21,34 @@ class ColorAB {
 
         this.plot = Bokeh.Plotting.figure({
             title: 'Color CIE-Lab (AB - Plane)',
-            tools: "lasso_select, pan,wheel_zoom,box_zoom,reset,save",
-            height: 300,
-            width: 300,
+            tools: "lasso_select,pan,wheel_zoom,box_zoom,reset,save",
+            aspect_ratio: 1,
             x_axis_label: "A-Channel",
             y_axis_label: "B-Channel",
-            match_aspect:true, 
+            match_aspect: true,
         });
 
         this.plot.center[0].grid_line_alpha = 0.0
         this.plot.center[1].grid_line_alpha = 0.0
 
-        this.plot.background_fill_color = this.background
-        this.plot.background_fill_alpha = 0.0
-        this.plot.border_fill_alpha = 0.0
-        this.plot.sizing_mode = "scale_both"
+        this.plot.height_policy  = "max"
+        this.plot.width_policy  = "fit"
         this.aspect = 9.0 / 16
 
-        this.plot.circle({
-            x: { field: 'x' },
-            y: { field: 'y' },
-            fill_alpha: 0.0,
-            line_alpha: 0.0,
-            source: this.source
-        })
-
-        var r = this.plot.image_url({
+        this.r = this.plot.image_url({
             url: { field: "image" }, x: { field: "x" }, y: { field: "y" },
-            w: 40,
-            h: 40 * this.aspect,
             anchor: "center",
-            // global_alpha: 0.2,
             source: this.source
         });
-        r.glyph.h.units = "screen"
-        r.glyph.w.units = "screen"
 
-        // this.plot.add_tools(Bokeh.LassoSelectTool({callback:function(){console.log("Hello World")}}))
+        this.setCircleInterval(circleInterval);
 
-        this.q = 20
-
-        for (var i = 0; i < 10; i++) {
-            this.source_grid.data.x.push(0);
-            this.source_grid.data.y.push(0);
-            this.source_grid.data.radius.push(i * this.q);
-        }
-
-        this.plot.circle({
+        this.grid_renderer = this.plot.circle({
             x: { field: "x" },
             y: { field: "y" },
             radius: { field: "radius" },
             fill_alpha: 0,
-            line_color: this.grid_col,
-            line_alpha: 0.1,
+            line_alpha: 0.6,
             line_width: 1.0,
             source: this.source_grid
         })
@@ -89,25 +60,27 @@ class ColorAB {
         this.source.change.emit()
     }
 
-    setBackgroundColor(r, g, b) {
-        let col = "rgb(" + r + "," + g + "," + b + ")";
-        let line = "rgb(255,255,255)";
-        if (r + g + b > 300) {
-            line = "rgb(0,0,0)"
-        }
-        this.grid_renderer.forEach(function (elem) {
-            elem.glyph.line_color = line;
-        });
+    setBackgroundColor(back, front) {
+        let col = "rgb(" + back + "," + back + "," + back + ")";
+        let line = "rgb(" + front + "," + front + "," + front + ")";
+
+        this.grid_renderer.glyph.line_color = line;
         this.plot.background_fill_color = col;
-        this.plot.background_fill_color = col;
-        if (r < 100) {
-            this.plot.background_fill_alpha = 0.0;
-            this.plot.border_fill_alpha = 0.0;
-        } else {
-            this.plot.background_fill_alpha = 1.0;
-            this.plot.border_fill_alpha = 1.0;
-        }
-        console.log(this.plot.background_fill_alpha, this.plot.background_fill_color)
+        this.plot.border_fill_color = col;
+    }
+
+    setImageSize(s){
+        console.log("setimagesize")
+        console.log(s)
+        this.r.glyph.h = s * this.aspect;
+        this.r.glyph.w = s;
+        this.r.glyph.h.units = "screen";
+        this.r.glyph.w.units = "screen";
+    }
+    setCircleInterval(s){
+        this.interval = s;
+
+        this.update_grid(this.max, this.interval);
     }
 
     setData(a, b, urls, uuids) {
@@ -120,41 +93,30 @@ class ColorAB {
 
         if (a.length > 0){
             this.ab_max = Math.max(Math.abs(Math.min(Math.min(...a), Math.min(...b))), Math.max(Math.max(...a), Math.max(...b)))
-            this.update_grid(this.ab_max)
+            this.update_grid(this.ab_max, this.interval)
         }
+
+        this.plot.x_range = new Bokeh.Range1d({ start: this.ab_max*-1, end: this.ab_max });
+        this.plot.y_range = new Bokeh.Range1d({ start: this.ab_max*-1, end: this.ab_max });
 
 
         this.source.change.emit();
     }
 
-    update_grid(max){
+    update_grid(max, interval){
         this.source_grid.data.x = [];
         this.source_grid.data.y = [];
         this.source_grid.data.radius = [];
-        
-        let step = Math.ceil(max / 20)
-        let grid_max = step * 20
-        if (grid_max > 100){
-            let step = 20
-        }else if (grid_max > 50){
-            let step = 10
-        }else{
-            let step = 5
-        }
 
-        let n_steps = grid_max / step + 1
-
-        for (var i = 0; i < n_steps; i++) {
+        //in Lab color space, the ranges for a and b values are [-110, 110]; max is not used currently
+        for (var i = parseFloat(interval); i <= 110; i = i + parseFloat(interval)) {
             this.source_grid.data.x.push(0);
             this.source_grid.data.y.push(0);
-            this.source_grid.data.radius.push(i * step);
+            this.source_grid.data.radius.push(i);
         }
-
-        
         this.source_grid.change.emit();
-
-        // this.plot.reset.emit()
     }
+
     poll(pollTime) {
         var that = this;
         this.source.change.emit();
