@@ -17,7 +17,6 @@ class ColorAB {
         this.source.selected.change.connect(function (a, selection) {
             that.onSelectionChanged(that.source, selection);
         })
-        console.log(this.source)
 
         this.plot = Bokeh.Plotting.figure({
             title: 'Color CIE-Lab (AB - Plane)',
@@ -35,13 +34,11 @@ class ColorAB {
         this.plot.width_policy  = "fit"
         this.aspect = 9.0 / 16
 
-        this.r = this.plot.image_url({
+        this.glyph_renderer = this.plot.image_url({
             url: { field: "image" }, x: { field: "x" }, y: { field: "y" },
             anchor: "center",
             source: this.source
         });
-
-        this.setCircleInterval(circleInterval);
 
         this.grid_renderer = this.plot.circle({
             x: { field: "x" },
@@ -55,7 +52,6 @@ class ColorAB {
 
         var doc = new Bokeh.Document();
         doc.add_root(this.plot);
-        console.log(this.plot)
         Bokeh.embed.add_document_standalone(doc, document.getElementById(divName));
         this.source.change.emit()
     }
@@ -70,22 +66,20 @@ class ColorAB {
     }
 
     setImageSize(s){
-        console.log("setimagesize")
-        console.log(s)
-        this.r.glyph.h = s * this.aspect;
-        this.r.glyph.w = s;
-        this.r.glyph.h.units = "screen";
-        this.r.glyph.w.units = "screen";
+        this.glyph_renderer.glyph.h = s * this.aspect;
+        this.glyph_renderer.glyph.w = s;
+        this.glyph_renderer.glyph.h.units = "screen";
+        this.glyph_renderer.glyph.w.units = "screen";
+
+        this.source.change.emit();
     }
     setCircleInterval(s){
         this.interval = s;
 
-        this.update_grid(this.max, this.interval);
+        this.update_grid(this.interval);
     }
 
     setData(a, b, urls, uuids) {
-       
-
         this.source.data.x = a;
         this.source.data.y = b;
         this.source.data.image = urls;
@@ -93,22 +87,18 @@ class ColorAB {
 
         if (a.length > 0){
             this.ab_max = Math.max(Math.abs(Math.min(Math.min(...a), Math.min(...b))), Math.max(Math.max(...a), Math.max(...b)))
-            this.update_grid(this.ab_max, this.interval)
+            this.plot.x_range = new Bokeh.Range1d({ start: this.ab_max*-1, end: this.ab_max });
+            this.plot.y_range = new Bokeh.Range1d({ start: this.ab_max*-1, end: this.ab_max });
         }
-
-        this.plot.x_range = new Bokeh.Range1d({ start: this.ab_max*-1, end: this.ab_max });
-        this.plot.y_range = new Bokeh.Range1d({ start: this.ab_max*-1, end: this.ab_max });
-
-
         this.source.change.emit();
     }
 
-    update_grid(max, interval){
+    update_grid(interval){
         this.source_grid.data.x = [];
         this.source_grid.data.y = [];
         this.source_grid.data.radius = [];
 
-        //in Lab color space, the ranges for a and b values are [-110, 110]; max is not used currently
+        //in Lab color space, the ranges for a and b values are [-110, 110]
         for (var i = parseFloat(interval); i <= 110; i = i + parseFloat(interval)) {
             this.source_grid.data.x.push(0);
             this.source_grid.data.y.push(0);
