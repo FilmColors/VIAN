@@ -39,5 +39,5 @@ jobs:
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          bodyFile: "vian/dist/VIAN"
+          artifacts: "vian/dist/VIAN"
           token: ${{ secrets.GITHUB_TOKEN }}

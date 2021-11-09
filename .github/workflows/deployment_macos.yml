@@ -57,5 +57,5 @@ jobs:
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          bodyFile: "result.zip"
+          artifacts: "result.zip"
           token: ${{ secrets.GITHUB_TOKEN }}

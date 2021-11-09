@@ -185,8 +185,9 @@ class VocabularyLibrary(QObject):
             for i, t in self.collections.items():
                 data['collections'].append(t.serialize())
 
+            data = json.dumps(data)
             with open(filepath, "w") as f:
-                json.dump(data, f)
+                f.write(data)
 
         return data
 
