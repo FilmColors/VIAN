@@ -114,8 +114,13 @@ class Segmentation(BaseProjectEntity, IHasName, ISelectable, ITimelineItem, ILoc
             return
 
         ID = len(self.segments) + 1
-        new_seg = Segment(ID=ID, start=start, end=stop, name=str(ID),
-                          segmentation=self, annotation_body=body, unique_id=unique_id)
+        new_seg = Segment(ID=ID,
+                          start=start,
+                          end=stop,
+                          name=str(ID),
+                          segmentation=self,
+                          annotation_body=body,
+                          unique_id=unique_id)
         new_seg.set_project(self.project)
 
         self.add_segment(new_seg, dispatch)
@@ -367,7 +372,7 @@ class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineIte
     """
     onSegmentChanged = pyqtSignal(object)
 
-    def __init__(self, ID = None, start = 0, end  = 1000, duration  = None, segmentation=None,
+    def __init__(self, ID = None, start = 0, end  = 1000, segmentation=None,
                  annotation_body = "", name = "New Segment", unique_id = -1):
         BaseProjectEntity.__init__(self, unique_id=unique_id)
         ILockable.__init__(self)
@@ -377,11 +382,13 @@ class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineIte
 
         self.MIN_SIZE = 10
         self.ID = ID
-        self.start = start
-        self.end = end
-        self.name = name
 
-        self.duration = duration
+        # Ensure that start and end is not an nd.array
+        self.start: int = int(start)
+        self.end: int = int(end)
+        self.name: str = name
+
+        self.duration = end - start
 
         self.annotation_body = self.deprecate_string_to_annotation(annotation_body)
 

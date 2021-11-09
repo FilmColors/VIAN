@@ -265,17 +265,9 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.screenshot_manager.arrange_images()
         self.screenshot_manager.frame_segment(self.screenshot_manager.current_segment_index)
 
-    # def on_image_size_changed(self):
-    #     self.ab_view.set_image_scale(self.slider_image_size.value())
-    #     self.color_dt.set_image_scale(self.slider_image_size.value())
-
-    # def color_dt_mode_changed(self, v):
-    #     self.color_dt_mode = v
-    #     for scr in self.main_window.project.screenshots:
-    #         self.update_screenshot(scr)
-
     def remove_screenshot(self, scr):
-        self.color_dt.remove_image_by_uid(scr.unique_id)
+        pass
+        # self.color_dt.remove_image_by_uid(scr.unique_id)
         # self.ab_view.remove_image_by_uid(scr.unique_id)
         # self.lc_view.remove_image_by_uid(scr.unique_id)
 
@@ -609,7 +601,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
             self.center_images()
         else:
-            # print("Current Location", self.current_y, self.verticalScrollBar().value())
             self.verticalScrollBar().setValue(self.current_y)
 
     def clear_manager(self):
@@ -879,16 +870,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def on_selected(self, sender, selected):
         return
-        # if selected is None:
-        #     selected = []
-        # if not sender is self:
-        #     sel = []
-        #     for i in self.images_plain:
-        #             for s in selected:
-        #                 if isinstance(s, Screenshot):
-        #                     if i.screenshot_obj is s:
-        #                         sel.append(i)
-        #     self.select_image(sel, dispatch=False)
 
     def rubber_band_selection(self, QRect, Union, QPointF=None, QPoint=None):
         self.rubberband_rect = self.mapToScene(QRect).boundingRect()

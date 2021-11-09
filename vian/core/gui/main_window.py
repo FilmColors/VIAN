@@ -2093,9 +2093,9 @@ class MainWindow(QtWidgets.QMainWindow):
             args = [self.project, self.project.path]
 
         if sync:
-            store_project_concurrent(args, self.dummy_func)
+            self.project.store_project(path)
         else:
-            worker = Worker(store_project_concurrent, self, None, args, msg_finished="Project Saved")
+            worker = Worker(self.project.store_project, self, None, [path], msg_finished="Project Saved")
             self.start_worker(worker, "Saving Project")
 
         log_info("Saving to:", path)
