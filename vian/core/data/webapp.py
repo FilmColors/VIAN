@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-from core.data.log import log_info
+from vian.core.data.log import log_info
 from PyQt5.QtCore import QObject, QThread, pyqtSlot, pyqtSignal
 from PyQt5 import uic
 from PyQt5.QtWidgets import QWidget, QToolBar, QHBoxLayout, QSpacerItem, QSizePolicy, QWidgetAction, QMessageBox
