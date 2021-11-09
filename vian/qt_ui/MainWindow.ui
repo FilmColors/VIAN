@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>1662</width>
-     <height>22</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -461,6 +461,9 @@
   <action name="actionAdd_Annotation_Layer">
    <property name="text">
     <string>Add Annotation Layer</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionAdd_Segmentation">

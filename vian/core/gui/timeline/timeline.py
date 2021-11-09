@@ -29,8 +29,8 @@ class TimelineContainer(EDockWidget):
 
         self.menu_create = self.inner.menuBar().addMenu("Create")
         self.a_create_segmentation = self.menu_create.addAction("New Segmentation")
-        self.a_create_annotation_layer = self.menu_create.addAction("New SVGAnnotation Layer")
-        self.a_create_annotation_layer.triggered.connect(partial(self.timeline.create_layer, []))
+        # self.a_create_annotation_layer = self.menu_create.addAction("New SVGAnnotation Layer")
+        # self.a_create_annotation_layer.triggered.connect(partial(self.timeline.create_layer, []))
         self.a_create_segmentation.triggered.connect(self.timeline.create_segmentation)
 
         self.menu_tools = self.inner.menuBar().addMenu("Tools")
@@ -1414,30 +1414,30 @@ class SelectorContextMenu(QtWidgets.QMenu):
         if self.selector.width() < 20:
             self.selector.end = self.selector.start + 100 * self.timeline.scale
 
-        self.action_add_layer = self.addAction("New SVGAnnotation Layer")
+        # self.action_add_layer = self.addAction("New SVGAnnotation Layer")
         self.action_add_segmentation = self.addAction("New Segmentation")
 
-        self.action_add_layer.triggered.connect(self.on_add_layer)
+        # self.action_add_layer.triggered.connect(self.on_add_layer)
         self.action_add_segmentation.triggered.connect(self.on_add_segmentation)
 
-        self.annotation_menu = self.addMenu("Create SVGAnnotation")
-        self.a_add_rectangle = self.annotation_menu.addAction("Rectangle")
-        self.a_add_ellipse = self.annotation_menu.addAction("Ellipse")
-        self.a_add_text = self.annotation_menu.addAction("Text")
-        self.a_add_image = self.annotation_menu.addAction("Image")
-        self.a_add_free_hand = self.annotation_menu.addAction("Free Hand")
+        # self.annotation_menu = self.addMenu("Create SVGAnnotation")
+        # self.a_add_rectangle = self.annotation_menu.addAction("Rectangle")
+        # self.a_add_ellipse = self.annotation_menu.addAction("Ellipse")
+        # self.a_add_text = self.annotation_menu.addAction("Text")
+        # self.a_add_image = self.annotation_menu.addAction("Image")
+        # self.a_add_free_hand = self.annotation_menu.addAction("Free Hand")
 
-
-        self.a_add_rectangle.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_rectangle,
-                                                       [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
-        self.a_add_ellipse.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_ellipse,
-                                                       [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
-        self.a_add_text.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_text,
-                                                       [255, 255, 255], 12, 12, start=self.selector.start, end=self.selector.end))
-        self.a_add_image.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_image,
-                                                       image_path=None, start=self.selector.start, end=self.selector.end))
-        self.a_add_free_hand.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_freehand,
-                                                       [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
+        # self.annotation_menu.setVisible(False)
+        # self.a_add_rectangle.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_rectangle,
+        #                                                [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
+        # self.a_add_ellipse.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_ellipse,
+        #                                                [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
+        # self.a_add_text.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_text,
+        #                                                [255, 255, 255], 12, 12, start=self.selector.start, end=self.selector.end))
+        # self.a_add_image.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_image,
+        #                                                image_path=None, start=self.selector.start, end=self.selector.end))
+        # self.a_add_free_hand.triggered.connect(partial(self.timeline.main_window.drawing_overlay.create_freehand,
+        #                                                [255, 255, 255], 12, start=self.selector.start, end=self.selector.end))
 
         self.popup(pos)
 

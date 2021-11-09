@@ -27,12 +27,12 @@ class VocabularySelectorDialog(EDialogWidget):
 
 
 class VocabularySelectorWidget(QWidget):
-    def __init__(self, parent, target:Segmentation , vocabulary_library: VocabularyLibrary):
+    def __init__(self, parent, target: Segmentation, vocabulary_library: VocabularyLibrary):
         super(VocabularySelectorWidget, self).__init__(parent)
-        self.target = target                            # type: Segmentation | ScreenshotGroup
-        self.project = target.project                   # type: VIANProject
-        self.selected_clobj = None                      # type: None | ClassificationObject
-        self.vocabulary_library = vocabulary_library    # type: VocabularyLibrary
+        self.target = target  # type: Segmentation | ScreenshotGroup
+        self.project = target.project  # type: VIANProject
+        self.selected_clobj = None  # type: None | ClassificationObject
+        self.vocabulary_library = vocabulary_library  # type: VocabularyLibrary
         self.tree = VocabularyTreeView(self, self.vocabulary_library, mode=VocabularyTreeView.MODE_SELECTING)
 
         self.clobj_list = ClassificationObjectList(self, target, target.project)
@@ -44,7 +44,7 @@ class VocabularySelectorWidget(QWidget):
         self.layout().addWidget(self.tree)
 
     @pyqtSlot(object)
-    def set_classification_object(self, obj:ClassificationObject):
+    def set_classification_object(self, obj: ClassificationObject):
         self.selected_clobj = obj
         vocabularies = obj.get_vocabularies()
         self.tree.set_check_status(vocabularies)
@@ -66,11 +66,11 @@ class VocabularySelectorWidget(QWidget):
 class ClassificationObjectList(QWidget):
     onClassificationObjectSelected = pyqtSignal(object)
 
-    def __init__(self, parent, target:Segmentation, project: VIANProject):
+    def __init__(self, parent, target: Segmentation, project: VIANProject):
         super(ClassificationObjectList, self).__init__(parent)
         self.list = QListWidget()
-        self.target = target        # type: Segmentation | ScreenshotGroup
-        self.project = project      # type: VIANProject
+        self.target = target    # type: Segmentation | ScreenshotGroup
+        self.project = project  # type: VIANProject
 
         self.setLayout(QVBoxLayout())
 
@@ -110,9 +110,7 @@ class ClassificationObjectList(QWidget):
 
 
 class ClassificationObjectItem(QListWidgetItem):
-    def __init__(self, parent, clobj:ClassificationObject):
+    def __init__(self, parent, clobj: ClassificationObject):
         super(ClassificationObjectItem, self).__init__(parent)
         self.clobj = clobj
         self.setText(clobj.name)
-
-
