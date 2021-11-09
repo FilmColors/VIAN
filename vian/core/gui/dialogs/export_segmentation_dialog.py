@@ -21,6 +21,7 @@ class ExportSegmentationDialog(EDialogWidget):
             self.layout_Segmentations.addWidget(cb)
             self.segm_cBs.append(cb)
 
+        self.comboBox_Format.setCurrentText("HH:MM:SS:FRAME")
         self.checkBox_Timestamp.stateChanged.connect(self.on_timestamp_toggle)
         self.btn_Browse.clicked.connect(self.on_browse)
         self.btn_Export.clicked.connect(self.on_export)

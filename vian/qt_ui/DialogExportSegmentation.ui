@@ -74,6 +74,9 @@
      <property name="text">
       <string>Timestamp</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
@@ -104,6 +107,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="currentText">
+        <string>HH:MM:SS:FRAME</string>
        </property>
        <item>
         <property name="text">
@@ -148,6 +154,9 @@
      <property name="text">
       <string>Segment Start</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
@@ -155,12 +164,18 @@
      <property name="text">
       <string>Segment End</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="cB_Duration">
      <property name="text">
       <string>Segment Duration</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

@@ -42,7 +42,7 @@ os.environ["QT_MAC_WANTS_LAYER"] = "1"
 os.environ["VIAN_GUI"] = "1"
 
 print("IS GUI", is_gui())
-
+print("IS DEV", CONFIG["dev_mode"])
 logging.getLogger('tensorfyylow').disabled = True
 
 MAIN_WINDOW = None

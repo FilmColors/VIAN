@@ -8,7 +8,7 @@ from PyQt5.QtGui import QIcon
 
 
 from vian.core.container.experiment import Vocabulary, VocabularyWord
-from vian.core.gui.ewidgetbase import EDockWidget
+from vian.core.gui.ewidgetbase import EDockWidget, EditableListWidget, EditableListWidgetItem
 from vian.core.data.interfaces import IProjectChangeNotify
 from vian.core.container.project import Segmentation, VIANProject
 
@@ -76,7 +76,6 @@ class VocabularyTreeView(QWidget):
 
         if hasattr(parent, "main_window"):
             parent.main_window.onProjectOpened.connect(partial(self.recreate_tree))
-
 
         self.mode = mode
         self.recreate_tree()
@@ -302,6 +301,7 @@ class WordItem(QTreeWidgetItem):
         self.setText(0, word.name)
 
 
+
 class WordsList(QListWidget):
     def __init__(self, parent):
         super(WordsList, self).__init__(parent)
@@ -362,26 +362,26 @@ class WordEditor(QWidget):
         self.setLayout(QGridLayout())
 
         self.layout().addWidget(QLabel("Term"), 0, 0)
-        self.layout().addWidget(QLabel("Term DE"), 1, 0)
+        # self.layout().addWidget(QLabel("Term DE"), 1, 0)
         self.layout().addWidget(QLabel( "Category"), 2, 0)
         self.layout().addWidget(QLabel( "Complexity Group"), 3, 0)
         self.layout().addWidget(QLabel( "Complexity Level"), 4, 0)
         self.layout().addItem(QSpacerItem(10, 10, QSizePolicy.Fixed, QSizePolicy.Expanding), 5, 0)
 
         self.lineEdit_TermEn = QLineEdit(self)
-        self.lineEdit_TermDE = QLineEdit(self)
+        # self.lineEdit_TermDE = QLineEdit(self)
         self.lineEdit_Category = QLineEdit(self)
         self.lineEdit_ComplexityGroup = QLineEdit(self)
         self.lineEdit_ComplexityLevel = QSpinBox(self)
 
         self.layout().addWidget(self.lineEdit_TermEn, 0, 1)
-        self.layout().addWidget(self.lineEdit_TermDE, 1, 1)
+        # self.layout().addWidget(self.lineEdit_TermDE, 1, 1)
         self.layout().addWidget(self.lineEdit_Category, 2, 1)
         self.layout().addWidget(self.lineEdit_ComplexityGroup, 3, 1)
         self.layout().addWidget(self.lineEdit_ComplexityLevel, 4, 1)
 
         # Future
-        self.lineEdit_TermDE.setEnabled(False)
+        # self.lineEdit_TermDE.setEnabled(False)
 
         self.lineEdit_TermEn.editingFinished.connect(self.apply_changes)
         self.lineEdit_Category.editingFinished.connect(self.apply_changes)

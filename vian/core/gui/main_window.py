@@ -1994,10 +1994,12 @@ class MainWindow(QtWidgets.QMainWindow):
         path = path[0]
         self.close_project()
         try:
+
             self.load_project(path)
         except Exception as e:
             log_error(e)
             QMessageBox.warning(self, "Failed to Load", "File is corrupt and could not be loaded")
+
 
     def close_project(self):
         self.worker_manager.on_closed()
@@ -2024,6 +2026,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dispatch_on_closed()
 
     def load_project(self, path):
+        self.menuExport.setDisabled(True)
+
         if self.project is not None:
             self.close_project()
 

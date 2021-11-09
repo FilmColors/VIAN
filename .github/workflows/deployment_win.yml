@@ -6,6 +6,8 @@ name: Windows - Build_and_upload_VIAN
 on:
   push:
     branches: [ develop ]
+    tags:
+      - "v*.*.*"
 
 jobs:
   build_application:
@@ -28,9 +30,15 @@ jobs:
       - run: pip install pyinstaller==4.6
       - run: pyinstaller main.spec
         working-directory: vian
-      - uses: actions/upload-artifact@v2
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
           name: ${{ matrix.os }}_bundle
-          path: vian/dist/VIAN
+          files: result.zip
+      - name: Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os }}_bundle
+          path: result.zip
           if-no-files-found: error
 
