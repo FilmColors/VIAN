@@ -1,0 +1,156 @@
+{% extends 'base.tmpl.html' %}
+{% block header %}
+<!--  <h1>{% block title %}Register{% endblock %}</h1>-->
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class=col-md-6>
+        <div id=ab-color></div>
+    </div>
+    <div class=col-md-6>
+        <div id="renderframe" style="width:100%; height:100%">
+            <canvas id="palette-3d" style="width:100%; height:100%"></canvas>
+          </div>
+    </div>
+</div>
+<div class="row">
+    <div class=col-md-12>
+        <div id=dt-color></div>
+    </div>
+</div>
+  {% endblock %}
+
+  {% block script %}
+  <script src="/static/color_ab.js"></script>
+  <script src="/static/color_dt.js"></script>
+  <!-- <script src="/static/timeline.js"></script> -->
+
+  <script>
+    var color_ab_plot = null;
+    var color_dt_plot = null;
+
+    var screenshot_revision = 0;
+
+    $(document).ready(function () {
+      color_ab_plot = new ColorAB("ab-color");
+      color_dt_plot = new ColorDT("dt-color");
+      // timeline = new VIANTimeline("timeline");
+
+      $(document).on("screenshotPollUpdate", function (event, data) {
+        color_ab_plot.setData(data.a, data.b, data.urls, data.uuids);
+        color_dt_plot.setData(
+          data.time,
+          data.luminance,
+          data.saturation,
+          data.chroma,
+          data.hue,
+          data.a,
+          data.b,
+          data.urls, 
+          data.uuids);
+      });
+
+      $("#setting-bg-white").on("click", function () {
+        color_ab_plot.setBackgroundColor(255, 255, 255);
+        color_ab_plot.setBackgroundColor(255, 255, 255);
+      })
+
+      $("#setting-bg-black").on("click", function () {
+        color_ab_plot.setBackgroundColor(17, 17, 17);
+        color_ab_plot.setBackgroundColor(17, 17, 17);
+      })
+      updateScreenshotVis(1000);
+    });
+
+
+    function checkUpdate(pollTime) {
+      $.ajax({
+        url: "/check-updates/",
+        data: JSON.stringify({
+          screenshot_uuids: screenshot_uuids, 
+          h:"Hello World",
+        }),
+        dataType: 'json',
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function (e) {
+          screenshot_uuids = e.uuids;
+          console.log(e);
+          if (e.screenshots_changed){
+            updateScreenshotVis();
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown ) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+        complete: function () {
+          setTimeout(function () { checkUpdate(pollTime); }, pollTime);
+        }
+      });
+    }
+
+    function updateScreenshotVis(pollTime) {
+      console.log("Pulling Screenshots ")
+      $.ajax({
+        type: 'GET',
+        dataType: 'json',
+        url: "/screenshot-data/" + screenshot_revision,
+        success: function (e) {
+          if (e.update){
+            $(document).trigger("screenshotPollUpdate", [e.data]);
+          }
+          screenshot_revision = e.revision;
+        },
+        error: function (jqXHR, textStatus, errorThrown ) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+        complete: function () {
+          setTimeout(function () { updateScreenshotVis(pollTime); }, pollTime);
+        }
+      });
+    }
+  </script>
+
+  <script type="module">
+    import * as RENDERER from '/static/threeJsPlot2.js';
+    console.log(RENDERER)
+    var plot = new RENDERER.Palette3D("renderframe", "palette-3d")
+    // RENDERER.initScene(env_lines, "palette-3d", "renderframe");
+    
+    $("#renderframe").on("resize", function () {
+      setTimeout(function () { plot.onWindowResize(); }, 500)
+    })
+
+    $(document).on("screenshotPollUpdate", function (event, data) {
+      plot.clear();
+
+      data.palettes.forEach((elem) => {
+        let rgb = [elem.bgr[2] / 255, elem.bgr[1] / 255, elem.bgr[0] / 255];
+        plot.addPoint(
+          elem.lab[0],
+          elem.lab[1],
+          elem.lab[2]
+          , rgb);
+      });
+    });
+
+
+    let rgbs = []
+
+    for (var i = 0; i < 1000; i++) {
+      var r = Math.random();
+      var g = Math.random();
+      var b = Math.random();
+
+      plot.addPoint(
+        Math.floor(255 * r) - 128,
+        Math.floor(255 * g) - 128,
+        Math.floor(255 * b) - 128
+        , [r, b, g]);
+    }
+    plot.onWindowResize()
+  </script>
+
+
+  {% endblock %}

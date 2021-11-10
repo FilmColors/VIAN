@@ -1,14 +1,13 @@
 tensorflow
 keras
 sqlalchemy
-opencv-contrib-python-headless
+opencv-contrib-python-headless== 4.5.3.56
 requests
-fastcluster
 PyQt5
 PyQtWebEngine
 scikit-learn
 flask
-fastcluster
+fastcluster==1.1.25
 moviepy
 python-vlc
 pandas
@@ -16,3 +15,6 @@ librosa
 pysrt
 bokeh==2.2.1
 matplotlib
+pymediainfo
+XlsxWriter
+openpyxl

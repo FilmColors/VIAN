@@ -1,0 +1,43 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Windows - Build_and_upload_VIAN
+
+on:
+  push:
+    branches: [ develop ]
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build_application:
+
+    strategy:
+      matrix:
+        os: [windows-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - uses: BSFishy/pip-action@v1
+        with:
+          requirements: requirements.txt
+      - run: pip install pyinstaller==4.6
+      - run: pyinstaller main.spec
+        working-directory: vian
+      - name: Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os }}_bundle
+          path: vian/dist/VIAN
+          if-no-files-found: error
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "vian/dist/VIAN"
+          token: ${{ secrets.GITHUB_TOKEN }}

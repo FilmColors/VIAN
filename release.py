@@ -2,23 +2,26 @@ import sys
 import os
 import shutil
 
-BUILD_PYTHON_WIN = "C:/Users/gaude/AppData/Local/Programs/Python/Python36/python.exe"
-BUILD_PYTHON_OSX = "/Users/Kris/Documents/Gaudenz/vian_env/bin/python"
-BUILD_PYTHON_OSX = "venv37/bin/python"
+REPO_DIR = os.path.dirname(__file__)
+os.chdir(os.path.join(REPO_DIR, "vian"))
+
+BUILD_PYTHON_WIN = os.path.join(REPO_DIR, "vianenv39/Scripts/python.exe")
+BUILD_PYTHON_OSX = "venv/bin/python"
 
 SPEC_FILE = "main.spec"
 
 arguments = ["-y", "--debug=all", "--additional-hooks-dir=hooks"]
+
 if sys.platform.startswith("win"):
     build_python = BUILD_PYTHON_WIN
-    build_dir = os.path.split(build_python)[0]
+    build_dir = os.path.dirname(build_python)
     build_archive = "VIAN-Windows-64bit"
-    pyinstaller = os.path.join(build_dir, "Scripts/pyinstaller")
+    pyinstaller = os.path.normpath(os.path.join(build_dir, "pyinstaller"))
 
 elif sys.platform.startswith("darwin"):
     arguments += ["--windowed"]
     build_python = BUILD_PYTHON_OSX
-    build_archive = "VIAN-OSX"
+    build_archive = "VIAN-macOS"
 
     build_dir = os.path.split(build_python)[0]
     pyinstaller = os.path.join(build_dir, "pyinstaller")
