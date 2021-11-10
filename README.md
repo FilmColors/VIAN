@@ -1,6 +1,6 @@
 # VIAN - Visual Film Annotation (Beta)
 
-![alt text](qt_ui/images/github-title.png)
+![alt text](vian/qt_ui/images/github-title.png)
 
 Welcome to the repo of VIAN, software package for annotating, analysing and 
 visualizing color in film. 
