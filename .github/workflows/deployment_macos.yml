@@ -5,7 +5,7 @@ name: macOS - Build_and_upload_VIAN
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ master, develop ]
     tags:
       - "v*.*.*"
 jobs:
