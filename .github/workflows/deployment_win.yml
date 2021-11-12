@@ -38,6 +38,7 @@ jobs:
           if-no-files-found: error
       - name: Release
         uses: ncipollo/release-action@v1
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
           allowUpdates: true
           artifacts: "vian/dist/VIAN"
