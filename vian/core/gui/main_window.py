@@ -467,6 +467,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionClearColormetry.triggered.connect(self.clear_colormetry)
 
         self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
+        self.actionStart_AudioExtraction.setEnabled(False)
 
         self.actionBrowserVisualizations.triggered.connect(partial(self.on_browser_visualization))
         self.actionProjectSummary.triggered.connect(partial(self.on_project_summary))

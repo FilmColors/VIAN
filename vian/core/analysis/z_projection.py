@@ -170,6 +170,7 @@ class ZProjectionAnalysis(IAnalysisJob):
         img = cv2.imread(file_path)
         return img
 
+
 class ZProjectionParameterWidget(ParameterWidget):
     """
     We want the User to be able to determine the resolution of frames when reading and the
