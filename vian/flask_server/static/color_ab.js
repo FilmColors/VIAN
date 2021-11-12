@@ -18,6 +18,11 @@ class ColorAB {
             that.onSelectionChanged(that.source, selection);
         })
 
+        new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(divName));
+
+        //document.getElementById(divName).addEventListener('resize', e => {this.onResize()});
+        //document.getElementById(divName).dispatchEvent(new Event("resize"))
+
         this.plot = Bokeh.Plotting.figure({
             title: 'Color CIE-Lab (AB - Plane)',
             tools: "lasso_select,pan,wheel_zoom,box_zoom,reset,save",
@@ -26,12 +31,11 @@ class ColorAB {
             y_axis_label: "B-Channel",
             match_aspect: true,
         });
+        //this.plot.sizing_mode = "scale_height"
 
         this.plot.center[0].grid_line_alpha = 0.0
         this.plot.center[1].grid_line_alpha = 0.0
 
-        this.plot.height_policy  = "max"
-        this.plot.width_policy  = "fit"
         this.aspect = 9.0 / 16
 
         this.glyph_renderer = this.plot.image_url({
@@ -147,4 +151,16 @@ class ColorAB {
 
         }
     }
+
+    onResize(){
+        let elem = document.getElementById(this.divName)
+        //console.log(elem.clientHeight, elem.clientWidth, "lalala")
+        if (elem.clientHeight > elem.clientWidth){
+            this.plot.sizing_mode = "scale_width"
+        }else{
+            this.plot.sizing_mode = "scale_height"
+    }
+}
+
+
 }
