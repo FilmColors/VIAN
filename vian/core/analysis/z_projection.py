@@ -156,6 +156,10 @@ class ZProjectionAnalysis(IAnalysisJob):
     # def deserialize(self, data_dict):
     #     return data_dict
 
+
+    def get_extension(self):
+        return ".jpg"
+
     def to_file(self, data, file_path):
         file_path = file_path + self.get_extension()
         cv2.imwrite(file_path, data)

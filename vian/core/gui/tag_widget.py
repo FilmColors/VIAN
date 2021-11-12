@@ -12,6 +12,7 @@ class TagWidget(QWidget):
         self.setLayout(FlowLayout())
 
     def add_tag(self, name):
+        # TODO this clears the widget every time and adds it again
         to_add = [name]
         for k, itm in self.tags.items():
             itm.deleteLater()

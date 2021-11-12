@@ -7,8 +7,10 @@ from vian.core.node_editor.node_editor import *
 from vian.core.gui.annotation_editor import AnnotationEditor
 from vian.core.gui.misc.filmography_widget import FilmographyWidget2
 
+from vian.core.container.project import *
 from vian.core.gui.tag_widget import TagWidget
 from PyQt5 import QtCore
+
 
 class Inspector(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
@@ -153,8 +155,8 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         if isinstance(target_item, IHasMediaObject):
             widgets.append(AttributesMediaObject(self, target_item))
 
-        if isinstance(target_item, IClassifiable):
-            widgets.append(AttributesClassifiable(self, target_item))
+        # if isinstance(target_item, IClassifiable):
+        #     widgets.append(AttributesClassifiable(self, target_item))
 
         for w in widgets:
             self.add_attribute_widget(w)
