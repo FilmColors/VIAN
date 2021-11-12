@@ -30,15 +30,14 @@ jobs:
       - run: pip install pyinstaller==4.6
       - run: pyinstaller main.spec
         working-directory: vian
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{ matrix.os }}_bundle
-          files: result.zip
       - name: Artifact
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
-          path: result.zip
+          path: vian/dist/VIAN
           if-no-files-found: error
-
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "vian/dist/VIAN"
+          token: ${{ secrets.GITHUB_TOKEN }}

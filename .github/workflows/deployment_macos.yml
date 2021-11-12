@@ -48,14 +48,14 @@ jobs:
       - run: |
           mv vian/dist/VIAN.app VIAN.app
           tar -a -c -f result.zip VIAN.app
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{ matrix.os }}_bundle
-          files: result.zip
       - name: Artifact
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
           path: result.zip
           if-no-files-found: error
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "result.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
