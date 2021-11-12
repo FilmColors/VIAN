@@ -30,7 +30,7 @@ class ZProjectionAnalysis(IAnalysisJob):
         and gather all data we need.
 
         """
-        super(ZProjectionAnalysis, self).prepare(project, targets, fps, class_objs)
+        targets, args = super(ZProjectionAnalysis, self).prepare(project, targets, fps, class_objs)
 
         if project.folder is None and self.output_dir is None:
             raise ValueError("Z-Projections need a directory-based project or an output_dir")
