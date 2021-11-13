@@ -30,7 +30,7 @@ class ZProjectionAnalysis(IAnalysisJob):
         and gather all data we need.
 
         """
-        super(ZProjectionAnalysis, self).prepare(project, targets, fps, class_objs)
+        targets, args = super(ZProjectionAnalysis, self).prepare(project, targets, fps, class_objs)
 
         if project.folder is None and self.output_dir is None:
             raise ValueError("Z-Projections need a directory-based project or an output_dir")
@@ -156,6 +156,10 @@ class ZProjectionAnalysis(IAnalysisJob):
     # def deserialize(self, data_dict):
     #     return data_dict
 
+
+    def get_extension(self):
+        return ".jpg"
+
     def to_file(self, data, file_path):
         file_path = file_path + self.get_extension()
         cv2.imwrite(file_path, data)
@@ -165,6 +169,7 @@ class ZProjectionAnalysis(IAnalysisJob):
         file_path = file_path + self.get_extension()
         img = cv2.imread(file_path)
         return img
+
 
 class ZProjectionParameterWidget(ParameterWidget):
     """

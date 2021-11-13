@@ -11,7 +11,7 @@ requirements = [
     'PyQtWebEngine==5.14',
     'scikit-learn',
     'flask',
-    'fastcluster==1.1.25',
+    'fastcluster',
     'moviepy',
     'python-vlc',
     'pandas',
