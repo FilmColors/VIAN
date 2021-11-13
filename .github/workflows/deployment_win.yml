@@ -34,17 +34,17 @@ jobs:
       - run: pyinstaller main.spec
         working-directory: vian
       - name: Zipping files
-        run: 7z a archive.zip
+        run: zip vian/dist/VIAN vian-windows.zip
       - name: Artifact
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
-          path: vian/dist/VIAN
+          path: vian-windows.zip
           if-no-files-found: error
       - name: Release
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           allowUpdates: true
-          artifacts: "vian/dist/VIAN"
+          artifacts: "vian-windows.zip"
           token: ${{ secrets.GITHUB_TOKEN }}
