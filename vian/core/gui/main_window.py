@@ -467,7 +467,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionClearColormetry.triggered.connect(self.clear_colormetry)
 
         self.actionStart_AudioExtraction.triggered.connect(partial(self.audio_handler.extract))
-        self.actionStart_AudioExtraction.setEnabled(False)
 
         self.actionBrowserVisualizations.triggered.connect(partial(self.on_browser_visualization))
         self.actionProjectSummary.triggered.connect(partial(self.on_project_summary))
@@ -480,7 +479,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionSave_Perspective.triggered.connect(self.on_save_custom_perspective)
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
         self.actionDocumentation.triggered.connect(self.open_documentation)
-
 
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
         self.actionFrame_Forward.triggered.connect(partial(self.player.frame_step, False))

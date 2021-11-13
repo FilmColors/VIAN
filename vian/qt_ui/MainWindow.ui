@@ -227,6 +227,9 @@
      <addaction name="separator"/>
     </widget>
     <widget class="QMenu" name="menuAudio">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="title">
       <string>Audio</string>
      </property>
