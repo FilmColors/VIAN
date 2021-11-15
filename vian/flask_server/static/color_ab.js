@@ -21,7 +21,7 @@ class ColorAB {
         new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(divName));
 
         this.plot = Bokeh.Plotting.figure({
-            tools: "lasso_select,pan,wheel_zoom,box_zoom,reset,save",
+            tools: "pan,wheel_zoom,box_zoom,reset",
             aspect_ratio: 1,
             x_axis_label: "A-Channel",
             y_axis_label: "B-Channel",
