@@ -5,10 +5,13 @@ name: Windows - Build_and_upload_VIAN
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ master ]
     tags:
       - "v*.*.*"
-
+  pull_request:
+    branches: [ master ]
+    tags:
+      - "v*.*.*"
 jobs:
   build_application:
 
@@ -30,14 +33,22 @@ jobs:
       - run: pip install pyinstaller==4.6
       - run: pyinstaller main.spec
         working-directory: vian
+      - name: Zipping files
+        uses: papeloto/action-zip@v1
+        with:
+         files: vian/dist/VIAN
+         recursive: false
+         dest: vian-windows.zip
       - name: Artifact
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
-          path: vian/dist/VIAN
+          path: vian-windows.zip
           if-no-files-found: error
       - name: Release
         uses: ncipollo/release-action@v1
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
-          artifacts: "vian/dist/VIAN"
+          allowUpdates: true
+          artifacts: "vian-windows.zip"
           token: ${{ secrets.GITHUB_TOKEN }}

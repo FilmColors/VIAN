@@ -480,7 +480,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad_Perspective.triggered.connect(self.on_load_custom_perspective)
         self.actionDocumentation.triggered.connect(self.open_documentation)
 
-
         self.actionPlay_Pause.triggered.connect(self.player.play_pause)
         self.actionFrame_Forward.triggered.connect(partial(self.player.frame_step, False))
         self.actionFrame_Backward.triggered.connect(partial(self.player.frame_step, True))

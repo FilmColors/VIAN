@@ -52,10 +52,12 @@ class DialogScreenshotExporter(EDialogWidget):
         path = self.folder_path
         quality = self.QualitySlider.value()
         selection = self.project.selected
+
         device = ScreenshotExporter(naming=self.lineEdit_Nomenclature.text(),
                                     selection=selection,
                                     quality=quality,
-                                    semantic_segmentation = self.comboBox_SemanticSegmentation.currentText())
+                                    semantic_segmentation = self.comboBox_SemanticSegmentation.currentText(),
+                                    apply_letterbox = self.checkBox_ApplyLetterbox.isChecked())
         self.project.export(device, path)
         self.close()
 

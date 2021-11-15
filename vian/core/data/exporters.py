@@ -38,11 +38,12 @@ class ScreenshotExporter(IExportDevice):
     SemSeg_Filled = "Filled"
     SemSeg_OutlinesFilled = "Both"
 
-    def __init__(self, naming, selection = None, quality = 100, semantic_segmentation=SemSeg_None):
+    def __init__(self, naming, selection = None, quality = 100, semantic_segmentation=SemSeg_None, apply_letterbox=False):
         self.naming = naming
         self.quality = quality
         self.selection = selection
         self.semantic_segmentation = semantic_segmentation
+        self.apply_letterbox = apply_letterbox
 
     def export(self, project, path):
         # If nothing is selected we export all screenshots
@@ -54,6 +55,7 @@ class ScreenshotExporter(IExportDevice):
             if len(self.selection) == 0:
                 self.selection = project.screenshots
 
+        margins = project.movie_descriptor.get_letterbox_rect()
         for s in self.selection:
             name = self.build_file_name(self.naming, s, project.movie_descriptor)
             file_name = os.path.join(path, name)
@@ -90,6 +92,8 @@ class ScreenshotExporter(IExportDevice):
                         # print(tuple((np.array(colormap[i][:3]) * 255).astype(np.uint8)))
                         cv2.drawContours(img, [c], -1, (232, 255, 12), thickness=3)
 
+            if self.apply_letterbox and margins is not None:
+                img = img[margins[1]:margins[3], margins[0]:margins[2]]
             if ".jpg" in file_name:
                 cv2.imwrite(file_name, img, [cv2.IMWRITE_JPEG_QUALITY, self.quality])
 

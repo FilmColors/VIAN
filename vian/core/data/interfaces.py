@@ -504,6 +504,9 @@ class IAnalysisJob(QObject):
 
         return None
 
+    def get_extension(self):
+        raise NotImplementedError("Extension is not implemented.")
+
     def abort(self):
         pass
 

@@ -1,4 +1,6 @@
 import os
+import typing
+
 from pymediainfo import MediaInfo
 
 from typing import Tuple
@@ -47,7 +49,7 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         self.fps = fps
         # self.is_relative = False
         self.meta_data = dict()
-        self.letterbox_rect = None
+        self.letterbox_rect: typing.Tuple[int, int, int, int] | None= None
 
         self.display_width = None
         self.display_height = None
@@ -72,7 +74,6 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
             source=self.source,
             duration=self.duration,
             notes=self.notes,
-            # is_relative = self.is_relative,
             meta_data = self.meta_data,
             letterbox_rect = self.letterbox_rect
         )
@@ -91,7 +92,6 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
                 setattr(self, key, value)
             except:
                 continue
-
         self.set_project(self.project)
         self.parse_movie()
         return self
