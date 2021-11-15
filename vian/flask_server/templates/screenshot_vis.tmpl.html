@@ -44,9 +44,12 @@
             <div style="margin-bottom:10px; display: flex;flex-direction: row;justify-content: space-between"><label style="margin: 0px">Screenshot Size</label><input style="max-width: 100px" type="number" class="screenshot_size" min="10" max="100"></div>
             <input style="width: 100%" type="range" class="form-range screenshot_size" id="imageSize" min="10" max="100" value="40">
           </div>
-          <div style="margin-bottom: 40px"><p>Circle Interval  </p><input type="range" class="form-range" id="circleInterval" min="5" max="20", value="10" step="0.01"></div>
-          <div>
-            <p>Background  </p>
+          <div style="margin-bottom: 40px; display: flex;flex-direction: column;">
+            <div style="margin-bottom:10px; display: flex;flex-direction: row;justify-content: space-between"><label style="margin: 0px">Circle Interval</label><input style="max-width: 100px" type="number" class="circle_interval" min="5" max="20"></div>
+            <input style="width: 100%" type="range" class="form-range circle_interval" id="circleInterval" min="5" max="20" value="10">
+          </div>
+          <div style="margin-bottom: 40px;display: flex;flex-direction: row;justify-content: space-between;">
+            <label>Background</label>
             <select id="dropdown-bgcolor-menu">
               <option value="white">White</option>
               <option value="gray" selected="selected">Dark Gray</option>
@@ -116,11 +119,12 @@
       },false));
       screenshot_inputs[1].dispatchEvent(new Event("input"))
 
-      var e1 = document.getElementById("circleInterval");
-      e1.addEventListener("input", function(){
-        color_ab_plot.setCircleInterval(e1.value)
-      }, false);
-      e1.dispatchEvent(new Event("input"))
+      const circle_intervals=[...document.getElementsByClassName("circle_interval")];
+      circle_intervals.forEach((inp,i)=>inp.addEventListener("input",function(){
+        circle_intervals[1-i].value=circle_intervals[i].value;
+        color_ab_plot.setCircleInterval(circle_intervals[i].value);
+      },false));
+      circle_intervals[1].dispatchEvent(new Event("input"))
 
       var e2 = document.getElementById("dropdown-bgcolor-menu");
       e2.addEventListener("change", function(){

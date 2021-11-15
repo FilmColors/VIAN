@@ -20,29 +20,18 @@ class ColorAB {
 
         new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(divName));
 
-        //document.getElementById(divName).addEventListener('resize', e => {this.onResize()});
-        //document.getElementById(divName).dispatchEvent(new Event("resize"))
-
         this.plot = Bokeh.Plotting.figure({
-            title: 'Color CIE-Lab (AB - Plane)',
             tools: "lasso_select,pan,wheel_zoom,box_zoom,reset,save",
             aspect_ratio: 1,
             x_axis_label: "A-Channel",
             y_axis_label: "B-Channel",
             match_aspect: true,
         });
-        //this.plot.sizing_mode = "scale_height"
 
         this.plot.center[0].grid_line_alpha = 0.0
         this.plot.center[1].grid_line_alpha = 0.0
 
         this.aspect = 9.0 / 16
-
-        this.glyph_renderer = this.plot.image_url({
-            url: { field: "image" }, x: { field: "x" }, y: { field: "y" },
-            anchor: "center",
-            source: this.source
-        });
 
         this.grid_renderer = this.plot.circle({
             x: { field: "x" },
@@ -53,6 +42,14 @@ class ColorAB {
             line_width: 1.0,
             source: this.source_grid
         })
+
+        this.glyph_renderer = this.plot.image_url({
+            url: { field: "image" },
+            x: { field: "x" },
+            y: { field: "y" },
+            anchor: "center",
+            source: this.source
+        });
 
         var doc = new Bokeh.Document();
         doc.add_root(this.plot);
@@ -67,6 +64,18 @@ class ColorAB {
         this.grid_renderer.glyph.line_color = line;
         this.plot.background_fill_color = col;
         this.plot.border_fill_color = col;
+
+        this.plot.xaxis[0].axis_line_color = line;
+        this.plot.xaxis[0].major_tick_line_color = line;
+        this.plot.xaxis[0].minor_tick_line_color = line;
+        this.plot.xaxis[0].axis_label_text_color = line;
+        this.plot.xaxis[0].major_label_text_color = line;
+        this.plot.yaxis[0].axis_line_color = line;
+        this.plot.yaxis[0].major_tick_line_color = line;
+        this.plot.yaxis[0].minor_tick_line_color = line;
+        this.plot.yaxis[0].axis_label_text_color = line;
+        this.plot.yaxis[0].major_label_text_color = line;
+        this.plot.outline_line_color = line;
     }
 
     setImageSize(s){
@@ -154,7 +163,6 @@ class ColorAB {
 
     onResize(){
         let elem = document.getElementById(this.divName)
-        //console.log(elem.clientHeight, elem.clientWidth, "lalala")
         if (elem.clientHeight > elem.clientWidth){
             this.plot.sizing_mode = "scale_width"
         }else{
