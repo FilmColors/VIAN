@@ -30,7 +30,7 @@ class ColorDT {
         this.plot.below[0].axis_label = "Time"
 
         let args = {
-            seconds:['%Ss'], minutes:["%H:%M:%S"], hours:["%H"], hourmin:["%H:%M:%S"], months:["%H:%M:%S"], years:["%H:%M:%S"]
+            seconds:['%Ss'], minsec:["%M:%S"], hours:["%Hh"], hourmin:["%H:%M:%S"], months:["%H:%M:%S"], years:["%H:%M:%S"]
         }
         let f = new Bokeh.DatetimeTickFormatter(args)
         this.plot.below[0].formatter = f;

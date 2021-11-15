@@ -159,8 +159,7 @@
 
       var e3 = document.getElementById("dropdown-channel");
       e3.addEventListener("change", function(){
-        console.log("E3 value", e3.value);
-          color_dt_plot.parameterChanged(e3.value);
+        color_dt_plot.parameterChanged(e3.value);
       }, false);
       e3.dispatchEvent(new Event("change"));
 
@@ -181,7 +180,6 @@
         type: 'POST',
         success: function (e) {
           screenshot_uuids = e.uuids;
-          console.log(e);
           if (e.screenshots_changed) {
             updateScreenshotVis();
           }
@@ -252,6 +250,8 @@
 
     $(document).on("screenshotPollUpdate", function (event, data) {
       plot.clear();
+
+      console.log("Palette3D screenshotPollUpdate")
 
       var ls = []
       var as = []
