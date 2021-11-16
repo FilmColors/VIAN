@@ -26,6 +26,7 @@ jobs:
       - uses: BSFishy/pip-action@v1
         with:
           requirements: requirements.txt
+      - run: SYSTEM_VERSION_COMPAT=0 pip install tensorflow-macos tensorflow-metal
       - run: pip install pyinstaller
       - run: pyinstaller main.spec
         working-directory: vian
