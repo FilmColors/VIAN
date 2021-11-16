@@ -15,7 +15,7 @@ Visualization and MultimediaLab
 import os
 
 # Comment this out for the full VIAN Version
-# os.environ['VIAN_LIGHT'] = "1"
+os.environ['VIAN_LIGHT'] = "1"
 
 
 import sys
