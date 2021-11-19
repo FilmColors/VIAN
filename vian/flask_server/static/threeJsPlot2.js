@@ -25,6 +25,8 @@ class ThreeJSView {
         this.frame_name = frame_name;
         this.canvas_name = canvas_name;
 
+        new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(frame_name));
+
         this.canvas = document.getElementById(canvas_name);
         this.frame = document.getElementById(frame_name);
 
@@ -85,9 +87,6 @@ class ThreeJSView {
         if (this.useVr){
             this.initVrController();
         }
-        var that = this;
-        window.addEventListener('resize', function () { that.onWindowResize() }, false);
-        this.frame.addEventListener('resize', function () { that.onWindowResize() }, false);
 
         this.frame.addEventListener("keydown", event => {
           if (event.keyCode === 70) {
@@ -137,10 +136,9 @@ class ThreeJSView {
         this.scene.background = new THREE.Color(background);
     }
 
-    onWindowResize() {
-        var frame = this.frame;
-        var width = frame.clientWidth;
-        var height = width;
+    onResize() {
+        var width = this.frame.clientWidth;
+        var height = this.frame.clientHeight;
 
 
         this.camera.aspect = width / height;
