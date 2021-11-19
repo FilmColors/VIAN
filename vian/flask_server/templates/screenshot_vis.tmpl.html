@@ -92,9 +92,11 @@
   <script src="/static/color_ab.js"></script>
   <script src="/static/color_dt.js"></script>
 
-  <script>
+  <script type="module">
+    import * as RENDERER from '/static/threeJsPlot2.js';
     var color_ab_plot = null;
     var color_dt_plot = null;
+    var colorspace_plot = null;
 
     var screenshot_revision = 0;
 
@@ -102,6 +104,7 @@
       color_ab_plot = new ColorAB("ab-color");
       color_ab_plot.selectionCallback = setSelected;
       color_dt_plot = new ColorDT("dt-color");
+      colorspace_plot = new RENDERER.Palette3D("renderframe", "palette-3d");
 
       $(document).on("screenshotPollUpdate", function (event, data) {
         color_ab_plot.setData(data.a, data.b, data.urls, data.uuids);
@@ -115,8 +118,39 @@
                 data.b,
                 data.urls,
                 data.uuids);
-      });
 
+
+        colorspace_plot.clear();
+
+        var ls = []
+        var as = []
+        var bs = []
+        var cols = []
+        var sizes = []
+
+        data.palettes.forEach((elem) => {
+          let rgb = [elem.bgr[2] / 255, elem.bgr[1] / 255, elem.bgr[0] / 255];
+          ls.push(elem.lab[0]);
+          as.push(elem.lab[1]);
+          bs.push(elem.lab[2]);
+          sizes.push(10);
+          cols.push(rgb);
+        });
+        colorspace_plot.addPoints(ls, as, bs, cols, sizes);
+      });
+      let rgbs = []
+
+      for (var i = 0; i < 1000; i++) {
+        var r = Math.random();
+        var g = Math.random();
+        var b = Math.random();
+
+        colorspace_plot.addPoint(
+          Math.floor(255 * r) - 128,
+          Math.floor(255 * g) - 128,
+          Math.floor(255 * b) - 128
+          , [r, b, g]);
+      }
       // updated settings menu
       $('a[data-toggle=tab]').click(function(){
         if(this.id == "nav-ab-plane-tab"){
@@ -156,11 +190,11 @@
         if(e2.value == "white"){
           color_ab_plot.setBackgroundColor("255", "17");
           color_dt_plot.setBackgroundColor("255", "17");
-          //colorspace_plot.setBackgroundColor("255", "17");
+          colorspace_plot.setBackgroundColor("255", "17");
         }else if (e2.value == "gray"){
           color_ab_plot.setBackgroundColor("17", "255");
           color_dt_plot.setBackgroundColor("17", "255");
-          //colorspace_plot.setBackgroundColor("17", "255");
+          colorspace_plot.setBackgroundColor("17", "255");
         }
       }, false);
       e2.dispatchEvent(new Event("change"));
@@ -177,6 +211,7 @@
 
 
     function checkUpdate(pollTime) {
+      /*
       $.ajax({
         url: "/check-updates/",
         data: JSON.stringify({
@@ -199,6 +234,7 @@
           setTimeout(function () { checkUpdate(pollTime); }, pollTime);
         }
       });
+      */
     }
 
     function updateScreenshotVis(pollTime) {
@@ -244,56 +280,5 @@
 
 
   </script>
-
-  <script type="module">
-    import * as RENDERER from '/static/threeJsPlot2.js';
-    console.log(RENDERER)
-    var plot = new RENDERER.Palette3D("renderframe", "palette-3d")
-    // RENDERER.initScene(env_lines, "palette-3d", "renderframe");
-
-    $("#nav-3d-palette-tab").on("click", function () {
-      setTimeout(function () { plot.onWindowResize(); console.log("Hello"); }, 500)
-
-    })
-
-    $(document).on("screenshotPollUpdate", function (event, data) {
-      plot.clear();
-
-      console.log("Palette3D screenshotPollUpdate")
-
-      var ls = []
-      var as = []
-      var bs = []
-      var cols = []
-      var sizes = []
-
-      data.palettes.forEach((elem) => {
-        let rgb = [elem.bgr[2] / 255, elem.bgr[1] / 255, elem.bgr[0] / 255];
-        ls.push(elem.lab[0]);
-        as.push(elem.lab[1]);
-        bs.push(elem.lab[2]);
-        sizes.push(10);
-        cols.push(rgb);
-      });
-      plot.addPoints(ls, as, bs, cols, sizes);
-
-    });
-
-
-    let rgbs = []
-
-    for (var i = 0; i < 1000; i++) {
-      var r = Math.random();
-      var g = Math.random();
-      var b = Math.random();
-
-      plot.addPoint(
-        Math.floor(255 * r) - 128,
-        Math.floor(255 * g) - 128,
-        Math.floor(255 * b) - 128
-        , [r, b, g]);
-    }
-  </script>
-
 
   {% endblock %}
