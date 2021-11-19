@@ -21,14 +21,13 @@ function floatRgb2ThreeColor(r, g, b) {
 }
 
 class ThreeJSView {
-    constructor(frame_name, canvas_name, background_color = [17 / 255, 17 / 255, 17 / 255], useVr = false) {
+    constructor(frame_name, canvas_name, useVr = false) {
         this.frame_name = frame_name;
         this.canvas_name = canvas_name;
 
         this.canvas = document.getElementById(canvas_name);
         this.frame = document.getElementById(frame_name);
 
-        this.background_color = background_color
         const VERTEX_SCALE = 10;
 
         if (useVr == true && navigator.xr != null){
@@ -50,7 +49,6 @@ class ThreeJSView {
         var orthoWidth = VERTEX_SCALE
 
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
-        this.scene.background = new THREE.Color("rgb(17,17,17)");
         this.renderer.setSize(this.renderWidth, this.renderHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.gammaInput = true;
@@ -133,6 +131,10 @@ class ThreeJSView {
 
         this.controls.update();
         this.renderer.render( that.scene, that.camera );
+    }
+    setBackgroundColor(back, front){
+        let background = "rgb(" + back + "," + back + "," + back + ")";
+        this.scene.background = new THREE.Color(background);
     }
 
     onWindowResize() {
@@ -241,8 +243,8 @@ class ThreeJSView {
 }
 
 class Palette3D extends ThreeJSView {
-    constructor(rame_name, canvas_name, background_color = "rgb(255,255,255)") {
-        super(rame_name, canvas_name, background_color)
+    constructor(rame_name, canvas_name) {
+        super(rame_name, canvas_name)
         this._palette = []
 
         this._sprite = new THREE.TextureLoader().load('/static/textures/disc.png');
