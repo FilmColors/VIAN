@@ -25,7 +25,7 @@ class ThreeJSView {
         this.frame_name = frame_name;
         this.canvas_name = canvas_name;
 
-        new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(frame_name));
+        new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(canvas_name));
 
         this.canvas = document.getElementById(canvas_name);
         this.frame = document.getElementById(frame_name);
@@ -39,19 +39,13 @@ class ThreeJSView {
         }
 
         this.scene = new THREE.Scene();
-        this.renderWidth = this.frame.clientWidth;
-        this.renderHeight = this.frame.clientHeight;
         if (this.fov == null) {
             this.fov = 75;
         }
-        this.camera = new THREE.PerspectiveCamera(this.fov, this.renderWidth / this.renderHeight, 0.1, 1000);
+        this.camera = new THREE.PerspectiveCamera(this.fov, 1, 0.1, 1000);
         this.camera.updateProjectionMatrix();
-        var currentCamera = this.camera;
-        var ratio = this.renderHeight / this.renderWidth
-        var orthoWidth = VERTEX_SCALE
 
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
-        this.renderer.setSize(this.renderWidth, this.renderHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.gammaInput = true;
         this.renderer.gammaOutput = true;
@@ -119,17 +113,18 @@ class ThreeJSView {
     }
 
     animate() {
-        var that = this;
-        that.renderer.setAnimationLoop( function(){that.render(that); });
+        this.renderer.setAnimationLoop( () => {this.render(); });
     }
-    render(that) {
+
+    render() {
+        this.onResize();
         if (this.useVr){
-            this.handleController( that.controller1 );
-            this.handleController( that.controller2 );
+            this.handleController( this.controller1 );
+            this.handleController( this.controller2 );
         }
 
         this.controls.update();
-        this.renderer.render( that.scene, that.camera );
+        this.renderer.render( this.scene, this.camera );
     }
     setBackgroundColor(back, front){
         let background = "rgb(" + back + "," + back + "," + back + ")";
