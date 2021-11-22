@@ -132,9 +132,9 @@ class ThreeJSView {
     }
 
     onResize() {
+
         var width = this.frame.clientWidth;
         var height = this.frame.clientHeight;
-
 
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
@@ -142,7 +142,7 @@ class ThreeJSView {
     }
 
     initVrController() {
-        var that = this;
+
         document.body.appendChild(VRButton.createButton(this.renderer));
 
         // controllers
