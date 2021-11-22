@@ -132,9 +132,9 @@ class ThreeJSView {
     }
 
     onResize() {
-
         var width = this.frame.clientWidth;
-        var height = this.frame.clientHeight;
+        //todo: this is not very clean, but the best solution I came up with..
+        var height = document.getElementById("container").clientHeight - document.getElementById("nav-part").clientHeight;
 
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
