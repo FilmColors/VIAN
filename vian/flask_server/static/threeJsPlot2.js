@@ -68,14 +68,8 @@ class ThreeJSView {
         this.initialTarget = this.controls.target;
         // this.controls.target.set(VERTEX_SCALE / 2, 0, 0);
 
-        var targetObject = new THREE.Object3D();
-        this.scene.add(targetObject);
-
         this.stats = new Stats();
         this.stats.showPanel(1);
-
-        this.gridHelper = new THREE.GridHelper(10, 10);
-        this.scene.add(this.gridHelper);
 
         // gridLines(this);
         if (this.useVr){
@@ -88,6 +82,32 @@ class ThreeJSView {
             this.controls.target.set(0,0,0)
           }
         });
+
+        //set up second renderer (for axis helper)
+        const insetWidth = 150, insetHeight = 150;
+        this.container2 = document.getElementById( 'inset' );
+        this.container2.width = insetWidth;
+        this.container2.height = insetHeight;
+
+        // renderer
+        this.renderer2 = new THREE.WebGLRenderer( { alpha: true } );
+        this.renderer2.setClearColor( 0x000000, 0 );
+        this.renderer2.setSize( insetWidth, insetHeight );
+        this.container2.appendChild( this.renderer2.domElement );
+
+        // scene
+        this.scene2 = new THREE.Scene();
+
+        // camera
+        this.camera2 = new THREE.PerspectiveCamera( 50, insetWidth / insetHeight, 1, 1000 );
+        this.camera2.up = this.camera.up; // important!
+
+        // axes
+        this.axes2 = new THREE.AxesHelper( 100 );
+        this.scene2.add( this.axes2 );
+
+
+
         // window.addEventListener('mousemove', function (event) { onMouseMove(event) }, false);
         this.animate();
         // this.renderer.render(this.scene, this.camera);
@@ -124,7 +144,16 @@ class ThreeJSView {
         }
 
         this.controls.update();
+
+        //copy position of the camera into inset
+        this.camera2.position.copy( this.camera.position );
+        this.camera2.position.sub( this.controls.target );
+        this.camera2.position.setLength( 300 );
+        this.camera2.lookAt( this.scene2.position );
+
+
         this.renderer.render( this.scene, this.camera );
+        this.renderer2.render(this.scene2, this.camera2);
     }
     setBackgroundColor(back, front){
         let background = "rgb(" + back + "," + back + "," + back + ")";
@@ -228,10 +257,7 @@ class ThreeJSView {
         this.scene.add(particles);
     }
 
-    clear() {
-        this.scene.remove.apply(this.scene, this.scene.children);
-    }
-
+    clear() {}
 
 }
 
@@ -241,7 +267,6 @@ class Palette3D extends ThreeJSView {
         this._palette = []
 
         this._sprite = new THREE.TextureLoader().load('/static/textures/disc.png');
-
     }
     addPoint(l, a, b, col, size = 10) {
         let p = {}
@@ -295,7 +320,7 @@ class Palette3D extends ThreeJSView {
 
     clear() {
         this.scene.remove.apply(this.scene, this.scene.children);
-        this._palette = []
+        this._palette = [];
     }
 }
 
