@@ -396,6 +396,10 @@ class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.segmentation = segmentation
         self.notes = ""
 
+    @property
+    def duration(self):
+        return self.end - self.start
+
     def set_id(self, ID):
         self.ID = ID
         self.onSegmentChanged.emit(self)
@@ -503,7 +507,7 @@ class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.start = deprecation_serialization(serialization, ["start_ms", "start"])
         self.end = deprecation_serialization(serialization, ["end_ms", "end"])
 
-        self.duration = self.end - self.start
+        # self.duration = self.end - self.start
         self.notes = serialization['notes']
 
         # Backwards Compatibility
