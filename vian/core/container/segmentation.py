@@ -388,8 +388,6 @@ class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.end: int = int(end)
         self.name: str = name
 
-        self.duration = end - start
-
         self.annotation_body = self.deprecate_string_to_annotation(annotation_body)
 
         self.timeline_visibility = True
