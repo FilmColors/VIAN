@@ -43,6 +43,15 @@ class ColorAB {
             source: this.source_grid
         })
 
+
+        this.border_renderer = this.plot.rect({
+            x: { field: "x" },
+            y: { field: "y" },
+            fill_color: "transparent",
+            line_width: 2,
+            source:this.source
+        });
+
         this.glyph_renderer = this.plot.image_url({
             url: { field: "image" },
             x: { field: "x" },
@@ -62,6 +71,7 @@ class ColorAB {
         let line = "rgb(" + front + "," + front + "," + front + ")";
 
         this.grid_renderer.glyph.line_color = line;
+        this.border_renderer.glyph.line_color = line;
         this.plot.background_fill_color = col;
         this.plot.border_fill_color = col;
 
@@ -83,6 +93,11 @@ class ColorAB {
         this.glyph_renderer.glyph.w = s;
         this.glyph_renderer.glyph.h.units = "screen";
         this.glyph_renderer.glyph.w.units = "screen";
+
+        this.border_renderer.glyph.height = s * this.aspect;
+        this.border_renderer.glyph.width = s;
+        this.border_renderer.glyph.height.units = "screen";
+        this.border_renderer.glyph.width.units = "screen";
 
         this.source.change.emit();
     }
