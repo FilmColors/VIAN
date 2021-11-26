@@ -1,12 +1,6 @@
 import * as THREE from '/static/three/build/three.module.js';
 import Stats from '/static/three/jsm/libs/stats.module.js';
-import { GUI } from '/static/three/jsm/libs/dat.gui.module.js';
-import { DragControls } from '/static/three/jsm/controls/DragControls.js';
 import { OrbitControls } from '/static/three/jsm/controls/OrbitControls.js';
-import { TransformControls } from '/static/three/jsm/controls/TransformControls.js';
-import { LineMaterial } from '/static/three/jsm/lines/LineMaterial.js';
-import { LineGeometry } from '/static/three/jsm/lines/LineGeometry.js';
-import { Line2 } from '/static/three/jsm/lines/Line2.js';
 
 import { VRButton } from '/static/three/jsm/webxr/VRButton.js';
 import { XRControllerModelFactory } from '/static/three/jsm/webxr/XRControllerModelFactory.js';
@@ -103,9 +97,32 @@ class ThreeJSView {
         this.camera2.up = this.camera.up; // important!
 
         // axes
-        this.axes2 = new THREE.AxesHelper( 100 );
-        this.scene2.add( this.axes2 );
+        const material = new THREE.LineBasicMaterial({linewidth:3, vertexColors: true});
+        const geometry = new THREE.BufferGeometry();
 
+        const vertices = new Float32Array( [
+            -100, 0,  0,
+            100, 0,  0,
+            0,  -100,  0,
+            0,  100,  0,
+            0,  0,  -100,
+            0, 0,  100
+        ] );
+        geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+
+        const colors = new Float32Array( [
+            0,  0.5,  0,
+            1,  0,  0,
+            0, 0,  0,
+            1, 1,  1,
+            0,  0,  1,
+            1, 1,  0
+        ] );
+
+        geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+
+        const line = new THREE.LineSegments( geometry, material );
+        this.scene2.add( line );
 
 
         // window.addEventListener('mousemove', function (event) { onMouseMove(event) }, false);
