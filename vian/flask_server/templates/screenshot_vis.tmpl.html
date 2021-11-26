@@ -20,6 +20,10 @@
 .menu-item:hover .popup-menu {
 	height: auto;
 }
+a{
+  padding: 0px 10px 0px 10px;
+  height: 100%;
+}
 
 #inset {
     width: 150px;
@@ -61,7 +65,9 @@
 </div>
 <nav id="nav-part" style="display:flex;">
     <ul class="nav nav-tabs">
-      <li><a class="nav-item nav-link active" id="nav-ab-plane-tab" data-toggle="tab" href="#nav-ab-plane" role="tab">AB-Plane <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">L</button></a>
+      <li><a class="nav-item nav-link active" id="nav-ab-plane-tab" data-toggle="tab" href="#nav-ab-plane" role="tab">AB-Plane
+        <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#exampleModalCenter" id="ab-plane-alert-button">Alert</button>
+      </a>
       </li>
       <li><a class="nav-item nav-link" id="nav-color-dt-tab" data-toggle="tab" href="#nav-color-dt" role="tab">Color-dT</a></li>
       <li><a class="nav-item nav-link" id="nav-3d-palette-tab" data-toggle="tab" href="#nav-colorspace" role="tab">Colorspace 3D</a></li>
@@ -130,6 +136,7 @@
     var color_ab_plot = null;
     var color_dt_plot = null;
     var colorspace_plot = null;
+    var current_data = null;
 
     var screenshot_revision = 0;
 
@@ -141,17 +148,8 @@
 
       $(document).on("screenshotPollUpdate", function (event, data) {
 
-
-
-        if(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length > 0){
-          //$("button#alert-close-button").click();
-          //$("nav#nav-part a.active > button:first-child").click();
-          $("#exampleModalCenter").modal('show');
-          $("div#info-text-body").html(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length + " screenshot(s) in your selection have not yet been analyzed and are not available for this plot.");
-        }else{
-          $("button#alert-close-button").click(); //close alert if open
-        }
-
+        checkForAlerts(data);
+        current_data = data;
 
         color_ab_plot.setData(data.a, data.b, data.urls, data.uuids);
         color_dt_plot.setData(
@@ -185,8 +183,7 @@
         colorspace_plot.addPoints(ls, as, bs, cols, sizes);
       });
 
-      // updated settings menu
-      $('a[data-toggle=tab]').click(function(){
+      $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         if(this.id == "nav-ab-plane-tab"){
           document.getElementById("circleDiv").style.display = "flex";
           document.getElementById("screenshotsDiv").style.display = "flex";
@@ -202,6 +199,7 @@
           document.getElementById("circleDiv").style.display = "none";
           document.getElementById("screenshotsDiv").style.display = "none";
         }
+        checkForAlerts(current_data);
       });
 
       const screenshot_inputs=[...document.getElementsByClassName("screenshot_size")];
@@ -242,6 +240,23 @@
 
       updateScreenshotVis(1000);
     });
+
+    function checkForAlerts(data){
+      if (data == null){
+        return;
+      }
+      if(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length > 0){
+        if(["nav-ab-plane-tab", "nav-color-dt-tab"].includes($("#nav-part a.active").attr('id'))){
+          $("#exampleModalCenter").modal('show');
+          $("div#info-text-body").html(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length +
+                  " screenshot(s) in your selection have not yet been analyzed and are not available for this plot.");
+        }
+        $("#ab-plane-alert-button").show();
+      }else{
+        $("#exampleModalCenter").modal('hide');
+        $("#ab-plane-alert-button").hide();
+      }
+    }
 
     function updateScreenshotVis(pollTime) {
       console.log("Pulling Screenshots ")
