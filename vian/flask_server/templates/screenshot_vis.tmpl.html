@@ -38,48 +38,70 @@
 
 {% block content %}
 <div id="container" style="height: 100%; display: flex;flex-direction: column;">
+  <!-- Button trigger modal -->
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Alert</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="info-text-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="alert-close-button">Close</button>
+        <button type="button" class="btn btn-primary">Run analysis for all screenshots in your current selection</button>
+        <button type="button" class="btn btn-primary">Run analysis for all screenshots in your project</button>
+      </div>
+    </div>
+  </div>
+</div>
 <nav id="nav-part" style="display:flex;">
     <ul class="nav nav-tabs">
-      <li><a class="nav-item nav-link active" id="nav-ab-plane-tab" data-toggle="tab" href="#nav-ab-plane" role="tab">AB-Plane</a></li>
+      <li><a class="nav-item nav-link active" id="nav-ab-plane-tab" data-toggle="tab" href="#nav-ab-plane" role="tab">AB-Plane <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">L</button></a>
+      </li>
       <li><a class="nav-item nav-link" id="nav-color-dt-tab" data-toggle="tab" href="#nav-color-dt" role="tab">Color-dT</a></li>
       <li><a class="nav-item nav-link" id="nav-3d-palette-tab" data-toggle="tab" href="#nav-colorspace" role="tab">Colorspace 3D</a></li>
     </ul>
   <div class="menu-item" style="position: relative">
-  <button class="btn btn-primary nav-item nav-link" type="button"  aria-expanded="false" aria-controls="collapseExample" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
-  <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
-  <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
-</svg></button>
-  <div class="popup-menu">
-        <div class="card card-body" style="display: flex;flex-direction: column;">
-          <div id="screenshotsDiv" style="margin-bottom: 40px; display: flex;flex-direction: column;">
-            <div style="margin-bottom:10px; display: flex;flex-direction: row;justify-content: space-between"><label style="margin: 0px">Screenshot Size</label><input style="max-width: 100px" type="number" class="screenshot_size" min="10" max="100"></div>
-            <input style="width: 100%" type="range" class="form-range screenshot_size" id="imageSize" min="10" max="100" value="40">
-          </div>
-          <div id="circleDiv" style="margin-bottom: 40px; display: flex;flex-direction: column;">
-            <div style="margin-bottom:10px; display: flex;flex-direction: row;justify-content: space-between"><label style="margin: 0px">Circle Interval</label><input style="max-width: 100px" type="number" class="circle_interval" min="5" max="20"></div>
-            <input style="width: 100%" type="range" class="form-range circle_interval" id="circleInterval" min="5" max="20" value="10">
-          </div>
-          <div id="channelSelection" style="margin-bottom: 40px;display: none;flex-direction: row;justify-content: space-between;">
-            <label>Channel</label>
-            <select id="dropdown-channel">
-              <option value="saturation" selected="selected">Saturation</option>
-              <option value="chroma" >Chroma</option>
-              <option value="hue">Hue</option>
-              <option value="luminance">Luminance</option>
-              <option value="a-channel">A-Channel</option>
-              <option value="b-channel">B-Channel</option>
-            </select>
-          </div>
-          <div style="margin-bottom: 40px;display: flex;flex-direction: row;justify-content: space-between;">
-            <label>Background</label>
-            <select id="dropdown-bgcolor-menu">
-              <option value="white">White</option>
-              <option value="gray" selected="selected">Dark Gray</option>
-            </select>
+    <button class="btn btn-primary nav-item nav-link" type="button"  aria-expanded="false" aria-controls="collapseExample" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+  </svg></button>
+    <div class="popup-menu">
+          <div class="card card-body" style="display: flex;flex-direction: column;">
+            <div id="screenshotsDiv" style="margin-bottom: 40px; display: flex;flex-direction: column;">
+              <div style="margin-bottom:10px; display: flex;flex-direction: row;justify-content: space-between"><label style="margin: 0px">Screenshot Size</label><input style="max-width: 100px" type="number" class="screenshot_size" min="10" max="100"></div>
+              <input style="width: 100%" type="range" class="form-range screenshot_size" id="imageSize" min="10" max="100" value="40">
+            </div>
+            <div id="circleDiv" style="margin-bottom: 40px; display: flex;flex-direction: column;">
+              <div style="margin-bottom:10px; display: flex;flex-direction: row;justify-content: space-between"><label style="margin: 0px">Circle Interval</label><input style="max-width: 100px" type="number" class="circle_interval" min="5" max="20"></div>
+              <input style="width: 100%" type="range" class="form-range circle_interval" id="circleInterval" min="5" max="20" value="10">
+            </div>
+            <div id="channelSelection" style="margin-bottom: 40px;display: none;flex-direction: row;justify-content: space-between;">
+              <label>Channel</label>
+              <select id="dropdown-channel">
+                <option value="saturation" selected="selected">Saturation</option>
+                <option value="chroma" >Chroma</option>
+                <option value="hue">Hue</option>
+                <option value="luminance">Luminance</option>
+                <option value="a-channel">A-Channel</option>
+                <option value="b-channel">B-Channel</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 40px;display: flex;flex-direction: row;justify-content: space-between;">
+              <label>Background</label>
+              <select id="dropdown-bgcolor-menu">
+                <option value="white">White</option>
+                <option value="gray" selected="selected">Dark Gray</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+  </div>
 </nav>
 <div class="tab-content" id="nav-tabContent" style="width:100%; height:100%">
   <div class="tab-pane fade fade show active" id="nav-ab-plane" role="tabpanel" style="width: 100%; height: 100%;" >
@@ -118,6 +140,19 @@
       colorspace_plot = new RENDERER.Palette3D("renderframe", "palette-3d");
 
       $(document).on("screenshotPollUpdate", function (event, data) {
+
+
+
+        if(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length > 0){
+          //$("button#alert-close-button").click();
+          //$("nav#nav-part a.active > button:first-child").click();
+          $("#exampleModalCenter").modal('show');
+          $("div#info-text-body").html(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length + " screenshot(s) in your selection have not yet been analyzed and are not available for this plot.");
+        }else{
+          $("button#alert-close-button").click(); //close alert if open
+        }
+
+
         color_ab_plot.setData(data.a, data.b, data.urls, data.uuids);
         color_dt_plot.setData(
                 data.time,
@@ -218,6 +253,7 @@
           if (e.update) {
             $(document).trigger("screenshotPollUpdate", [e.data]);
           }
+          console.log(e);
           screenshot_revision = e.revision;
         },
         error: function (jqXHR, textStatus, errorThrown) {

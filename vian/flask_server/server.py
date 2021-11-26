@@ -59,6 +59,9 @@ class ScreenshotData:
 
         self.palettes = []
 
+        self.selected_but_not_analyzed_uuids_ColorFeatureAnalysis = []
+        self.selected_but_not_analyzed_uuids_ColorPaletteAnalysis = []
+
 
 class ServerData:
     def __init__(self):
@@ -97,6 +100,10 @@ class ServerData:
         palettes = []
 
         uuids = []
+
+        selected_but_not_analyzed_uuids_ColorFeatureAnalysis = []
+        selected_but_not_analyzed_uuids_ColorPaletteAnalysis = []
+        print("selected screenshots", self.selected_uuids)
         for i, s in enumerate(self.project.screenshots):
             if self.selected_uuids is not None and s.unique_id not in self.selected_uuids:
                 continue
@@ -118,6 +125,8 @@ class ServerData:
                 chroma.append(float(lch[1]))
                 hue.append(float(lch[2]))
                 saturation.append(float(lab_to_sat(arr)))
+            else:
+                selected_but_not_analyzed_uuids_ColorFeatureAnalysis.append(s.unique_id)
 
             t2 = s.get_connected_analysis(ColorPaletteAnalysis)
             if len(t2) > 0:
@@ -129,6 +138,8 @@ class ServerData:
                 pal = get_palette_at_merge_depth(arr, depth=15)
                 if pal is not None:
                     palettes.extend(pal)
+            else:
+                selected_but_not_analyzed_uuids_ColorPaletteAnalysis.append(s.unique_id)
 
         data = ScreenshotData()
         data.a = np.nan_to_num(a).tolist()
@@ -141,6 +152,9 @@ class ServerData:
 
         data.uuids = uuids
         data.palettes = palettes
+
+        data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis = selected_but_not_analyzed_uuids_ColorFeatureAnalysis
+        data.selected_but_not_analyzed_uuids_ColorPaletteAnalysis = selected_but_not_analyzed_uuids_ColorPaletteAnalysis
 
         self._screenshot_cache['has_changed'] = True
         self._screenshot_cache['data'] = data
