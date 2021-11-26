@@ -44,7 +44,7 @@ a{
 <div id="container" style="height: 100%; display: flex;flex-direction: column;">
   <!-- Button trigger modal -->
 
-<!-- Modal -->
+<!-- Alert pop up -->
 <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -57,7 +57,7 @@ a{
       <div class="modal-body" id="info-text-body"></div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal" id="alert-close-button">Close</button>
-        <button type="button" class="btn btn-primary">Run analysis for all screenshots in your current selection</button>
+        <button type="button" class="btn btn-primary" id="run-selected">Run analysis for all screenshots in your current selection</button>
         <button type="button" class="btn btn-primary">Run analysis for all screenshots in your project</button>
       </div>
     </div>
@@ -200,6 +200,25 @@ a{
           document.getElementById("screenshotsDiv").style.display = "none";
         }
         checkForAlerts(current_data);
+      });
+
+      $("#run-selected").on('click', function(e){
+        $.ajax({
+        url: "/run-ColorFeatureAnalysis/",
+        data: JSON.stringify({
+          uuids: "test123",
+          h: "Hello World",
+        }),
+        dataType: 'json',
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function (e) {
+          console.log("Selection Set")
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+      });
       });
 
       const screenshot_inputs=[...document.getElementsByClassName("screenshot_size")];

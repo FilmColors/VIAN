@@ -242,6 +242,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.flask_server_thread = QThread()
             self.flask_server.moveToThread(self.flask_server_thread)
             self.flask_server_thread.start()
+            self.flask_server.onAnalyse.connect(self.on_start_analysis2)
             self.onStartFlaskServer.connect(self.flask_server.run_server)
             self.onStartFlaskServer.emit()
 
@@ -1707,6 +1708,9 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = AnalysisDialog(self, analysis, targets)
         dialog.onAnalyse.connect(self.on_start_analysis)
         dialog.show()
+
+    def on_start_analysis2(self):
+        print("on_start_analysis2 test breakthrough")
 
     def on_start_analysis(self, from_dialog):
         analysis = from_dialog['analysis']

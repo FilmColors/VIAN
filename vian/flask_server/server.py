@@ -103,7 +103,8 @@ class ServerData:
 
         selected_but_not_analyzed_uuids_ColorFeatureAnalysis = []
         selected_but_not_analyzed_uuids_ColorPaletteAnalysis = []
-        print("selected screenshots", self.selected_uuids)
+        #print("selected screenshots", self.selected_uuids)
+
         for i, s in enumerate(self.project.screenshots):
             if self.selected_uuids is not None and s.unique_id not in self.selected_uuids:
                 continue
@@ -160,8 +161,9 @@ class ServerData:
         self._screenshot_cache['data'] = data
         self.export_screenshots()
 
-    def set_project(self, project:VIANProject):
+    def set_project(self, project:VIANProject, onAnalyseSignal):
         self.project = project
+        self.onAnalyseSignal = onAnalyseSignal
 
         self._screenshot_cache = dict(revision = 0, data=ScreenshotData())
 
@@ -234,6 +236,7 @@ _server_data = ServerData()
 
 
 class FlaskServer(QObject):
+    onAnalyse = pyqtSignal()
     def __init__(self, parent):
         super(FlaskServer, self).__init__(parent)
         self.app = app
@@ -244,7 +247,7 @@ class FlaskServer(QObject):
 
     def on_loaded(self, project):
         global _server_data
-        _server_data.set_project(project)
+        _server_data.set_project(project, self.onAnalyse)
 
     def on_closed(self):
         global _server_data
@@ -385,6 +388,15 @@ def set_selection():
         selected.remove(None)
 
     _server_data.project.set_selected(_server_data, selected)
+    return make_response("OK")
+
+@app.route("/run-ColorFeatureAnalysis/", methods=['POST'])
+def run_colorFeatureAnalysis():
+    if _server_data.project is None:
+        return make_response(dict(screenshots_changed=False, uuids=[]))
+    d = request.json
+    uuid_submitted = d['uuids']
+    _server_data.onAnalyseSignal.emit()
     return make_response("OK")
 
 
