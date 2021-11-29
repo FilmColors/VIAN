@@ -236,7 +236,7 @@ _server_data = ServerData()
 
 
 class FlaskServer(QObject):
-    onAnalyse = pyqtSignal()
+    onAnalyse = pyqtSignal(list)
     def __init__(self, parent):
         super(FlaskServer, self).__init__(parent)
         self.app = app
@@ -393,10 +393,15 @@ def set_selection():
 @app.route("/run-ColorFeatureAnalysis/", methods=['POST'])
 def run_colorFeatureAnalysis():
     if _server_data.project is None:
-        return make_response(dict(screenshots_changed=False, uuids=[]))
+        return make_response("Project is not set.")
     d = request.json
     uuid_submitted = d['uuids']
-    _server_data.onAnalyseSignal.emit()
+    if len(uuid_submitted) == 0: # means: analyse all
+        for s in _server_data.project.screenshots:
+            analyses = s.get_connected_analysis(ColorFeatureAnalysis)
+            if len(analyses) == 0:
+                uuid_submitted.append(s.unique_id)
+    _server_data.onAnalyseSignal.emit(uuid_submitted)
     return make_response("OK")
 
 

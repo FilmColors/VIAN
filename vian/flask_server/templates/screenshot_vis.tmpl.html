@@ -49,7 +49,7 @@ a{
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Alert</h5>
+        <h5 class="modal-title" id="exampleModalLongTitle">Alert: Visualization incomplete</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -57,8 +57,8 @@ a{
       <div class="modal-body" id="info-text-body"></div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal" id="alert-close-button">Close</button>
-        <button type="button" class="btn btn-primary" id="run-selected">Run analysis for all screenshots in your current selection</button>
-        <button type="button" class="btn btn-primary">Run analysis for all screenshots in your project</button>
+        <button type="button" class="btn btn-primary" id="run-selected-ColorFeature">Run analysis for all screenshots in your current selection</button>
+        <button type="button" class="btn btn-primary" id="run-all-ColorFeature">Run analysis for all screenshots in your project</button>
       </div>
     </div>
   </div>
@@ -202,12 +202,28 @@ a{
         checkForAlerts(current_data);
       });
 
-      $("#run-selected").on('click', function(e){
+      $("#run-selected-ColorFeature").on('click', function(e){
         $.ajax({
         url: "/run-ColorFeatureAnalysis/",
         data: JSON.stringify({
-          uuids: "test123",
-          h: "Hello World",
+          uuids: current_data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis,
+        }),
+        dataType: 'json',
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function (e) {
+          console.log("Selection Set")
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+      });
+      });
+      $("#run-all-ColorFeature").on('click', function(e){
+        $.ajax({
+        url: "/run-ColorFeatureAnalysis/",
+        data: JSON.stringify({
+          uuids: [],
         }),
         dataType: 'json',
         contentType: 'application/json;charset=UTF-8',
@@ -267,8 +283,12 @@ a{
       if(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length > 0){
         if(["nav-ab-plane-tab", "nav-color-dt-tab"].includes($("#nav-part a.active").attr('id'))){
           $("#exampleModalCenter").modal('show');
-          $("div#info-text-body").html(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length +
-                  " screenshot(s) in your selection have not yet been analyzed and are not available for this plot.");
+          let html_string = data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length +
+                  " screenshots in your selection have not yet been analyzed and are not available for this plot.";
+          if(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length == 1){
+            html_string = "1 screenshot in your selection has not yet been analyzed and is not available for this plot."
+          }
+          $("div#info-text-body").html(html_string);
         }
         $("#ab-plane-alert-button").show();
       }else{

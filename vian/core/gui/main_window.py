@@ -1709,8 +1709,13 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.onAnalyse.connect(self.on_start_analysis)
         dialog.show()
 
-    def on_start_analysis2(self):
-        print("on_start_analysis2 test breakthrough")
+    def on_start_analysis2(self, uuids):
+        targets_list = []
+        for s in self.project.screenshots:
+            if s.unique_id in uuids:
+                targets_list.append(s)
+        fps = self.player.get_fps()
+        self.worker_manager.push(self.project, ColorFeatureAnalysis(), targets_list, None, fps, None)
 
     def on_start_analysis(self, from_dialog):
         analysis = from_dialog['analysis']
