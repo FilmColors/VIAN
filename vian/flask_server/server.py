@@ -13,6 +13,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEng
 from PyQt5 import QtGui
 from flask import Flask, render_template, send_file, url_for, jsonify, request, make_response
 
+from core.data.interfaces import IAnalysisJob
 from vian.core.data.log import log_error, log_info
 from vian.core.gui.ewidgetbase import EDockWidget
 from vian.core.container.project import VIANProject, Screenshot, Segment
@@ -161,9 +162,10 @@ class ServerData:
         self._screenshot_cache['data'] = data
         self.export_screenshots()
 
-    def set_project(self, project:VIANProject, onAnalyseSignal):
+    def set_project(self, project:VIANProject, onAnalyseColorFeatureSignal, onAnalyseColorPaletteSignal):
         self.project = project
-        self.onAnalyseSignal = onAnalyseSignal
+        self.onAnalyseColorFeatureSignal = onAnalyseColorFeatureSignal
+        self.onAnalyseColorPaletteSignal = onAnalyseColorPaletteSignal
 
         self._screenshot_cache = dict(revision = 0, data=ScreenshotData())
 
@@ -236,7 +238,8 @@ _server_data = ServerData()
 
 
 class FlaskServer(QObject):
-    onAnalyse = pyqtSignal(list)
+    onAnalyseColorFeature = pyqtSignal(list)
+    onAnalyseColorPalette = pyqtSignal(list)
     def __init__(self, parent):
         super(FlaskServer, self).__init__(parent)
         self.app = app
@@ -247,7 +250,7 @@ class FlaskServer(QObject):
 
     def on_loaded(self, project):
         global _server_data
-        _server_data.set_project(project, self.onAnalyse)
+        _server_data.set_project(project, self.onAnalyseColorFeature, self.onAnalyseColorPalette)
 
     def on_closed(self):
         global _server_data
@@ -401,7 +404,21 @@ def run_colorFeatureAnalysis():
             analyses = s.get_connected_analysis(ColorFeatureAnalysis)
             if len(analyses) == 0:
                 uuid_submitted.append(s.unique_id)
-    _server_data.onAnalyseSignal.emit(uuid_submitted)
+    _server_data.onAnalyseColorFeatureSignal.emit(uuid_submitted)
+    return make_response("OK")
+
+@app.route("/run-ColorPaletteAnalysis/", methods=['POST'])
+def run_colorPaletteAnalysis():
+    if _server_data.project is None:
+        return make_response("Project is not set.")
+    d = request.json
+    uuid_submitted = d['uuids']
+    if len(uuid_submitted) == 0: # means: analyse all
+        for s in _server_data.project.screenshots:
+            analyses = s.get_connected_analysis(ColorPaletteAnalysis)
+            if len(analyses) == 0:
+                uuid_submitted.append(s.unique_id)
+    _server_data.onAnalyseColorPaletteSignal.emit(uuid_submitted)
     return make_response("OK")
 
 

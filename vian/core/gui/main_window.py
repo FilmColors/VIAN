@@ -242,7 +242,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.flask_server_thread = QThread()
             self.flask_server.moveToThread(self.flask_server_thread)
             self.flask_server_thread.start()
-            self.flask_server.onAnalyse.connect(self.on_start_analysis2)
+            self.flask_server.onAnalyseColorFeature.connect(self.on_start_analysis_ColorFeature)
+            self.flask_server.onAnalyseColorPalette.connect(self.on_start_analysis_ColorPalette)
             self.onStartFlaskServer.connect(self.flask_server.run_server)
             self.onStartFlaskServer.emit()
 
@@ -1709,13 +1710,21 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.onAnalyse.connect(self.on_start_analysis)
         dialog.show()
 
-    def on_start_analysis2(self, uuids):
+    def on_start_analysis_ColorFeature(self, uuids):
         targets_list = []
         for s in self.project.screenshots:
             if s.unique_id in uuids:
                 targets_list.append(s)
         fps = self.player.get_fps()
         self.worker_manager.push(self.project, ColorFeatureAnalysis(), targets_list, None, fps, None)
+
+    def on_start_analysis_ColorPalette(self, uuids):
+        targets_list = []
+        for s in self.project.screenshots:
+            if s.unique_id in uuids:
+                targets_list.append(s)
+        fps = self.player.get_fps()
+        self.worker_manager.push(self.project, ColorPaletteAnalysis(), targets_list, None, fps, None)
 
     def on_start_analysis(self, from_dialog):
         analysis = from_dialog['analysis']

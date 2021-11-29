@@ -244,7 +244,7 @@
         contentType: 'application/json;charset=UTF-8',
         type: 'POST',
         success: function (e) {
-          console.log("Selection Set")
+          console.log("Color Feature selected Screenshots")
         },
         error: function (jqXHR, textStatus, errorThrown) {
           console.log("Error", jqXHR, textStatus, errorThrown);
@@ -261,13 +261,50 @@
         contentType: 'application/json;charset=UTF-8',
         type: 'POST',
         success: function (e) {
-          console.log("Selection Set")
+          console.log("Color Feature all Screenshots")
         },
         error: function (jqXHR, textStatus, errorThrown) {
           console.log("Error", jqXHR, textStatus, errorThrown);
         },
       });
       });
+
+      $("#run-selected-ColorPalette").on('click', function(e){
+        $.ajax({
+        url: "/run-ColorPaletteAnalysis/",
+        data: JSON.stringify({
+          uuids: current_data.selected_but_not_analyzed_uuids_ColorPaletteAnalysis,
+        }),
+        dataType: 'json',
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function (e) {
+          console.log("Color Palette selected Screenshots")
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+      });
+      });
+      $("#run-all-ColorPalette").on('click', function(e){
+        $.ajax({
+        url: "/run-ColorPaletteAnalysis/",
+        data: JSON.stringify({
+          uuids: [],
+        }),
+        dataType: 'json',
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function (e) {
+          console.log("Color Palette all Screenshots")
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+      });
+      });
+
+
 
       const screenshot_inputs=[...document.getElementsByClassName("screenshot_size")];
       screenshot_inputs.forEach((inp,i)=>inp.addEventListener("input",function(){
