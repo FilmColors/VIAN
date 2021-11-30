@@ -17,7 +17,6 @@ import os
 # Comment this out for the full VIAN Version
 # os.environ['VIAN_LIGHT'] = "1"
 
-
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))

@@ -18,6 +18,11 @@ from .hdf5_manager import get_analysis_by_name
 
 from typing import TYPE_CHECKING
 
+class ColorimetryNotFoundException(BaseException):
+    pass
+class HDF5ManagerNotFoundException(BaseException):
+    pass
+
 if TYPE_CHECKING:
     from vian.core.data.interfaces import TimelineDataset, IAnalysisJob, SpatialOverlayDataset
     from vian.core.container.project import VIANProject
@@ -564,9 +569,12 @@ class ColormetryAnalysis(AnalysisContainer):
         except Exception as e:
             log_error("Exception in Loading Analysis", str(e))
 
+        if project.hdf5_manager is None:
+            raise HDF5ManagerNotFoundException(
+                f"No hdf5 manager set in the project. Probably the project {project.name} does only exist in memory?"
+            )
         if project.hdf5_manager.has_colorimetry() is False:
-            log_error("Could not find colorimetry, continuing without deserialization")
-            return None
+            raise ColorimetryNotFoundException("Could not find colorimetry, omitting.")
 
         self.current_idx = project.hdf5_manager.get_colorimetry_length() - 1
         self.time_ms = project.hdf5_manager.get_colorimetry_times()[:self.current_idx + 1].tolist()
