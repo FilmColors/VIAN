@@ -1378,9 +1378,19 @@ class VIANProject(QObject, IHasName, IClassifiable):
                             self.create_colormetry()
                     else:
                         self.add_analysis(new)
+                # IF the project is kept in memory only, this exception will be raised during the deserialization of
+                # the Colorimetry
+                except HDF5ManagerNotFoundException as e:
+                    log_error(e)
+                    continue
+                # If no colorimetry exists
+                except ColorimetryNotFoundException as e:
+                    self.create_colormetry()
+                    continue
                 except Exception as e:
-                    raise e
+                    log_error(e)
                     print("Exception in Load Analyses", str(e))
+                    continue
 
         # This is due to a bug which happened in 0.9.3
         # When a vocabulary was copied, only the vocabulary uuid changed but not the word uuids.
