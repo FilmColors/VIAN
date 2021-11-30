@@ -399,13 +399,6 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_8">
-                <property name="text">
-                 <string>Corpus ID:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QSpinBox" name="spinBox_ID_0">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -428,9 +421,9 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_9">
+               <widget class="QLabel" name="label_8">
                 <property name="text">
-                 <string>TextLabel</string>
+                 <string>Corpus ID:</string>
                 </property>
                </widget>
               </item>
@@ -450,6 +443,13 @@
                 </property>
                 <property name="maximum">
                  <number>99999</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>Copy ID:</string>
                 </property>
                </widget>
               </item>
