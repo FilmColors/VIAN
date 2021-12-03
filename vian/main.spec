@@ -13,6 +13,7 @@ flask_hidden_imports = collect_submodules('flask_server')
 sklearn_hidden_imports = collect_submodules('sklearn')
 
 binaries = collect_dynamic_libs("pymediainfo")
+binaries += collect_dynamic_libs("librosa")
 hiddenimports = mp_hidden_imports \
                 + flask_hidden_imports \
                 + sklearn_hidden_imports

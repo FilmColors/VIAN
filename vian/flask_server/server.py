@@ -13,7 +13,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEng
 from PyQt5 import QtGui
 from flask import Flask, render_template, send_file, url_for, jsonify, request, make_response
 
-from core.data.interfaces import IAnalysisJob
+from vian.core.data.interfaces import IAnalysisJob
 from vian.core.data.log import log_error, log_info
 from vian.core.gui.ewidgetbase import EDockWidget
 from vian.core.container.project import VIANProject, Screenshot, Segment
