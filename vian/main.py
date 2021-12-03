@@ -152,6 +152,3 @@ if __name__ == '__main__':
     main = MainWindow(splash, file)
     MAIN_WINDOW = main
     sys.exit(app.exec_())
-
-
-
