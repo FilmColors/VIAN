@@ -26,10 +26,20 @@ class ColorAB {
             x_axis_label: "A-Channel",
             y_axis_label: "B-Channel",
             match_aspect: true,
+            x_range: new Bokeh.Range1d({ start: -50, end: 50 }),
+            y_range: new Bokeh.Range1d({ start: -50, end: 50 }),
+            outline_line_alpha: 0.0,
         });
 
         this.plot.center[0].grid_line_alpha = 0.0
         this.plot.center[1].grid_line_alpha = 0.0
+
+        this.plot.xaxis[0].major_tick_line_alpha = 0.0;
+        this.plot.xaxis[0].minor_tick_line_alpha = 0.0;
+        this.plot.xaxis[0].major_label_text_alpha = 0.0;
+        this.plot.yaxis[0].major_tick_line_alpha = 0.0;
+        this.plot.yaxis[0].minor_tick_line_alpha = 0.0;
+        this.plot.yaxis[0].major_label_text_alpha = 0.0;
 
         this.aspect = 9.0 / 16
 
@@ -40,16 +50,30 @@ class ColorAB {
             fill_alpha: 0,
             line_alpha: 0.6,
             line_width: 1.0,
-            source: this.source_grid
+            source: this.source_grid,
         })
+
+        this.labels = new Bokeh.LabelSet({
+            x: { field: "radius" },
+            y: { field: "y" },
+            text:{ field: "radius" },
+            x_offset:0,
+            y_offset:-6,
+            text_align: "center",
+            text_font_size: "12px",
+            source: this.source_grid,
+            render_mode:'canvas',
+            background_fill_alpha: 1.0,
+        });
+        this.plot.add_layout(this.labels);
 
 
         this.border_renderer = this.plot.rect({
-            x: { field: "x" },
+            x: { field: "radius" },
             y: { field: "y" },
             fill_color: "transparent",
             line_width: 2,
-            source:this.source
+            source:this.source,
         });
 
         this.glyph_renderer = this.plot.image_url({
@@ -57,8 +81,9 @@ class ColorAB {
             x: { field: "x" },
             y: { field: "y" },
             anchor: "center",
-            source: this.source
+            source: this.source,
         });
+
 
         var doc = new Bokeh.Document();
         doc.add_root(this.plot);
@@ -75,17 +100,14 @@ class ColorAB {
         this.plot.background_fill_color = col;
         this.plot.border_fill_color = col;
 
-        this.plot.xaxis[0].axis_line_color = line;
-        this.plot.xaxis[0].major_tick_line_color = line;
-        this.plot.xaxis[0].minor_tick_line_color = line;
         this.plot.xaxis[0].axis_label_text_color = line;
-        this.plot.xaxis[0].major_label_text_color = line;
-        this.plot.yaxis[0].axis_line_color = line;
-        this.plot.yaxis[0].major_tick_line_color = line;
-        this.plot.yaxis[0].minor_tick_line_color = line;
+        this.plot.xaxis[0].axis_line_color = col;
+
         this.plot.yaxis[0].axis_label_text_color = line;
-        this.plot.yaxis[0].major_label_text_color = line;
-        this.plot.outline_line_color = line;
+        this.plot.yaxis[0].axis_line_color = col;
+
+        this.labels.background_fill_color = col;
+        this.labels.text_color = line;
     }
 
     setImageSize(s){
@@ -113,11 +135,6 @@ class ColorAB {
         this.source.data.image = urls;
         this.source.data.uuids = uuids;
 
-        if (a.length > 0){
-            this.ab_max = Math.max(Math.abs(Math.min(Math.min(...a), Math.min(...b))), Math.max(Math.max(...a), Math.max(...b)))
-            this.plot.x_range = new Bokeh.Range1d({ start: this.ab_max*-1, end: this.ab_max });
-            this.plot.y_range = new Bokeh.Range1d({ start: this.ab_max*-1, end: this.ab_max });
-        }
         this.source.change.emit();
     }
 
