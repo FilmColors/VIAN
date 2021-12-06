@@ -49,7 +49,9 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         self.fps = fps
         # self.is_relative = False
         self.meta_data = dict()
-        self.letterbox_rect: typing.Tuple[int, int, int, int] | None= None
+
+        # Pixel coordinates of the four square points x0 x1 y0 y1
+        self.letterbox_rect: typing.Tuple[int, int, int, int] | None = None
 
         self.display_width = None
         self.display_height = None

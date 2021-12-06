@@ -4,7 +4,7 @@ channels:
   - defaults
 dependencies:
   - pip
-  - python=3.7
+  - python=3.8
   - moviepy
   - bokeh==2.2.1
   - librosa
@@ -19,7 +19,7 @@ dependencies:
   - sqlalchemy
   - matplotlib
   - scikit-learn
-  - fastcluster==1.1.25
+  - fastcluster
   - pymediainfo
   - pip:
       - pysrt

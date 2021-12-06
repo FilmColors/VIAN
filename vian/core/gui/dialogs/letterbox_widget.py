@@ -10,7 +10,8 @@ import os
 import numpy as np
 import typing
 
-from vian.core.data.computation import numpy_to_pixmap
+from sklearn.cluster import AgglomerativeClustering
+from vian.core.data.computation import numpy_to_pixmap, detect_letterbox
 from vian.core.gui.ewidgetbase import EDialogWidget
 from vian.core.gui.misc.utils import dialog_with_margin
 
@@ -61,8 +62,12 @@ class LetterBoxWidget(EDialogWidget):
         self.onFrameChanged.connect(self.view.set_image)
 
         self.btn_apply = QPushButton("Apply Letterbox", self)
-        self.widget_controls.layout().addWidget(self.btn_apply, 4, 0, 1, 2)
-        self.widget_controls.layout().addItem(QSpacerItem(1,1, hPolicy=QSizePolicy.Fixed, vPolicy= QSizePolicy.Expanding), 5, 0)
+        self.widget_controls.layout().addWidget(self.btn_apply, 5, 0, 1, 2)
+        self.btn_detect = QPushButton("Auto Detect", self)
+        self.btn_detect.clicked.connect(self.on_auto)
+        self.widget_controls.layout().addWidget(self.btn_detect, 4, 0, 1, 2)
+
+        self.widget_controls.layout().addItem(QSpacerItem(1,1, hPolicy=QSizePolicy.Fixed, vPolicy= QSizePolicy.Expanding), 6, 0)
 
         self.view.onChange.connect(self.on_view_changed)
         self.btn_apply.clicked.connect(self.on_apply)
@@ -95,10 +100,18 @@ class LetterBoxWidget(EDialogWidget):
         self.pos_slider.setValue(500)
 
         r = self.movie_descriptor.get_letterbox_rect()
+        
         if r is None:
             return
 
         self.view.set_rect(r)
+
+    def on_auto(self):
+        margins = detect_letterbox(self.movie_descriptor.movie_path, n_samples=20)
+        self.view.set_rect((margins['left'],
+                            margins['top'],
+                           self.cap.get(cv2.CAP_PROP_FRAME_WIDTH) - margins['right'] - margins['left'],
+                           self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT) - margins['bottom'] - margins['top']))
 
     def on_slider_change(self):
         if self.cap is None:
@@ -187,7 +200,6 @@ class LetterBoxView(QGraphicsView):
     @pyqtSlot(object)
     def set_image(self, frame):
         self.frame = frame
-
         pixmap = numpy_to_pixmap(frame)
         self.frame_pmap = self.scene().addPixmap(pixmap)
         self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
