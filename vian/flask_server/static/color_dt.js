@@ -210,6 +210,13 @@ class ColorDT {
             this.border_renderer.glyph.line_alpha=0.0;
         }
     }
+    showConnectingLine(show){
+        if(show){
+            this.lineRenderer.glyph.line_alpha = 1.0;
+        }else{
+            this.lineRenderer.glyph.line_alpha = 0.0;
+        }
+    }
 
     onResize() {
         let elem = document.getElementById(this.divName)

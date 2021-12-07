@@ -138,8 +138,12 @@
               </select>
             </div>
             <div id="screenshot-borders" style="margin-bottom: 40px;display: flex;flex-direction: row;justify-content: space-between;">
-              <label>Screenshot Borders</label>
-              <input id="checkbox-screenshot-borders" type="checkbox" checked="off"></input>
+              <label>Screenshot Border Visibility</label>
+              <input id="checkbox-screenshot-borders" type="checkbox"></input>
+            </div>
+            <div id="connecting-line" style="margin-bottom: 40px;display: flex;flex-direction: row;justify-content: space-between;">
+              <label>Connecting Line Visibility</label>
+              <input id="checkbox-connecting-line" type="checkbox"></input>
             </div>
           </div>
         </div>
@@ -227,18 +231,21 @@
           document.getElementById("screenshotsDiv").style.display = "flex";
           document.getElementById("channelSelection").style.display = "none";
           document.getElementById("screenshot-borders").style.display = "flex";
+          document.getElementById("connecting-line").style.display = "none";
         }
         else if(this.id == "nav-color-dt-tab"){
           document.getElementById("circleDiv").style.display = "none";
           document.getElementById("screenshotsDiv").style.display = "flex";
           document.getElementById("channelSelection").style.display = "flex";
           document.getElementById("screenshot-borders").style.display = "flex";
+          document.getElementById("connecting-line").style.display = "flex";
         }
         else if(this.id == "nav-3d-palette-tab") {
           document.getElementById("channelSelection").style.display = "none";
           document.getElementById("circleDiv").style.display = "none";
           document.getElementById("screenshotsDiv").style.display = "none";
           document.getElementById("screenshot-borders").style.display = "none";
+          document.getElementById("connecting-line").style.display = "none";
         }
         checkForAlerts(current_data);
       });
@@ -354,11 +361,17 @@
 
       var e4 = document.getElementById("checkbox-screenshot-borders");
       e4.addEventListener("change", function (){
-        color_dt_plot.showScreenshotBorders(this.checked);
         color_ab_plot.showScreenshotBorders(this.checked);
+        color_dt_plot.showScreenshotBorders(this.checked);
         sendSettings();
       }, false);
       e4.dispatchEvent(new Event("change"));
+
+      var e5 = document.getElementById("checkbox-connecting-line");
+      e5.addEventListener("change", function (){
+        color_dt_plot.showConnectingLine(this.checked);
+      }, false);
+      e5.dispatchEvent(new Event("change"));
 
       updateScreenshotVis(1000);
       getAndApplySettings();
@@ -456,7 +469,10 @@
             document.getElementById("checkbox-screenshot-borders").checked = e['screenshot_borders'];
             document.getElementById("checkbox-screenshot-borders").dispatchEvent(new Event("change"));
           }
-
+          if('connecting_line' in e){
+            document.getElementById("checkbox-connecting-line").checked = e['connecting_line'];
+            document.getElementById("checkbox-connecting-line").dispatchEvent(new Event("change"));
+          }
         },
         error: function (jqXHR, textStatus, errorThrown) {
           console.log("Error in get-settings", jqXHR, textStatus, errorThrown);
@@ -481,6 +497,7 @@
           circle_interval: document.getElementsByClassName("circle_interval")[0].value,
           dt_selected_channel: document.getElementById("dropdown-channel").value,
           screenshot_borders: document.getElementById("checkbox-screenshot-borders").checked,
+          connecting_line: document.getElementById("checkbox-connecting-line").checked,
         }),
         url: "/post-settings/",
         contentType: 'application/json;charset=UTF-8',
