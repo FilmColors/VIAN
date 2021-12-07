@@ -172,6 +172,8 @@
 
     var screenshot_revision = 0;
 
+    var settings_init_running = true;
+
     $(document).ready(function () {
       color_ab_plot = new ColorAB("ab-color");
       color_ab_plot.selectionCallback = setSelected;
@@ -304,13 +306,12 @@
       });
       });
 
-
-
       const screenshot_inputs=[...document.getElementsByClassName("screenshot_size")];
       screenshot_inputs.forEach((inp,i)=>inp.addEventListener("input",function(){
         screenshot_inputs[1-i].value=screenshot_inputs[i].value;
         color_ab_plot.setImageSize(screenshot_inputs[i].value);
         color_dt_plot.setImageSize(screenshot_inputs[i].value);
+        sendSettings();
       },false));
       screenshot_inputs[1].dispatchEvent(new Event("input"))
 
@@ -332,6 +333,7 @@
           color_dt_plot.setBackgroundColor("17", "255");
           colorspace_plot.setBackgroundColor("17", "255");
         }
+        sendSettings();
       }, false);
       e2.dispatchEvent(new Event("change"));
 
@@ -341,8 +343,8 @@
       }, false);
       e3.dispatchEvent(new Event("change"));
 
-
       updateScreenshotVis(1000);
+      getAndApplySettings();
     });
 
     function checkForAlerts(data){
@@ -403,6 +405,54 @@
         complete: function () {
           setTimeout(function () { updateScreenshotVis(pollTime); }, pollTime);
         }
+      });
+    }
+    function getAndApplySettings(){
+      $.ajax({
+        type: 'GET',
+        dataType: 'json',
+        url: "/get-settings/",
+        success: function(e, textStatus, xhr) {
+          if(xhr.status == 204){
+            console.log("/get-settings/ returned 204");
+            return;
+          }
+          document.getElementById("dropdown-bgcolor-menu").value = e['background'];
+          document.getElementById("dropdown-bgcolor-menu").dispatchEvent(new Event("change"));
+
+          const screenshot_inputs=[...document.getElementsByClassName("screenshot_size")];
+          screenshot_inputs[1].value = e['screenshot_size'];
+          screenshot_inputs[1].dispatchEvent(new Event("input"))
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error in get-settings", jqXHR, textStatus, errorThrown);
+        },
+        complete: function () {
+          settings_init_running = false;
+        }
+      });
+    }
+
+  function sendSettings() {
+      if (settings_init_running){
+        return;
+      }
+      console.log("sendSettings entered")
+      $.ajax({
+        type: 'POST',
+        dataType: 'json',
+        data: JSON.stringify({
+          background: document.getElementById("dropdown-bgcolor-menu").value,
+          screenshot_size: document.getElementsByClassName("screenshot_size")[0].value
+        }),
+        url: "/post-settings/",
+        contentType: 'application/json;charset=UTF-8',
+        success: function (e) {
+            console.log("Settings set")
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
       });
     }
 

@@ -4,6 +4,7 @@ import cv2
 from functools import partial
 import json
 import platform
+import requests
 
 import numpy as np
 
@@ -73,6 +74,7 @@ class ServerData:
 
         self._project_closed = False
         self.selected_uuids = None
+        self.settings = None
 
     def get_screenshot_data(self, revision = 0):
         if self._recompute_screenshot_cache:
@@ -226,6 +228,12 @@ class ServerData:
                 ps.append(p)
         return ps
 
+    def set_settings(self, settings):
+        self.settings = settings
+
+    def get_settings(self):
+        return self.settings
+
     def clear(self):
         self._project_closed = True
 
@@ -323,6 +331,8 @@ class FlaskWebWidget(EDockWidget):
         self.a_open_browser.triggered.connect(self.on_browser)
 
         self.url = None
+        self.getSettingsURL = None
+        self.setSettingsURL = None
 
 
     def on_browser(self):
@@ -338,6 +348,10 @@ class FlaskWebWidget(EDockWidget):
             self.view.setUrl(QUrl(url))
             self.view.reload()
 
+    def set_settingsURL(self, getSettingsURL, setSettingsURL):
+        self.getSettingsURL = getSettingsURL
+        self.setSettingsURL = setSettingsURL
+
     def showEvent(self, a0: QtGui.QShowEvent) -> None:
         self.reload()
         super(FlaskWebWidget, self).showEvent(a0)
@@ -345,6 +359,19 @@ class FlaskWebWidget(EDockWidget):
     def reload(self):
         if not self.mac_disable_web:
             self.view.reload()
+
+    def get_settings(self):
+        if self.getSettingsURL == None:
+            return None
+        response = requests.get(self.getSettingsURL)
+        if response.status_code == 204:
+            return None
+        return response.json()
+
+    def apply_settings(self, settings):
+        r = requests.post(self.setSettingsURL, json=settings)
+        print(r)
+
 
 
 @app.route("/")
@@ -420,6 +447,21 @@ def run_colorPaletteAnalysis():
                 uuid_submitted.append(s.unique_id)
     _server_data.onAnalyseColorPaletteSignal.emit(uuid_submitted)
     return make_response("OK")
+
+@app.route("/post-settings/", methods=['POST'])
+def post_settings():
+    d = request.json
+    if d == None:
+        return make_response("nothing set, submitted settings are None")
+    _server_data.set_settings(d)
+    return make_response("OK")
+
+@app.route("/get-settings/")
+def get_settings():
+    if _server_data.project is None or _server_data.get_settings() is None:
+        return '', 204
+    return json.dumps(_server_data.get_settings())
+
 
 
 @app.route("/summary/")
