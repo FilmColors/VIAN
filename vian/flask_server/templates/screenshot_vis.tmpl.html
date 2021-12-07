@@ -319,6 +319,7 @@
       circle_intervals.forEach((inp,i)=>inp.addEventListener("input",function(){
         circle_intervals[1-i].value=circle_intervals[i].value;
         color_ab_plot.setCircleInterval(circle_intervals[i].value);
+        sendSettings();
       },false));
       circle_intervals[1].dispatchEvent(new Event("input"))
 
@@ -340,6 +341,7 @@
       var e3 = document.getElementById("dropdown-channel");
       e3.addEventListener("change", function(){
         color_dt_plot.parameterChanged(e3.value);
+        sendSettings();
       }, false);
       e3.dispatchEvent(new Event("change"));
 
@@ -417,12 +419,25 @@
             console.log("/get-settings/ returned 204");
             return;
           }
-          document.getElementById("dropdown-bgcolor-menu").value = e['background'];
-          document.getElementById("dropdown-bgcolor-menu").dispatchEvent(new Event("change"));
+          if('background' in e){
+            document.getElementById("dropdown-bgcolor-menu").value = e['background'];
+            document.getElementById("dropdown-bgcolor-menu").dispatchEvent(new Event("change"));
+          }
+          if('screenshot_size' in e){
+            const screenshot_inputs=[...document.getElementsByClassName("screenshot_size")];
+            screenshot_inputs[1].value = e['screenshot_size'];
+            screenshot_inputs[1].dispatchEvent(new Event("input"))
+          }
+          if('circle_interval' in e){
+            const circle_inputs=[...document.getElementsByClassName("circle_interval")];
+            circle_inputs[1].value = e['circle_interval'];
+            circle_inputs[1].dispatchEvent(new Event("input"))
+          }
+          if('dt_selected_channel' in e){
+            document.getElementById("dropdown-channel").value = e['dt_selected_channel'];
+            document.getElementById("dropdown-channel").dispatchEvent(new Event("change"));
+          }
 
-          const screenshot_inputs=[...document.getElementsByClassName("screenshot_size")];
-          screenshot_inputs[1].value = e['screenshot_size'];
-          screenshot_inputs[1].dispatchEvent(new Event("input"))
         },
         error: function (jqXHR, textStatus, errorThrown) {
           console.log("Error in get-settings", jqXHR, textStatus, errorThrown);
@@ -443,7 +458,9 @@
         dataType: 'json',
         data: JSON.stringify({
           background: document.getElementById("dropdown-bgcolor-menu").value,
-          screenshot_size: document.getElementsByClassName("screenshot_size")[0].value
+          screenshot_size: document.getElementsByClassName("screenshot_size")[0].value,
+          circle_interval: document.getElementsByClassName("circle_interval")[0].value,
+          dt_selected_channel: document.getElementById("dropdown-channel").value,
         }),
         url: "/post-settings/",
         contentType: 'application/json;charset=UTF-8',
