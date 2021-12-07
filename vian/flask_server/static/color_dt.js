@@ -37,6 +37,14 @@ class ColorDT {
 
         this.lineRenderer = this.plot.line({x: { field: "x" }, y: { field: "y" }, line_alpha:0.7, line_width:2, source: this.source});
 
+        this.border_renderer = this.plot.rect({
+            x: { field: "x" },
+            y: { field: "y" },
+            fill_color: "transparent",
+            line_width: 2,
+            source:this.source,
+        });
+
         this.glyph_renderer = this.plot.image_url({
             url: { field: "url" },
             x: { field: "x" },
@@ -56,6 +64,11 @@ class ColorDT {
         this.glyph_renderer.glyph.h.units = "screen";
         this.glyph_renderer.glyph.w.units = "screen";
 
+        this.border_renderer.glyph.height = s * this.aspect;
+        this.border_renderer.glyph.width = s;
+        this.border_renderer.glyph.height.units = "screen";
+        this.border_renderer.glyph.width.units = "screen";
+
         this.source.change.emit();
     }
 
@@ -65,6 +78,8 @@ class ColorDT {
 
         this.plot.background_fill_color = background;
         this.plot.border_fill_color = background;
+
+        this.border_renderer.glyph.line_color = foreground;
 
         this.plot.center[0].grid_line_color = foreground;
         this.plot.center[1].grid_line_color = foreground;
@@ -186,6 +201,14 @@ class ColorDT {
         this.plot.left[0].axis_label = label;
         this.source.data.y = values;
         this.source.change.emit()
+    }
+
+    showScreenshotBorders(show){
+        if(show){
+            this.border_renderer.glyph.line_alpha=1.0;
+        }else{
+            this.border_renderer.glyph.line_alpha=0.0;
+        }
     }
 
     onResize() {

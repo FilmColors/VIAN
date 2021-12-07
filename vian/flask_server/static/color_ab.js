@@ -69,7 +69,7 @@ class ColorAB {
 
 
         this.border_renderer = this.plot.rect({
-            x: { field: "radius" },
+            x: { field: "x" },
             y: { field: "y" },
             fill_color: "transparent",
             line_width: 2,
@@ -83,7 +83,6 @@ class ColorAB {
             anchor: "center",
             source: this.source,
         });
-
 
         var doc = new Bokeh.Document();
         doc.add_root(this.plot);
@@ -150,6 +149,14 @@ class ColorAB {
             this.source_grid.data.radius.push(i);
         }
         this.source_grid.change.emit();
+    }
+
+    showScreenshotBorders(show){
+        if(show){
+            this.border_renderer.glyph.line_alpha=1.0;
+        }else{
+            this.border_renderer.glyph.line_alpha=0.0;
+        }
     }
 
     poll(pollTime) {

@@ -137,6 +137,10 @@
                 <option value="gray" selected="selected">Dark Gray</option>
               </select>
             </div>
+            <div id="screenshot-borders" style="margin-bottom: 40px;display: flex;flex-direction: row;justify-content: space-between;">
+              <label>Screenshot Borders</label>
+              <input id="checkbox-screenshot-borders" type="checkbox" checked="off"></input>
+            </div>
           </div>
         </div>
   </div>
@@ -222,16 +226,19 @@
           document.getElementById("circleDiv").style.display = "flex";
           document.getElementById("screenshotsDiv").style.display = "flex";
           document.getElementById("channelSelection").style.display = "none";
+          document.getElementById("screenshot-borders").style.display = "flex";
         }
         else if(this.id == "nav-color-dt-tab"){
           document.getElementById("circleDiv").style.display = "none";
           document.getElementById("screenshotsDiv").style.display = "flex";
           document.getElementById("channelSelection").style.display = "flex";
+          document.getElementById("screenshot-borders").style.display = "flex";
         }
         else if(this.id == "nav-3d-palette-tab") {
           document.getElementById("channelSelection").style.display = "none";
           document.getElementById("circleDiv").style.display = "none";
           document.getElementById("screenshotsDiv").style.display = "none";
+          document.getElementById("screenshot-borders").style.display = "none";
         }
         checkForAlerts(current_data);
       });
@@ -345,6 +352,14 @@
       }, false);
       e3.dispatchEvent(new Event("change"));
 
+      var e4 = document.getElementById("checkbox-screenshot-borders");
+      e4.addEventListener("change", function (){
+        color_dt_plot.showScreenshotBorders(this.checked);
+        color_ab_plot.showScreenshotBorders(this.checked);
+        sendSettings();
+      }, false);
+      e4.dispatchEvent(new Event("change"));
+
       updateScreenshotVis(1000);
       getAndApplySettings();
     });
@@ -437,6 +452,10 @@
             document.getElementById("dropdown-channel").value = e['dt_selected_channel'];
             document.getElementById("dropdown-channel").dispatchEvent(new Event("change"));
           }
+          if('screenshot_borders' in e){
+            document.getElementById("checkbox-screenshot-borders").checked = e['screenshot_borders'];
+            document.getElementById("checkbox-screenshot-borders").dispatchEvent(new Event("change"));
+          }
 
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -461,6 +480,7 @@
           screenshot_size: document.getElementsByClassName("screenshot_size")[0].value,
           circle_interval: document.getElementsByClassName("circle_interval")[0].value,
           dt_selected_channel: document.getElementById("dropdown-channel").value,
+          screenshot_borders: document.getElementById("checkbox-screenshot-borders").checked,
         }),
         url: "/post-settings/",
         contentType: 'application/json;charset=UTF-8',
