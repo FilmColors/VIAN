@@ -383,12 +383,14 @@
       var e5 = document.getElementById("checkbox-connecting-line");
       e5.addEventListener("change", function (){
         color_dt_plot.showConnectingLine(this.checked);
+        sendSettings();
       }, false);
       e5.dispatchEvent(new Event("change"));
 
       var e6 = document.getElementById("dropdown-xAxis");
       e6.addEventListener("change", function (){
         color_dt_plot.xAxisOptionChanged(e6.value);
+        sendSettings();
       }, false);
       e6.dispatchEvent(new Event("change"));
 
@@ -491,8 +493,8 @@
             document.getElementById("checkbox-connecting-line").checked = e['connecting_line'];
             document.getElementById("checkbox-connecting-line").dispatchEvent(new Event("change"));
           }
-          if('xAxis_option' in e){
-            document.getElementById("dropdown-xAxis").checked = e['xAxis_option'];
+          if('xaxis_option' in e){
+            document.getElementById("dropdown-xAxis").value = e['xaxis_option'];
             document.getElementById("dropdown-xAxis").dispatchEvent(new Event("change"));
           }
         },
@@ -519,7 +521,7 @@
           dt_selected_channel: document.getElementById("dropdown-channel").value,
           screenshot_borders: document.getElementById("checkbox-screenshot-borders").checked,
           connecting_line: document.getElementById("checkbox-connecting-line").checked,
-          xAxis_option: document.getElementById("dropdown-xAxis").value,
+          xaxis_option: document.getElementById("dropdown-xAxis").value,
         }),
         dataType: 'html',
         contentType: 'application/json;charset=UTF-8',

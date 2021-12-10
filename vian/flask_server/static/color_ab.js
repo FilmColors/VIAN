@@ -10,7 +10,7 @@ class ColorAB {
         });
 
         this.source_grid = new Bokeh.ColumnDataSource({
-            data: { x: [], y: [], radius: [] }
+            data: { x: [], y: [], radius: [], radius_label: [] }
         });
 
         var that = this;
@@ -56,7 +56,7 @@ class ColorAB {
         this.labels = new Bokeh.LabelSet({
             x: { field: "radius" },
             y: { field: "y" },
-            text:{ field: "radius" },
+            text:{ field: "radius_label" },
             x_offset:0,
             y_offset:-6,
             text_align: "center",
@@ -147,6 +147,7 @@ class ColorAB {
             this.source_grid.data.x.push(0);
             this.source_grid.data.y.push(0);
             this.source_grid.data.radius.push(i);
+            this.source_grid.data.radius_label.push(i.toString());
         }
         this.source_grid.change.emit();
     }

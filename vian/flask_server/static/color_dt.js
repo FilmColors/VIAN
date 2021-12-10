@@ -24,8 +24,21 @@ class ColorDT {
             x_axis_type: "datetime",
         });
 
-        this.plot.center[0].grid_line_alpha = 0.3
-        this.plot.center[1].grid_line_alpha = 0.3
+        let args = {
+            seconds:['%Ss'], minsec:["%M:%S"], hours:["%Hh"], hourmin:["%H:%M:%S"], months:["%H:%M:%S"], days:['%Ss'], years:["%H:%M:%S"]
+        }
+        let f = new Bokeh.DatetimeTickFormatter(args)
+        this.plot.below[0].formatter = f;
+        this.plot.below[0].axis_label = "Time";
+
+        this.plot.add_layout(new Bokeh.LinearAxis(), "below");
+        this.plot.below[1].axis_label = "Start of Segment [ID]";
+
+        this.plot.add_layout(new Bokeh.Grid(), "center");
+        
+        this.plot.center[0].grid_line_alpha = 0.3;
+        this.plot.center[1].grid_line_alpha = 0.3;
+        this.plot.center[2].grid_line_alpha = 0.3;
 
         this.aspect = 9.0 / 16
 
@@ -75,8 +88,9 @@ class ColorDT {
 
         this.border_renderer.glyph.line_color = foreground;
 
-        this.plot.center[0].grid_line_color = foreground;
+        this.plot.center[0].grid_line_color = foreground; //parallel to y-axis
         this.plot.center[1].grid_line_color = foreground;
+        this.plot.center[2].grid_line_color = foreground;
 
         this.lineRenderer.glyph.line_color = foreground;
 
@@ -85,6 +99,11 @@ class ColorDT {
         this.plot.xaxis[0].minor_tick_line_color = foreground;
         this.plot.xaxis[0].axis_label_text_color = foreground;
         this.plot.xaxis[0].major_label_text_color = foreground;
+        this.plot.xaxis[1].axis_line_color = foreground;
+        this.plot.xaxis[1].major_tick_line_color = foreground;
+        this.plot.xaxis[1].minor_tick_line_color = foreground;
+        this.plot.xaxis[1].axis_label_text_color = foreground;
+        this.plot.xaxis[1].major_label_text_color = foreground;
         this.plot.yaxis[0].axis_line_color = foreground;
         this.plot.yaxis[0].major_tick_line_color = foreground;
         this.plot.yaxis[0].minor_tick_line_color = foreground;
@@ -133,13 +152,13 @@ class ColorDT {
     }
 
     setData(times, luminance, saturation, chroma, hue, a, b, urls, uuids, segment_starts, segment_ids){
-        console.log(uuids);
+        //console.log(uuids);
 
         let time = []
         for (var i = 0; i < times.length; i++){
             time.push(new Date(times[i]))
         }
-        console.log(this.source)
+        //console.log(this.source)
 
         this.source.data.x = time;
         this.source.data.y = luminance;
@@ -158,6 +177,18 @@ class ColorDT {
         this.segment_starts = segment_starts;
         this.segment_ids = segment_ids;
         this.source.change.emit();
+
+
+        this.plot.xaxis[1].ticker = new Bokeh.FixedTicker({ticks:this.segment_starts});
+
+        let res_dict = {};
+        for (var i = 0; i < this.segment_ids.length; i++){
+            res_dict[this.segment_starts[i]] = this.segment_ids[i].toString();
+        }
+        //console.log(res_dict, this.segment_starts, segment_ids);
+        this.plot.xaxis[1].major_label_overrides = res_dict;
+
+        this.plot.center[2].ticker = new Bokeh.FixedTicker({ticks:this.segment_starts});
     }
 
     parameterChanged(value){
@@ -196,7 +227,7 @@ class ColorDT {
 
         this.plot.left[0].axis_label = label;
         this.source.data.y = values;
-        this.source.change.emit()
+        this.source.change.emit();
     }
 
     xAxisOptionChanged(value){
@@ -205,45 +236,26 @@ class ColorDT {
             case "time":
                 label = "Time";
 
-                /*
-                let args = {
-                    seconds:['%Ss'], minsec:["%M:%S"], hours:["%Hh"], hourmin:["%H:%M:%S"], months:["%H:%M:%S"], days:['%Ss'], years:["%H:%M:%S"]
-                }
+                this.plot.below[0].visible = true;
+                this.plot.below[1].visible = false;
 
-                let f = new Bokeh.DatetimeTickFormatter(args)
-                this.plot.below[0].formatter = f;
-                this.plot.center[0].grid_line_alpha = 0.3;
-
-                 */
+                this.plot.center[0].visible = true;
+                this.plot.center[2].visible = false;
 
                 break;
             case "segments":
                 label = "Start of Segment [ID]";
 
-                console.log("this.plot.renderers, this.plot.renderers", this.plot.renderers)
-/*
-                var xaxis = new Bokeh.LinearAxis({ axis_line_color: null });
-                this.plot.add_layout(xaxis, "below");
+                this.plot.below[0].visible = false;
+                this.plot.below[1].visible = true;
 
-                this.plot.xaxis[0].ticker = new Bokeh.FixedTicker({ticks:this.segment_starts});
-
-                let res_dict = {};
-                for (var i = 0; i < this.segment_ids.length; i++){
-                    res_dict[this.segment_starts[i]] = this.segment_ids[i];
-                }
-                this.plot.xaxis[0].major_label_overrides = res_dict;
-                const xgrid = new Bokeh.Grid({ ticker: new Bokeh.FixedTicker({ticks:this.segment_starts}), dimension: 0, name:"gridrenderer.." });
-                this.plot.center[0].grid_line_alpha = 0.0;
-                this.plot.add_layout(xgrid);
-                */
-
-
+                this.plot.center[0].visible = false;
+                this.plot.center[2].visible = true;
                 break;
             default:
                 throw "Option not available";
                 break;
         }
-        this.plot.below[0].axis_label = label;
     }
 
     showScreenshotBorders(show){
