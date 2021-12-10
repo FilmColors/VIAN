@@ -152,7 +152,7 @@ class ColorDT {
 
         this.source.data.sat = saturation;
         this.source.data.lum = luminance;
-        this.source.data.chroma =chroma;
+        this.source.data.chroma = chroma;
         this.source.data.hue = hue;
 
         this.source.data.a = a;
@@ -187,7 +187,7 @@ class ColorDT {
                 break;
             case "b-channel":
                 values = this.source.data.b;
-                label = "C-Channel";
+                label = "B-Channel";
                 break;
             case "luminance":
                 values = this.source.data.lum;

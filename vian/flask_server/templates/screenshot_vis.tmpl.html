@@ -489,8 +489,7 @@
       }
       console.log("sendSettings entered")
       $.ajax({
-        type: 'POST',
-        dataType: 'json',
+        url: "/post-settings/",
         data: JSON.stringify({
           background: document.getElementById("dropdown-bgcolor-menu").value,
           screenshot_size: document.getElementsByClassName("screenshot_size")[0].value,
@@ -499,8 +498,9 @@
           screenshot_borders: document.getElementById("checkbox-screenshot-borders").checked,
           connecting_line: document.getElementById("checkbox-connecting-line").checked,
         }),
-        url: "/post-settings/",
+        dataType: 'html',
         contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
         success: function (e) {
             console.log("Settings set")
         },
