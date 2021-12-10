@@ -205,6 +205,7 @@ class ColorDT {
             case "time":
                 label = "Time";
 
+                /*
                 let args = {
                     seconds:['%Ss'], minsec:["%M:%S"], hours:["%Hh"], hourmin:["%H:%M:%S"], months:["%H:%M:%S"], days:['%Ss'], years:["%H:%M:%S"]
                 }
@@ -213,9 +214,16 @@ class ColorDT {
                 this.plot.below[0].formatter = f;
                 this.plot.center[0].grid_line_alpha = 0.3;
 
+                 */
+
                 break;
             case "segments":
                 label = "Start of Segment [ID]";
+
+                console.log("this.plot.renderers, this.plot.renderers", this.plot.renderers)
+/*
+                var xaxis = new Bokeh.LinearAxis({ axis_line_color: null });
+                this.plot.add_layout(xaxis, "below");
 
                 this.plot.xaxis[0].ticker = new Bokeh.FixedTicker({ticks:this.segment_starts});
 
@@ -227,6 +235,8 @@ class ColorDT {
                 const xgrid = new Bokeh.Grid({ ticker: new Bokeh.FixedTicker({ticks:this.segment_starts}), dimension: 0, name:"gridrenderer.." });
                 this.plot.center[0].grid_line_alpha = 0.0;
                 this.plot.add_layout(xgrid);
+                */
+
 
                 break;
             default:
