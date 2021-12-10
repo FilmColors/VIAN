@@ -53,6 +53,7 @@ class ColorAB {
             source: this.source_grid,
         })
 
+        this.grid_renderer.level = "image";
         this.labels = new Bokeh.LabelSet({
             x: { field: "radius" },
             y: { field: "y" },
@@ -65,7 +66,8 @@ class ColorAB {
             render_mode:'canvas',
             background_fill_alpha: 1.0,
         });
-        this.plot.add_layout(this.labels);
+        this.plot.add_layout(this.labels, "center");
+        this.plot.center[2].level = "underlay";
 
 
         this.border_renderer = this.plot.rect({
