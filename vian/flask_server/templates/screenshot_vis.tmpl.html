@@ -119,8 +119,15 @@
               <div style="margin-bottom:10px; display: flex;flex-direction: row;justify-content: space-between"><label style="margin: 0px">Circle Interval</label><input style="max-width: 100px" type="number" class="circle_interval" min="5" max="20"></div>
               <input style="width: 100%" type="range" class="form-range circle_interval" id="circleInterval" min="5" max="20" value="10">
             </div>
+            <div id="xAxisSelection" style="margin-bottom: 40px;display: none;flex-direction: row;justify-content: space-between;">
+              <label>X-Axis Labeling</label>
+              <select id="dropdown-xAxis">
+                <option value="time" selected="selected">Time</option>
+                <option value="segments">Segments</option>
+              </select>
+            </div>
             <div id="channelSelection" style="margin-bottom: 40px;display: none;flex-direction: row;justify-content: space-between;">
-              <label>Channel</label>
+              <label>Y-Axis</label>
               <select id="dropdown-channel">
                 <option value="saturation" selected="selected">Saturation</option>
                 <option value="chroma" >Chroma</option>
@@ -203,7 +210,10 @@
                 data.a,
                 data.b,
                 data.urls,
-                data.uuids);
+                data.uuids,
+                data.segment_starts,
+                data.segment_ids
+        );
 
 
         colorspace_plot.clear();
@@ -232,6 +242,7 @@
           document.getElementById("channelSelection").style.display = "none";
           document.getElementById("screenshot-borders").style.display = "flex";
           document.getElementById("connecting-line").style.display = "none";
+          document.getElementById("xAxisSelection").style.display = "none";
         }
         else if(this.id == "nav-color-dt-tab"){
           document.getElementById("circleDiv").style.display = "none";
@@ -239,6 +250,7 @@
           document.getElementById("channelSelection").style.display = "flex";
           document.getElementById("screenshot-borders").style.display = "flex";
           document.getElementById("connecting-line").style.display = "flex";
+          document.getElementById("xAxisSelection").style.display = "flex";
         }
         else if(this.id == "nav-3d-palette-tab") {
           document.getElementById("channelSelection").style.display = "none";
@@ -246,6 +258,7 @@
           document.getElementById("screenshotsDiv").style.display = "none";
           document.getElementById("screenshot-borders").style.display = "none";
           document.getElementById("connecting-line").style.display = "none";
+          document.getElementById("xAxisSelection").style.display = "none";
         }
         checkForAlerts(current_data);
       });
@@ -373,6 +386,12 @@
       }, false);
       e5.dispatchEvent(new Event("change"));
 
+      var e6 = document.getElementById("dropdown-xAxis");
+      e6.addEventListener("change", function (){
+        color_dt_plot.xAxisOptionChanged(e6.value);
+      }, false);
+      e6.dispatchEvent(new Event("change"));
+
       updateScreenshotVis(1000);
       getAndApplySettings();
     });
@@ -417,7 +436,7 @@
     }
 
     function updateScreenshotVis(pollTime) {
-      console.log("Pulling Screenshots ")
+      //console.log("Pulling Screenshots ")
       $.ajax({
         type: 'GET',
         dataType: 'json',
@@ -426,7 +445,6 @@
           if (e.update) {
             $(document).trigger("screenshotPollUpdate", [e.data]);
           }
-          console.log(e);
           screenshot_revision = e.revision;
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -473,6 +491,10 @@
             document.getElementById("checkbox-connecting-line").checked = e['connecting_line'];
             document.getElementById("checkbox-connecting-line").dispatchEvent(new Event("change"));
           }
+          if('xAxis_option' in e){
+            document.getElementById("dropdown-xAxis").checked = e['xAxis_option'];
+            document.getElementById("dropdown-xAxis").dispatchEvent(new Event("change"));
+          }
         },
         error: function (jqXHR, textStatus, errorThrown) {
           console.log("Error in get-settings", jqXHR, textStatus, errorThrown);
@@ -497,6 +519,7 @@
           dt_selected_channel: document.getElementById("dropdown-channel").value,
           screenshot_borders: document.getElementById("checkbox-screenshot-borders").checked,
           connecting_line: document.getElementById("checkbox-connecting-line").checked,
+          xAxis_option: document.getElementById("dropdown-xAxis").value,
         }),
         dataType: 'html',
         contentType: 'application/json;charset=UTF-8',

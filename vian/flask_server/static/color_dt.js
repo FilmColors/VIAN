@@ -16,6 +16,8 @@ class ColorDT {
             uuids: []
         }});
 
+        this.segment_starts = [];
+
         this.plot = Bokeh.Plotting.figure({
             tools: "pan,wheel_zoom,box_zoom,reset,save",
             aspect_ratio: 2,
@@ -26,14 +28,6 @@ class ColorDT {
         this.plot.center[1].grid_line_alpha = 0.3
 
         this.aspect = 9.0 / 16
-        
-        this.plot.below[0].axis_label = "Time"
-
-        let args = {
-            seconds:['%Ss'], minsec:["%M:%S"], hours:["%Hh"], hourmin:["%H:%M:%S"], months:["%H:%M:%S"], days:['%Ss'], years:["%H:%M:%S"]
-        }
-        let f = new Bokeh.DatetimeTickFormatter(args)
-        this.plot.below[0].formatter = f;
 
         this.lineRenderer = this.plot.line({x: { field: "x" }, y: { field: "y" }, line_alpha:0.7, line_width:2, source: this.source});
 
@@ -138,7 +132,7 @@ class ColorDT {
         });
     }
 
-    setData(times, luminance, saturation, chroma, hue, a, b, urls, uuids){
+    setData(times, luminance, saturation, chroma, hue, a, b, urls, uuids, segment_starts, segment_ids){
         console.log(uuids);
 
         let time = []
@@ -160,7 +154,9 @@ class ColorDT {
 
         this.source.data.uuids = uuids;
 
-        this.source.data.url = urls
+        this.source.data.url = urls;
+        this.segment_starts = segment_starts;
+        this.segment_ids = segment_ids;
         this.source.change.emit();
     }
 
@@ -201,6 +197,43 @@ class ColorDT {
         this.plot.left[0].axis_label = label;
         this.source.data.y = values;
         this.source.change.emit()
+    }
+
+    xAxisOptionChanged(value){
+        var label = "";
+        switch (value){
+            case "time":
+                label = "Time";
+
+                let args = {
+                    seconds:['%Ss'], minsec:["%M:%S"], hours:["%Hh"], hourmin:["%H:%M:%S"], months:["%H:%M:%S"], days:['%Ss'], years:["%H:%M:%S"]
+                }
+
+                let f = new Bokeh.DatetimeTickFormatter(args)
+                this.plot.below[0].formatter = f;
+                this.plot.center[0].grid_line_alpha = 0.3;
+
+                break;
+            case "segments":
+                label = "Start of Segment [ID]";
+
+                this.plot.xaxis[0].ticker = new Bokeh.FixedTicker({ticks:this.segment_starts});
+
+                let res_dict = {};
+                for (var i = 0; i < this.segment_ids.length; i++){
+                    res_dict[this.segment_starts[i]] = this.segment_ids[i];
+                }
+                this.plot.xaxis[0].major_label_overrides = res_dict;
+                const xgrid = new Bokeh.Grid({ ticker: new Bokeh.FixedTicker({ticks:this.segment_starts}), dimension: 0, name:"gridrenderer.." });
+                this.plot.center[0].grid_line_alpha = 0.0;
+                this.plot.add_layout(xgrid);
+
+                break;
+            default:
+                throw "Option not available";
+                break;
+        }
+        this.plot.below[0].axis_label = label;
     }
 
     showScreenshotBorders(show){
