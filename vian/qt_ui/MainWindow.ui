@@ -100,9 +100,6 @@
      <property name="title">
       <string>Recently Opened</string>
      </property>
-     <addaction name="actionClearRecent"/>
-     <addaction name="actionCleanUpRecent"/>
-     <addaction name="separator"/>
     </widget>
     <addaction name="actionNew"/>
     <addaction name="actionLoad"/>
@@ -619,11 +616,6 @@
     <string>VIAN Vocabulary</string>
    </property>
   </action>
-  <action name="actionClearRecent">
-   <property name="text">
-    <string>Clear List</string>
-   </property>
-  </action>
   <action name="actionZip_Project">
    <property name="text">
     <string>Zip Project</string>
@@ -872,11 +864,6 @@
   <action name="actionAuto_Screenshots">
    <property name="text">
     <string>Auto Screenshots</string>
-   </property>
-  </action>
-  <action name="actionCleanUpRecent">
-   <property name="text">
-    <string>Clean Up</string>
    </property>
   </action>
   <action name="actionColorFeatures">

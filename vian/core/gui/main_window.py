@@ -338,7 +338,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionSave.triggered.connect(self.on_save_project)
         self.actionSaveAs.triggered.connect(self.on_save_project_as)
         self.actionBackup.triggered.connect(self.on_backup)
-        self.actionCleanUpRecent.triggered.connect(self.cleanup_recent)
         self.actionCompare_Project_with.triggered.connect(self.on_compare)
 
         self.actionNew_Corpus.triggered.connect(self.corpus_widget.on_new_corpus)
@@ -488,7 +487,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionFrame_Backward.triggered.connect(partial(self.player.frame_step, True))
         self.actionSetMovie.triggered.connect(self.on_set_movie_path)
         self.actionReload_Movie.triggered.connect(self.on_reload_movie)
-        self.actionClearRecent.triggered.connect(self.clear_recent)
         self.actionSet_Letterbox.triggered.connect(self.on_set_letterbox)
 
         self.audio_handler.audioExtractingStarted.connect(partial(self.set_audio_extracting, True))
@@ -1192,19 +1190,26 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update_recent_menu(self):
         for r in self.menuRecently_Opened.actions():
-            if r.text() not in ["Clean Up", "Clear List"]:
-                self.menuRecently_Opened.removeAction(r)
-
-        self.menuRecently_Opened.addSeparator()
+            self.menuRecently_Opened.removeAction(r)
         try:
             for i, recent in enumerate(self.settings.recent_files_name):
                 if recent is None:
                     continue
                 action = self.menuRecently_Opened.addAction(recent)
                 action.triggered.connect(partial(self.open_recent, i))
+                if i == 0:
+                    action.setShortcut(QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_O))
+
         except:
             self.settings.recent_files_path = []
             self.settings.recent_files_name = []
+
+        self.menuRecently_Opened.addSeparator()
+
+        action = self.menuRecently_Opened.addAction("Clear List")
+        action.triggered.connect(self.clear_recent)
+        action = self.menuRecently_Opened.addAction("Clean Up")
+        action.triggered.connect(self.cleanup_recent)
 
     def eval_class(self, class_name):
         try:
