@@ -184,7 +184,8 @@ class ServerData:
 
         self.project.onScreenshotAdded.connect(self.on_screenshot_added)
         self.project.onAnalysisAdded.connect(partial(self.queue_update))
-        self.project.onAnalysisAdded.connect(partial(self.queue_update))
+        self.project.onSelectionChanged.connect(partial(self.queue_update))
+        self.project.onProjectChanged.connect(partial(self.queue_update))
 
         for s in self.project.screenshots:
             s.onScreenshotChanged.connect(partial(self.queue_update))
