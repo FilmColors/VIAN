@@ -143,6 +143,7 @@ class ColorAB {
         this.source_grid.data.x = [];
         this.source_grid.data.y = [];
         this.source_grid.data.radius = [];
+        this.source_grid.data.radius_label = [];
 
         //in Lab color space, the ranges for a and b values are [-110, 110]
         for (var i = parseFloat(interval); i <= 110; i = i + parseFloat(interval)) {
