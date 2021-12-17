@@ -3,6 +3,8 @@ class ColorDT {
         this.divName = divName;
         new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(divName));
 
+        this.boxannotations = [];
+
         this.source = new Bokeh.ColumnDataSource({data:{
             url : [],
             x : [],
@@ -13,10 +15,13 @@ class ColorDT {
             hue : [],
             a: [], 
             b: [], 
-            uuids: []
+            uuids: [],
         }});
 
+
         this.segment_starts = [];
+        this.segment_ends = [];
+        this.segment_ids = [];
 
         this.plot = Bokeh.Plotting.figure({
             tools: "pan,wheel_zoom,box_zoom,reset,save",
@@ -60,11 +65,17 @@ class ColorDT {
             source: this.source
             });
 
+        this.plot.x_range.property('start').change.connect((_args, x_range) => this.plotRangesChangedCallback())
+        this.plot.x_range.property('end').change.connect((_args, x_range) => this.plotRangesChangedCallback())
+        this.plot.y_range.property('start').change.connect((_args, x_range) => this.plotRangesChangedCallback())
+        this.plot.y_range.property('end').change.connect((_args, x_range) => this.plotRangesChangedCallback())
+
         var doc = new Bokeh.Document();
         doc.add_root(this.plot);
         Bokeh.embed.add_document_standalone(doc, document.getElementById(divName));
         this.source.change.emit()
     }
+
     setImageSize(s){
         this.glyph_renderer.glyph.h = s * this.aspect;
         this.glyph_renderer.glyph.w = s;
@@ -75,8 +86,6 @@ class ColorDT {
         this.border_renderer.glyph.width = s;
         this.border_renderer.glyph.height.units = "screen";
         this.border_renderer.glyph.width.units = "screen";
-
-        this.source.change.emit();
     }
 
     setBackgroundColor(back, front) {
@@ -138,7 +147,10 @@ class ColorDT {
                     that.source.data.a = e.data.a;
                     that.source.data.b = e.data.b;
 
-                    that.source.data.url = e.data.urls
+                    that.source.data.url = e.data.urls;
+
+                    that.segment_starts = e.data.segment_starts;
+                    that.segment_ends = e.data.segment_ends;
                 }
             },
             error: function (error, timeout) {
@@ -151,17 +163,41 @@ class ColorDT {
         });
     }
 
-    setData(times, luminance, saturation, chroma, hue, a, b, urls, uuids, segment_starts, segment_ids){
-        //console.log(uuids);
-
-        let time = []
-        for (var i = 0; i < times.length; i++){
-            time.push(new Date(times[i]))
+    plotRangesChangedCallback(){
+        //remove all boxes
+        for (var i =0; i < this.boxannotations.length; i++){
+            var index = this.plot.center.indexOf(this.boxannotations[i]);
+            if (index !== -1) {
+              this.plot.center.splice(index, 1);
+            }
         }
-        //console.log(this.source)
 
-        this.source.data.x = time;
-        this.source.data.y = luminance;
+        if(isNaN(this.plot.y_range.start) || isNaN(this.plot.y_range.end)){
+            console.log("jumped out of plotRangesChangedCallback function due to NaN");
+            return;
+        }
+
+        //box annotation
+        var c1 = '#555555';
+        var c2 = '#888888';
+        for(var i = 0; i < this.segment_starts.length; i++){
+            var c = i%2==0 ? c1: c2;
+            let ba = new Bokeh.BoxAnnotation({
+                left:this.segment_starts[i],
+                right:this.segment_ends[i],
+                top:this.plot.y_range.start + (this.plot.y_range.end-this.plot.y_range.start)/20,
+                bottom:this.plot.y_range.start,
+                fill_color:c, fill_alpha:0.6});
+            this.boxannotations.push(ba);
+            this.plot.add_layout(ba);
+        }
+
+
+        this.source.change.emit();
+    }
+
+    setData(times, luminance, saturation, chroma, hue, a, b, urls, uuids, segment_starts, segment_ends, segment_ids){
+        this.source.data.x = times;
 
         this.source.data.sat = saturation;
         this.source.data.lum = luminance;
@@ -175,6 +211,7 @@ class ColorDT {
 
         this.source.data.url = urls;
         this.segment_starts = segment_starts;
+        this.segment_ends = segment_ends;
         this.segment_ids = segment_ids;
         this.source.change.emit();
 
@@ -185,7 +222,6 @@ class ColorDT {
         for (var i = 0; i < this.segment_ids.length; i++){
             res_dict[this.segment_starts[i]] = this.segment_ids[i].toString();
         }
-        //console.log(res_dict, this.segment_starts, segment_ids);
         this.plot.xaxis[1].major_label_overrides = res_dict;
 
         this.plot.center[2].ticker = new Bokeh.FixedTicker({ticks:this.segment_starts});

@@ -64,6 +64,7 @@ class ScreenshotData:
         self.selected_but_not_analyzed_uuids_ColorFeatureAnalysis = []
         self.selected_but_not_analyzed_uuids_ColorPaletteAnalysis = []
         self.segment_starts = []
+        self.segment_ends = []
 
 
 class ServerData:
@@ -106,6 +107,7 @@ class ServerData:
         uuids = []
 
         segment_starts = []
+        segment_ends = []
         segment_ids = []
 
         selected_but_not_analyzed_uuids_ColorFeatureAnalysis = []
@@ -151,6 +153,7 @@ class ServerData:
 
         for s in self.project.get_main_segmentation().segments:
             segment_starts.append(int(s.get_start()))
+            segment_ends.append(int(s.get_end()))
             segment_ids.append(s.ID)
 
         data = ScreenshotData()
@@ -169,6 +172,7 @@ class ServerData:
         data.selected_but_not_analyzed_uuids_ColorPaletteAnalysis = selected_but_not_analyzed_uuids_ColorPaletteAnalysis
 
         data.segment_starts = segment_starts
+        data.segment_ends = segment_ends
         data.segment_ids = segment_ids
 
         self._screenshot_cache['has_changed'] = True
