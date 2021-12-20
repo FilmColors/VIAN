@@ -151,10 +151,11 @@ class ServerData:
             else:
                 selected_but_not_analyzed_uuids_ColorPaletteAnalysis.append(s.unique_id)
 
-        for s in self.project.get_main_segmentation().segments:
-            segment_starts.append(int(s.get_start()))
-            segment_ends.append(int(s.get_end()))
-            segment_ids.append(s.ID)
+        if self.project.get_main_segmentation() is not None:
+            for s in self.project.get_main_segmentation().segments:
+                segment_starts.append(int(s.get_start()))
+                segment_ends.append(int(s.get_end()))
+                segment_ids.append(s.ID)
 
         data = ScreenshotData()
         data.a = np.nan_to_num(a).tolist()
