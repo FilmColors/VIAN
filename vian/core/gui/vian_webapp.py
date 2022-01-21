@@ -77,7 +77,7 @@ class CorpusProgressWidget(QWidget):
         self.list_widget.setLayout(QVBoxLayout())
         self.layout().addWidget(self.list_widget)
         self.spacer = QWidget()
-        self.spacer.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding))
+        self.spacer.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding))
 
         self.layout().addWidget(self.spacer)
         self.layout().addWidget(self.btn_runAll)

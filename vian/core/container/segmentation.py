@@ -5,7 +5,7 @@ from vian.core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectT
 from vian.core.container.container_interfaces import BaseProjectEntity, IHasName, ISelectable, ITimelineItem, ILockable, \
     AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject, deprecation_serialization
 from vian.core.data.log import log_error
-from PyQt5.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal
 from .annotation_body import AnnotationBody, Annotatable
 
 

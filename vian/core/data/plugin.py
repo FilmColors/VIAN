@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDockWidget, QMainWindow
+from PyQt6.QtWidgets import QDockWidget, QMainWindow
 import json
 GAPLUGIN_WNDTYPE_MAINWINDOW = 0
 GAPLUGIN_WNDTYPE_DOCKWIDGET = 1

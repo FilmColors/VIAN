@@ -1,9 +1,9 @@
 import os
 from functools import partial
-from PyQt5 import QtCore, uic, QtGui
-from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit
-from PyQt5.QtGui import QIcon
+from PyQt6 import QtCore, uic, QtGui
+from PyQt6.QtCore import Qt, pyqtSlot
+from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit
+from PyQt6.QtGui import QIcon
 
 from vian.core.data.computation import ms_to_string
 from vian.core.data.interfaces import IProjectChangeNotify
@@ -26,7 +26,7 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.dockWidgetContents.layout().addWidget(self.tree)
         self.performed_selection = False
         self.project_item = None
-        self.tree.setSelectionMode(self.tree.ExtendedSelection)
+        self.tree.setSelectionMode(self.tree.SelectionMode.ExtendedSelection)
         self.corpus = None #type: Corpus|None
 
         # self.corpus_client.onConnectionEstablished.connect(self.recreate_tree)
@@ -317,13 +317,13 @@ class Outliner(EDockWidget, IProjectChangeNotify):
         self.recreate_tree()
 
     # def keyPressEvent(self, QKeyEvent):
-    #     if QKeyEvent.key() == Qt.Key_Shift:
+    #     if QKeyEvent.key() == Qt.Key.Key_Shift:
     #         self.tree.setSelectionMode(self.tree.MultiSelection)
     #     else:
     #         QKeyEvent.ignore()
     #
     # def keyReleaseEvent(self, QKeyEvent):
-    #     if QKeyEvent.key() == Qt.Key_Shift:
+    #     if QKeyEvent.key() == Qt.Key.Key_Shift:
     #         self.tree.setSelectionMode(self.tree.SingleSelection)
     #     else:
     #         QKeyEvent.ignore()

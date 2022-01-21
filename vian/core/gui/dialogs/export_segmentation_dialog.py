@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QFileDialog, QCheckBox
-from PyQt5 import uic
+from PyQt6.QtWidgets import QFileDialog, QCheckBox
+from PyQt6 import uic
 from vian.core.gui.ewidgetbase import EDialogWidget
 from vian.core.data.exporters import SegmentationExporter
 import os

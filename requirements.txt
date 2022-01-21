@@ -4,7 +4,7 @@ numpy
 sqlalchemy
 opencv-contrib-python-headless== 4.5.3.56
 requests
-PyQt5
+PyQt6
 PyQtWebEngine
 scikit-learn
 flask

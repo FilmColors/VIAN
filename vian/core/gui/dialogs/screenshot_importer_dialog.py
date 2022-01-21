@@ -1,7 +1,7 @@
 import os
 
-from PyQt5 import uic
-from PyQt5.QtWidgets import QFileDialog
+from PyQt6 import uic
+from PyQt6.QtWidgets import QFileDialog
 
 from vian.core.data.enums import ScreenshotNamingConventionOptions, ImageType, get_enum
 from vian.core.gui.ewidgetbase import EDialogWidget

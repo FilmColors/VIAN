@@ -2,10 +2,10 @@ import numpy as np
 import cv2
 import typing
 from collections import namedtuple
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QPainter, QPainterPath, QTransform
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF, QObject
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QPainter, QPainterPath, QTransform
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF, QObject
 
 from vian.core.data.computation import *
 from vian.core.visualization.basic_vis import IVIANVisualization
@@ -25,7 +25,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         IVIANVisualization.__init__(self, naming_fields)
         self.naming_fields['plot_name'] = "image_plot"
 
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setMouseTracking(True)
         self.heads_up_widget = None
         if range_x is None:
@@ -69,15 +69,15 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
 
 
         # self.tipp_label = self.scene().addText("Use F to Focus the complete Plot\nUse Ctrl/Cmd and Wheel to Zoom")
-        # self.tipp_label.setFlag(QGraphicsItem.ItemIgnoresTransformations)
+        # self.tipp_label.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations)
         # self.tipp_label.setDefaultTextColor(QColor(10,255,10))
         # self.tipp_label.setPos(self.mapToScene(QPoint(0, self.height() - 50)))
 
-        self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+        self.fitInView(self.scene().itemsBoundingRect(), Qt.AspectRatioMode.KeepAspectRatio)
         # self.fitInView(   -range_x[0] * self.magnification / 12,
         #                   -range_y[0] * self.magnification/ 12,
         #                  (range_x[1] - range_x[0]) * self.magnification/ 12,
-        #                  (range_y[1] - range_y[0]) * self.magnification/ 12, Qt.KeepAspectRatio)
+        #                  (range_y[1] - range_y[0]) * self.magnification/ 12, Qt.AspectRatioMode.KeepAspectRatio)
 
     def add_image(self, x, y, img, convert = True, luminance = None, mime_data = None, z = 0, uid = None):
         pass
@@ -123,16 +123,16 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         self.img_scale = scale
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = True
             event.ignore()
 
-        elif event.key() == Qt.Key_F:
+        elif event.key() == Qt.Key.Key_F:
             self.frame_default()
 
-        elif event.key() == Qt.Key_Plus:
+        elif event.key() == Qt.Key.Key_Plus:
             self.set_image_scale(0.1)
-        elif event.key() == Qt.Key_Minus:
+        elif event.key() == Qt.Key.Key_Minus:
             self.set_image_scale(-0.1)
 
         else:
@@ -141,7 +141,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
             event.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = False
         else:
             event.ignore()
@@ -229,7 +229,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
     def frame_default(self):
         # self.tipp_label.setPos(QPointF())
         self.setSceneRect(self.scene().itemsBoundingRect())
-        self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+        self.fitInView(self.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
         # self.tipp_label.setPos(self.mapToScene(QPoint(30, self.height() - 50)))
 
@@ -246,7 +246,7 @@ class ImagePlot(QGraphicsView, IVIANVisualization):
         r.adjust(-20, -20, 20, 20)
         self.scene().setSceneRect(r)
 
-        image = QImage(size, QImage.Format_ARGB32)
+        image = QImage(size, QImage.Format.Format_ARGB32)
         image.fill(background)
 
         painter = QPainter()
@@ -574,10 +574,10 @@ class ImagePlotCircularControls(QWidget):
         hl2 = QHBoxLayout(self)
         hl2.addWidget(QLabel("Image Scale:", self))
 
-        self.slider_xscale = QSlider(Qt.Horizontal, self)
+        self.slider_xscale = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_xscale.setRange(1, 1000)
         self.slider_xscale.setValue(100)
-        self.slider_yscale = QSlider(Qt.Horizontal, self)
+        self.slider_yscale = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_yscale.setRange(1, 1000)
         self.slider_yscale.setValue(int(plot.img_scale * 100))
         self.slider_xscale.setValue(int(plot.pos_scale * 100))
@@ -835,18 +835,18 @@ class ImagePlotPlaneControls(QWidget):
         hl3 = QHBoxLayout(self)
         hl3.addWidget(QLabel("View Angle:", self))
 
-        self.slider_image = QSlider(Qt.Horizontal, self)
+        self.slider_image = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_image.setRange(1, 1000)
         self.slider_image.setValue(int(plot.img_scale * 100))
 
         hl2.addWidget(self.slider_image)
 
-        self.slider_angle = QSlider(Qt.Horizontal, self)
+        self.slider_angle = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_angle.setRange(0, 360)
 
         hl1 = QHBoxLayout(self)
         hl1.addWidget(QLabel("Scale:", self))
-        self.slider_xscale = QSlider(Qt.Horizontal, self)
+        self.slider_xscale = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_xscale.setRange(1, 1000)
         self.slider_xscale.setValue(plot.curr_scale * 100)
         hl1.addWidget(self.slider_xscale)
@@ -889,7 +889,7 @@ class ImagePlotControls(QWidget):
         self.setLayout(QVBoxLayout(self))
 
         self.lay_hcut = QHBoxLayout(self)
-        self.sl_hcut = QSlider(Qt.Horizontal, self)
+        self.sl_hcut = QSlider(Qt.Orientation.Horizontal, self)
         self.sl_hcut.setRange(0, 100)
         self.sl_hcut.setValue(100)
         self.sl_hcut.valueChanged.connect(self.on_high_cut)
@@ -899,7 +899,7 @@ class ImagePlotControls(QWidget):
         self.lay_hcut.addWidget(self.lbl_hcut)
 
         self.lay_lcut = QHBoxLayout(self)
-        self.sl_lcut = QSlider(Qt.Horizontal, self)
+        self.sl_lcut = QSlider(Qt.Orientation.Horizontal, self)
         self.sl_lcut.setRange(0, 100)
         self.sl_hcut.setValue(0)
         self.sl_lcut.valueChanged.connect(self.on_low_cut)
@@ -928,7 +928,7 @@ class ImagePlotControls(QWidget):
         self.ctrl_color_dt.layout().addWidget(self.cb_channel)
         self.layout().addWidget(self.ctrl_color_dt)
         self.ctrl_color_dt.layout().addWidget(QLabel("Image Density"))
-        self.sl_image_density = QSlider(Qt.Horizontal, self.ctrl_color_dt)
+        self.sl_image_density = QSlider(Qt.Orientation.Horizontal, self.ctrl_color_dt)
         self.sl_image_density.setRange(1, 300)
         self.sl_image_density.setValue(30)
 
@@ -1137,8 +1137,8 @@ class ImagePlotTime(ImagePlot):
             self.scene().removeItem(l)
         self.lines = []
         self.setSceneRect(self.scene().itemsBoundingRect())
-        # self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
-        # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+        # self.fitInView(self.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+        # self.fitInView(self.scene().itemsBoundingRect(), Qt.AspectRatioMode.KeepAspectRatio)
         self.add_grid(False)
 
     def set_x_scale(self, value):
@@ -1228,9 +1228,9 @@ class ImagePlotTimeControls(QWidget):
         hl2.addWidget(QLabel("Y-Max:", self))
         hl3 = QHBoxLayout(self)
 
-        self.slider_imagescale = QSlider(Qt.Horizontal, self)
+        self.slider_imagescale = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_imagescale.setRange(1, 2000)
-        self.slider_y_max = QSlider(Qt.Horizontal, self)
+        self.slider_y_max = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_y_max.setRange(1, 256)
 
         hl1.addWidget(self.slider_imagescale)
@@ -1389,8 +1389,8 @@ class ImagePlotYear(ImagePlotTime):
             self.year_grid.append(text)
 
             self.setSceneRect(self.scene().itemsBoundingRect())
-            # self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
-            #             # self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+            # self.fitInView(self.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+            #             # self.fitInView(self.scene().itemsBoundingRect(), Qt.AspectRatioMode.KeepAspectRatio)
             #             # self.add_grid(False)
 
 
@@ -1455,10 +1455,10 @@ class ImagePlotYearControls(QWidget):
         hl2 = QHBoxLayout(self)
         hl2.addWidget(QLabel("Y-Max:", self))
 
-        self.slider_imagescale = QSlider(Qt.Horizontal, self)
+        self.slider_imagescale = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_imagescale.setRange(1, 2000)
 
-        self.slider_y_max = QSlider(Qt.Horizontal, self)
+        self.slider_y_max = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_y_max.setRange(1, 255)
 
         hl1.addWidget(self.slider_imagescale)

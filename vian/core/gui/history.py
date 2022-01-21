@@ -1,5 +1,5 @@
 from vian.core.gui.ewidgetbase import EDockWidget
-from PyQt5 import uic, QtWidgets
+from PyQt6 import uic, QtWidgets
 from vian.core.data.interfaces import IProjectChangeNotify
 import os
 

@@ -5,9 +5,9 @@ from typing import Union
 from threading import Lock
 from uuid import uuid4
 
-from PyQt5.QtCore import QObject
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QFileDialog, QApplication
+from PyQt6.QtCore import QObject
+from PyQt6.QtGui import QStandardItem, QStandardItemModel
+from PyQt6.QtWidgets import QFileDialog, QApplication
 from random import randint
 
 from vian.core import version

@@ -2,9 +2,9 @@ from functools import partial
 from typing import Dict, List
 
 from uuid import uuid4
-from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QObject
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon
+from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal, QObject
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QIcon
 
 
 from vian.core.container.experiment import Vocabulary, VocabularyWord
@@ -70,7 +70,7 @@ class VocabularyTreeView(QWidget):
 
         self.tree = CollectionTreeWidget(self)
         self.tree.itemChanged.connect(self.on_item_check_changed)
-        self.tree.setSelectionMode(self.tree.ExtendedSelection)
+        self.tree.setSelectionMode(self.tree.SelectionMode.ExtendedSelection)
         self.tree.onContextMenu.connect(self.context_menu)
         self.layout().addWidget(self.tree)
 
@@ -366,7 +366,7 @@ class WordEditor(QWidget):
         self.layout().addWidget(QLabel( "Category"), 2, 0)
         self.layout().addWidget(QLabel( "Complexity Group"), 3, 0)
         self.layout().addWidget(QLabel( "Complexity Level"), 4, 0)
-        self.layout().addItem(QSpacerItem(10, 10, QSizePolicy.Fixed, QSizePolicy.Expanding), 5, 0)
+        self.layout().addItem(QSpacerItem(10, 10, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding), 5, 0)
 
         self.lineEdit_TermEn = QLineEdit(self)
         # self.lineEdit_TermDE = QLineEdit(self)

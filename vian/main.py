@@ -28,10 +28,10 @@ import logging
 import traceback as tb
 import subprocess
 
-import PyQt5
-from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox
-from PyQt5.QtCore import Qt, QObject, QEvent
-from PyQt5.QtGui import QPixmap, QIcon
+import PyQt6
+from PyQt6.QtWidgets import QApplication, QSplashScreen, QMessageBox
+from PyQt6.QtCore import Qt, QObject, QEvent
+from PyQt6.QtGui import QPixmap, QIcon
 
 from vian.core.data.settings import CONFIG, UserSettings
 from vian.core.gui.main_window import MainWindow, version
@@ -112,7 +112,7 @@ def set_style_sheet(app, path):
 
 if __name__ == '__main__':
     attributes = None
-    PyQt5.QtCore.qInstallMessageHandler(handler)
+    PyQt6.QtCore.qInstallMessageHandler(handler)
 
     sys._excepthook = sys.excepthook
     sys.excepthook = vian_exception_hook
@@ -129,8 +129,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     print("ApplicationDone")
 
-    app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)
+    #app.setAttribute(Qt.AA_EnableHighDpiScaling) #seems not to be needed in Qt6 (https://doc.qt.io/qt-6/highdpi.html)
 
     print("Setting UI")
     print(os.getcwd())
@@ -139,18 +139,18 @@ if __name__ == '__main__':
     set_style_sheet(app, "qt_ui/themes/qt_stylesheet_very_dark.css")
 
     # Splash Screen during loading
-    screen = app.desktop().screenGeometry()
+    screen = app.primaryScreen().geometry()
     pixmap = QPixmap("qt_ui/images/loading_screen_round.png")
-    pixmap = pixmap.scaled(screen.height() / 2, screen.height() / 2, transformMode=Qt.SmoothTransformation)
+    pixmap = pixmap.scaled(screen.height() / 2, screen.height() / 2, transformMode=Qt.TransformationMode.SmoothTransformation)
     splash = QSplashScreen(pixmap)
-    splash.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.SplashScreen)
+    splash.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint|Qt.WindowType.SplashScreen)
     splash.show()
     app.processEvents()
 
     print("Starting Up")
     main = MainWindow(splash, file)
     MAIN_WINDOW = main
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 

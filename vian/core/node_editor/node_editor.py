@@ -1,7 +1,7 @@
-from PyQt5 import QtGui
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6 import QtGui
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 import os
 from functools import partial
 from vian.core.node_editor.operations import *
@@ -69,7 +69,7 @@ class NodeEditor(QWidget, IProjectChangeNotify):
 
     def __init__(self, parent, result_visualizer):
         super(NodeEditor, self).__init__(parent)
-        self.setAttribute(Qt.WA_MouseTracking, True)
+        self.setAttribute(Qt.WidgetAttribute.WA_MouseTracking, True)
         self.show_grid = True
 
         # self.project = parent.project()
@@ -484,8 +484,8 @@ class NodeEditor(QWidget, IProjectChangeNotify):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
         pen.setWidth(2)
         qp.setPen(pen)
 
@@ -862,8 +862,8 @@ class Node(QWidget, IHasName):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
         pen.setWidth(3)
         pen.setColor(QColor(120,120,120,150))
         qp.setPen(pen)
@@ -1069,8 +1069,8 @@ class NodeField(QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
         pen.setWidth(2)
         if self.is_hovered:
             pen.setColor(QColor(255,160,47))
@@ -1196,8 +1196,8 @@ class NodePin(QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
         pen.setWidth(2)
         pen.setColor(self.field.data_type.color)
         qp.setPen(pen)

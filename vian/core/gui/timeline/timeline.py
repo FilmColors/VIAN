@@ -1,8 +1,8 @@
-from PyQt5 import QtWidgets, QtGui
-from PyQt5 import uic
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt6 import QtWidgets, QtGui
+from PyQt6 import uic
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
 from vian.core.gui.ewidgetbase import EDockWidget
 import typing
 from .timeline_base import TimelineControl, TimelineBar, TimelineScrubber, TimelineTimemark
@@ -98,7 +98,7 @@ class TimelineContainer(EDockWidget):
         self.a_show_text.triggered.connect(self.update_settings)
 
         self.toolbar = TimelineToolbar(self, self.timeline)
-        self.inner.addToolBar(Qt.LeftToolBarArea, self.toolbar)
+        self.inner.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.toolbar)
 
 
         # self.inner.addToolBar(self.toolbar)
@@ -118,10 +118,10 @@ class TimelineContainer(EDockWidget):
         if self.a_tools_toolbar.isChecked():
             if self.toolbar is None:
                 self.toolbar = TimelineToolbar(self, self.timeline)
-                self.inner.addToolBar(Qt.LeftToolBarArea, self.toolbar)
+                self.inner.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.toolbar)
 
             else:
-                self.inner.addToolBar(Qt.LeftToolBarArea, self.toolbar)
+                self.inner.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.toolbar)
             self.toolbar.show()
         else:
             self.toolbar.hide()
@@ -212,7 +212,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
         self.bar_height_min = 40
         self.group_height = self.fontMetrics().height() * 5
-        self.controls_width = int(QApplication.desktop().screenGeometry().width() / 9) #200
+        self.controls_width = int(QApplication.primaryScreen().geometry().width() / 9) #200
         self.time_bar_height = 50
         self.timeline_tail = 100
         self.opencv_frame_scale_threshold = 200
@@ -888,24 +888,24 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         # self.update()
 
     def keyPressEvent(self, QKeyEvent):
-        if QKeyEvent.key() == Qt.Key_Control:
+        if QKeyEvent.key() == Qt.Key.Key_Control:
             self.scrollArea.verticalScrollBar().setEnabled(False)
             self.main_window.keyPressEvent(QKeyEvent)
-        elif QKeyEvent.key() == Qt.Key_Shift:
+        elif QKeyEvent.key() == Qt.Key.Key_Shift:
             self.shift_pressed = True
             self.sticky_move = True
-        elif QKeyEvent.key() == Qt.Key_F:
+        elif QKeyEvent.key() == Qt.Key.Key_F:
             self.fit_movie_in_range()
 
         else:
             QKeyEvent.ignore()
 
     def keyReleaseEvent(self, QKeyEvent):
-        if QKeyEvent.key() == Qt.Key_Control:
+        if QKeyEvent.key() == Qt.Key.Key_Control:
             self.is_scaling = False
             self.scrollArea.verticalScrollBar().setEnabled(True)
             self.main_window.keyReleaseEvent(QKeyEvent)
-        elif QKeyEvent.key() == Qt.Key_Shift:
+        elif QKeyEvent.key() == Qt.Key.Key_Shift:
             self.shift_pressed = False
             self.sticky_move = False
         else:
@@ -1239,8 +1239,8 @@ class TimebarDrawing(QtWidgets.QWidget):
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing, True)
         pen.setColor(QtGui.QColor(255, 255, 255))
         qp.fillRect(self.rect(),self.background_color)
 
@@ -1382,8 +1382,8 @@ class TimebarSelector(QtWidgets.QWidget):
         qp = QtGui.QPainter()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing, True)
         qp.fillRect(self.rect(), self.background_color)
 
         qp.end()

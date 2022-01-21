@@ -1,7 +1,7 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import *
+from PyQt6 import QtWidgets, QtCore, QtGui
+from PyQt6.QtCore import *
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot
 from vian.core.gui.timeline.timeline_base import TimelineBar
 
 from vian.core.gui.context_menu import open_context_menu
@@ -101,7 +101,7 @@ class TimebarPicture(QtWidgets.QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(col)
         pen.setWidth(w)
         qp.setPen(pen)

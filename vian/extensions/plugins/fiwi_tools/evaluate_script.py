@@ -15,10 +15,10 @@ from sys import stdout as console
 
 from vian.core.data.plugin import GAPlugin, GAPLUGIN_WNDTYPE_MAINWINDOW
 from vian.core.gui.ewidgetbase import EDialogWidget
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 
-from PyQt5 import uic
+from PyQt6 import uic
 from vian.core.data.interfaces import IConcurrentJob
 
 ## TODO Remove this code

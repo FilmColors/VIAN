@@ -4,8 +4,8 @@ event system. All functions decorated with the respective decorators can be used
 as within VIAN to be called once a selector is created. 
 """
 
-from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal
+from PyQt6.QtWidgets import QMessageBox
 from vian.core.container.project import VIANProject, Segment, SVGAnnotation, Screenshot, Experiment
 from vian.core.analysis.pipeline_scripts.pipeline_script import PipelineScript
 from vian.core.data.log import log_info, log_error, log_debug, log_warning

@@ -1,9 +1,9 @@
 import os
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5 import uic
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6 import uic
 
 from vian.core.container.annotation_body import AnnotationBody, Annotatable
 
@@ -23,7 +23,7 @@ class AnnotationEditorPopup(QMainWindow):
 
         self.timeline = timeline
         self.setCentralWidget(self.inner)
-        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
 
         if timeline is not None:
             width = int(self.timeline.width() * 0.4)
@@ -190,7 +190,7 @@ class AnnotationEditorSimple(QPlainTextEdit):
 
     def keyPressEvent(self, a0: QKeyEvent):
         super(AnnotationEditorSimple, self).keyPressEvent(a0)
-        if a0.key() == Qt.Key_Enter:
+        if a0.key() == Qt.Key.Key_Enter:
             self.update_annotation()
             self.dialog.close()
 

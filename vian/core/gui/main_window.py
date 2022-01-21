@@ -130,8 +130,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # for MacOS
         if sys.platform == "darwin":
             self.is_darwin = True
-            self.setAttribute(Qt.WA_MacFrameworkScaled)
-            self.setAttribute(Qt.WA_MacOpaqueSizeGrip)
+            #self.setAttribute(Qt.WidgetAttribute.WA_MacFrameworkScaled) #seems to have no effect already in qt5 (https://doc.qt.io/qt-5/qt.html)
+            self.setAttribute(Qt.WidgetAttribute.WA_MacOpaqueSizeGrip)
 
 
         self.plugin_menu = self.extension_list.get_plugin_menu(self.menuWindows)
@@ -140,7 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if is_vian_light():
             self.plugin_menu.menuAction().setVisible(False)
 
-        QApplication.instance().setAttribute(Qt.AA_DontUseNativeMenuBar)
+        QApplication.instance().setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeMenuBar)
         self.dock_widgets = []
         self.open_dialogs = []
 
@@ -256,7 +256,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vocabulary_library.onLibraryChanged.connect(self.on_vocabulary_library_changed)
 
         self.web_view = FlaskWebWidget(self)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.web_view, Qt.Horizontal)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.web_view, Qt.Orientation.Horizontal)
         self.web_view.set_url("http://127.0.0.1:{p}/screenshot_vis".format(p=VIAN_PORT))
         self.web_view.set_settingsURL("http://127.0.0.1:{p}/get-settings".format(p=VIAN_PORT), "http://127.0.0.1:{p}/post-settings".format(p=VIAN_PORT))
         # self.web_view.set_url("https://threejs.org/examples/#webgl_camera")
@@ -303,12 +303,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.script_editor = self.pipeline_widget.editor
 
         self.window_toolbar = WidgetsToolbar(self)
-        self.addToolBar(Qt.RightToolBarArea, self.window_toolbar)
+        self.addToolBar(Qt.ToolBarArea.RightToolBarArea, self.window_toolbar)
 
-        self.addToolBar(Qt.RightToolBarArea, self.pipeline_toolbar)
+        self.addToolBar(Qt.ToolBarArea.RightToolBarArea, self.pipeline_toolbar)
 
-        self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Horizontal)
-        self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
+        self.splitDockWidget(self.player_controls, self.perspective_manager, Qt.Orientation.Horizontal)
+        self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Orientation.Vertical)
 
         self.tabifyDockWidget(self.inspector, self.history_view)
         self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_matrix)
@@ -319,7 +319,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.inspector.raise_()
         self.screenshots_manager_dock.raise_()
 
-        self.setTabPosition(QtCore.Qt.RightDockWidgetArea, QtWidgets.QTabWidget.East)
+        self.setTabPosition(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, QtWidgets.QTabWidget.TabPosition.East)
         self.history_view.hide()
         self.concurrent_task_viewer.hide()
 
@@ -388,7 +388,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionCopy.triggered.connect(self.on_copy)
         self.actionPaste.triggered.connect(self.on_paste)
         self.actionDelete.triggered.connect(self.on_delete)
-        self.actionDelete.setShortcuts([QKeySequence(Qt.Key_Delete), QKeySequence(Qt.Key_Backspace)])
+        self.actionDelete.setShortcuts([QKeySequence(Qt.Key.Key_Delete), QKeySequence(Qt.Key.Key_Backspace)])
         self.actionRun_Pipeline_for_Selection.triggered.connect(self.pipeline_widget.pipeline.run_selection)
         self.actionRun_Complete_Pipeline.triggered.connect(self.pipeline_widget.pipeline.run_all)
         self.actionDelete_all_Analyses.triggered.connect(self.on_remove_all_analyses)
@@ -500,7 +500,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.settings.apply_dock_widgets_settings(self.dock_widgets)
 
-        qApp.focusWindowChanged.connect(self.on_application_lost_focus)
+        QApplication.instance().focusWindowChanged.connect(self.on_application_lost_focus)
         self.i_project_notify_reciever = [self.player,
                                     self.drawing_overlay,
                                     self.screenshots_manager_dock,
@@ -537,12 +537,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Autosave
         self.autosave_timer = QTimer()
-        self.autosave_timer.timeout.connect(self.on_save_project, False)
+        self.autosave_timer.timeout.connect(self.on_save_project, no_receiver_check=False)
         self.update_autosave_timer(do_start=False)
 
         self.time_update_interval = 50
         self.update_timer = QtCore.QTimer()
-        self.update_timer.setTimerType(Qt.PreciseTimer)
+        self.update_timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.update_timer.setInterval(self.time_update_interval)
         self.update_timer.timeout.connect(self.signal_timestep_update)
 
@@ -551,10 +551,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.clock_synchronize_step = 100
         self.last_segment_index = 0
 
-        self.player.movieOpened.connect(self.on_movie_opened, QtCore.Qt.QueuedConnection)
-        self.player.started.connect(self.start_update_timer, QtCore.Qt.QueuedConnection)
-        self.player.stopped.connect(self.update_timer.stop, QtCore.Qt.QueuedConnection)
-        self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.AutoConnection)
+        self.player.movieOpened.connect(self.on_movie_opened, QtCore.Qt.ConnectionType.QueuedConnection)
+        self.player.started.connect(self.start_update_timer, QtCore.Qt.ConnectionType.QueuedConnection)
+        self.player.stopped.connect(self.update_timer.stop, QtCore.Qt.ConnectionType.QueuedConnection)
+        self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.ConnectionType.AutoConnection)
         self.onMovieOpened.connect(self.audio_handler.project_changed)
 
         self.player.started.connect(partial(self.frame_update_worker.set_opencv_frame, False))
@@ -607,7 +607,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.switch_perspective(Perspective.Segmentation)
         loading_screen.hide()
-        self.setWindowState(Qt.WindowMaximized)
+        self.setWindowState(Qt.WindowState.WindowMaximized)
         self.settings.apply_ui_settings()
 
         # self.set_overlay_visibility(False)
@@ -754,7 +754,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_widget_player_controls(self):
         if self.player_controls is None:
             self.player_controls = PlayerControls(self)
-            self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.player_controls, Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.BottomDockWidgetArea, self.player_controls, Qt.Orientation.Vertical)
         else:
             if not self.player_controls.visibleRegion().isEmpty():
                 self.player_controls.hide()
@@ -779,7 +779,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_annotation_dock(self):
         if self.annotation_options is None:
             self.annotation_options = AnnotationOptionsDock(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.annotation_options, Qt.Horizontal)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.annotation_options, Qt.Orientation.Horizontal)
         else:
             if not self.annotation_options.visibleRegion().isEmpty():
                 self.annotation_options.hide()
@@ -792,7 +792,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.player_dock_widget is None:
             self.player_dock_widget = PlayerDockWidget(self)
             self.player_dock_widget.set_player(self.player)
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.player_dock_widget, Qt.Orientation.Horizontal)
 
         else:
             if not self.player_dock_widget.visibleRegion().isEmpty():
@@ -814,7 +814,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_inspector(self):
         if self.inspector is None:
             self.inspector = Inspector(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.inspector, Qt.Orientation.Horizontal)
         else:
             if not self.inspector.visibleRegion().isEmpty():
                 self.inspector.hide()
@@ -826,7 +826,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_concurrent_task_viewer(self):
         if self.concurrent_task_viewer is None:
             self.concurrent_task_viewer = ConcurrentTaskDock(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.concurrent_task_viewer)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.concurrent_task_viewer)
         else:
             if not self.concurrent_task_viewer.visibleRegion().isEmpty():
                 self.concurrent_task_viewer.hide()
@@ -838,7 +838,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_history_view(self):
         if self.history_view is None:
             self.history_view = HistoryView(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.history_view)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.history_view)
         else:
             if not self.history_view.visibleRegion().isEmpty():
                 self.history_view.hide()
@@ -849,14 +849,14 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.screenshot_toolbar is None:
             self.screenshot_toolbar = ScreenshotsToolbar(self, self.screenshots_manager)
             self.addToolBar(self.screenshot_toolbar)
-            #self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.screenshot_toolbar)
+            #self.addDockWidget(QtCore.Qt.DockWidgetArea.TopDockWidgetArea, self.screenshot_toolbar)
         else:
             self.screenshot_toolbar.show()
 
     def create_perspectives_manager(self):
         if self.perspective_manager is None:
             self.perspective_manager = PerspectiveManager(self)
-            self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.perspective_manager, Qt.Horizontal)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.BottomDockWidgetArea, self.perspective_manager, Qt.Orientation.Horizontal)
             self.perspective_manager.hide()
         else:
             self.perspective_manager.show()
@@ -866,7 +866,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_outliner(self):
         if self.outliner is None:
             self.outliner = Outliner(self)
-            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.outliner)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.LeftDockWidgetArea, self.outliner)
         else:
             if not self.outliner.visibleRegion().isEmpty():
                 self.outliner.hide()
@@ -878,7 +878,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_timeline(self):
         if self.timeline is None:
             self.timeline = TimelineContainer(self)
-            self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.timeline, QtCore.Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.BottomDockWidgetArea, self.timeline, QtCore.Qt.Orientation.Vertical)
             # self.on_movie_updated()
         else:
             if not self.timeline.visibleRegion().isEmpty():
@@ -897,7 +897,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_screenshot_manager_dock_widget(self):
         if self.screenshots_manager_dock is None:
             self.screenshots_manager_dock = ScreenshotsManagerDockWidget(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.screenshots_manager_dock, QtCore.Qt.Horizontal)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.screenshots_manager_dock, QtCore.Qt.Orientation.Horizontal)
             self.screenshots_manager_dock.set_manager(self.screenshots_manager)
         else:
             if not self.screenshots_manager_dock.visibleRegion().isEmpty():
@@ -910,7 +910,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_node_editor(self):
         if self.node_editor_dock is None:
             self.node_editor_dock = NodeEditorDock(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.node_editor_dock, QtCore.Qt.Horizontal)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.node_editor_dock, QtCore.Qt.Orientation.Horizontal)
         else:
             self.node_editor_dock.show()
             self.node_editor_dock.activateWindow()
@@ -918,7 +918,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_node_editor_results(self):
         if self.node_editor_results is None:
             self.node_editor_results = NodeEditorResults(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.node_editor_results, QtCore.Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.node_editor_results, QtCore.Qt.Orientation.Vertical)
         else:
             self.node_editor_results.show()
             self.node_editor_results.activateWindow()
@@ -926,7 +926,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_vocabulary_manager(self):
         if self.vocabulary_manager is None:
             self.vocabulary_manager = VocabularyManager(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.vocabulary_manager, QtCore.Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.vocabulary_manager, QtCore.Qt.Orientation.Vertical)
         else:
             if not self.vocabulary_manager.visibleRegion().isEmpty():
                 self.vocabulary_manager.hide()
@@ -938,7 +938,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_experiment_editor(self):
         if self.experiment_dock is None:
             self.experiment_dock = ExperimentEditorDock(self)
-            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.experiment_dock, QtCore.Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.LeftDockWidgetArea, self.experiment_dock, QtCore.Qt.Orientation.Vertical)
         else:
             if not self.experiment_dock.visibleRegion().isEmpty():
                 self.experiment_dock.hide()
@@ -950,7 +950,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_vocabulary_matrix(self):
         if self.vocabulary_matrix is None:
             self.vocabulary_matrix = ClassificationWindow(self)
-            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.vocabulary_matrix, QtCore.Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.LeftDockWidgetArea, self.vocabulary_matrix, QtCore.Qt.Orientation.Vertical)
         else:
             if not self.vocabulary_matrix.visibleRegion().isEmpty():
                 self.vocabulary_matrix.hide()
@@ -974,7 +974,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_pipeline_widget(self):
         if self.pipeline_widget is None:
             self.pipeline_widget = PipelineDock(self, self.vian_event_handler)
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.pipeline_widget)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.pipeline_widget)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.pipeline_widget)
             if self.settings.USE_PIPELINES is False:
                 self.pipeline_widget.hide()
@@ -991,7 +991,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.analysis_results_widget_dock = AnalysisResultsDock(self)
             self.analysis_results_widget = AnalysisResultsWidget(self.analysis_results_widget_dock, self)
             self.analysis_results_widget_dock.set_analysis_widget(self.analysis_results_widget)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Orientation.Vertical)
         else:
             if not self.analysis_results_widget_dock.visibleRegion().isEmpty():
                 self.analysis_results_widget_dock.hide()
@@ -1003,7 +1003,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_analysis_results_widget2(self):
         if self.web_view is None:
             self.web_view = FlaskWebWidget(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.web_view, Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.web_view, Qt.Orientation.Vertical)
         else:
             if not self.web_view.visibleRegion().isEmpty():
                 self.web_view.hide()
@@ -1016,7 +1016,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_colorimetry_live(self):
         if self.colorimetry_live is None:
             self.colorimetry_live = ColorimetryLiveWidget(self)
-            self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.colorimetry_live, Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.BottomDockWidgetArea, self.colorimetry_live, Qt.Orientation.Vertical)
         else:
             if not self.colorimetry_live.visibleRegion().isEmpty():
                 self.colorimetry_live.hide()
@@ -1029,7 +1029,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.corpus_widget is None:
             self.corpus_widget = CorpusDockWidget(self)
             self.onSave.connect(self.corpus_widget.on_save_triggered)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.corpus_widget, Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.corpus_widget, Qt.Orientation.Vertical)
             # self.corpus_widget.hide()
         else:
             if not self.corpus_widget.visibleRegion().isEmpty():
@@ -1042,7 +1042,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_corpus_client_toolbar(self):
         if self.corpus_client_toolbar is None:
             self.corpus_client_toolbar = WebAppCorpusDock(self)
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_client_toolbar)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.corpus_client_toolbar)
             self.corpus_client_toolbar.show()
 
         else:
@@ -1056,7 +1056,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_summary_dock(self):
         if self.summary_dock is None:
             self.summary_dock = FlaskWebWidget(self)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.summary_dock, Qt.Vertical)
+            self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.summary_dock, Qt.Orientation.Vertical)
 
             self.summary_dock.hide()
         else:
@@ -1086,17 +1086,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update()
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.screenshots_manager.ctrl_is_pressed = True
             self.timeline.timeline.is_scaling = True
-        elif event.key() == Qt.Key_Shift:
+        elif event.key() == Qt.Key.Key_Shift:
             pass
 
     def keyReleaseEvent(self, event):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.screenshots_manager.ctrl_is_pressed = False
             self.timeline.timeline.is_scaling = False
-        elif event.key() == Qt.Key_Shift:
+        elif event.key() == Qt.Key.Key_Shift:
             pass
 
     def dragEnterEvent(self, event):
@@ -1198,7 +1198,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 action = self.menuRecently_Opened.addAction(recent)
                 action.triggered.connect(partial(self.open_recent, i))
                 if i == 0:
-                    action.setShortcut(QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_O))
+                    action.setShortcut(QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key.Key_O))
 
         except:
             self.settings.recent_files_path = []
@@ -1441,10 +1441,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.output_line.print_message(msg, color)
 
     def default_dock_locations(self):
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.timeline, QtCore.Qt.Vertical)
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.player_controls, QtCore.Qt.Vertical)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.screenshots_manager_dock, QtCore.Qt.Vertical)
-        self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.BottomDockWidgetArea, self.timeline, QtCore.Qt.Orientation.Vertical)
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.BottomDockWidgetArea, self.player_controls, QtCore.Qt.Orientation.Vertical)
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.screenshots_manager_dock, QtCore.Qt.Orientation.Vertical)
+        self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Orientation.Vertical)
 
     def dummy_func(self, *args):
         pass
@@ -1472,14 +1472,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.show()
             self.player_dock_widget.show()
 
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Horizontal)
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.outliner, Qt.Orientation.Horizontal)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.player_dock_widget, Qt.Orientation.Horizontal)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.inspector, Qt.Orientation.Horizontal)
             self.tabifyDockWidget(self.inspector, self.history_view)
             self.tabifyDockWidget(self.inspector, self.concurrent_task_viewer)
 
-            self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_client_toolbar)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.vocabulary_matrix)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.corpus_client_toolbar)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.vocabulary_manager)
@@ -1509,8 +1509,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.annotation_toolbar.show()
 
-            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector)
-            self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.inspector)
+            self.splitDockWidget(self.inspector, self.outliner, Qt.Orientation.Vertical)
             self.tabifyDockWidget(self.inspector, self.annotation_options)
             self.screenshots_manager_dock.raise_()
 
@@ -1522,8 +1522,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.screenshot_toolbar.show()
 
-            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
-            self.splitDockWidget(self.inspector, self.outliner, Qt.Vertical)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.inspector, Qt.Orientation.Horizontal)
+            self.splitDockWidget(self.inspector, self.outliner, Qt.Orientation.Vertical)
 
         elif perspective == Perspective.Analyses:
             self.inspector.show()
@@ -1531,9 +1531,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.node_editor_results.show()
             self.node_editor_dock.show()
 
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
-            self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Vertical)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.outliner)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.inspector, Qt.Orientation.Horizontal)
+            self.splitDockWidget(self.inspector, self.node_editor_results, Qt.Orientation.Vertical)
 
         elif perspective == Perspective.Results:
             self.inspector.show()
@@ -1541,9 +1541,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.analysis_results_widget_dock.show()
 
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Horizontal)
-            self.splitDockWidget(self.outliner, self.inspector, Qt.Vertical)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.outliner)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.analysis_results_widget_dock, Qt.Orientation.Horizontal)
+            self.splitDockWidget(self.outliner, self.inspector, Qt.Orientation.Vertical)
 
         elif perspective == Perspective.Classification:
 
@@ -1553,9 +1553,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_dock_widget.show()
             self.drawing_overlay.show()
 
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.screenshots_manager_dock, Qt.Vertical)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.vocabulary_matrix)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.timeline, Qt.Vertical)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.screenshots_manager_dock, Qt.Orientation.Vertical)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.vocabulary_matrix)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.timeline, Qt.Orientation.Vertical)
 
             # self.statusBar().hide()
 
@@ -1568,11 +1568,11 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.settings.USE_PIPELINES:
                 self.pipeline_widget.show()
 
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.experiment_dock)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.outliner)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.experiment_dock)
             self.tabifyDockWidget(self.experiment_dock, self.pipeline_widget)
             self.tabifyDockWidget(self.experiment_dock, self.vocabulary_manager)
-            # self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            # self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.inspector, Qt.Orientation.Horizontal)
 
 
         elif perspective == Perspective.Query:
@@ -1582,9 +1582,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.colorimetry_live.show()
             self.query_widget.show()
 
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.outliner, Qt.Horizontal)
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.player_dock_widget, Qt.Horizontal)
-            self.addDockWidget(Qt.RightDockWidgetArea, self.inspector, Qt.Horizontal)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.outliner, Qt.Orientation.Horizontal)
+            self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.player_dock_widget, Qt.Orientation.Horizontal)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.inspector, Qt.Orientation.Horizontal)
             self.tabifyDockWidget(self.screenshots_manager_dock, self.colorimetry_live)
             self.tabifyDockWidget(self.player_dock_widget, self.query_widget)
             if self.facial_identification_dock is not None:
@@ -1596,8 +1596,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # elif perspective == Perspective.CorpusVisualizer:
         #     self.corpus_visualizer_result_dock.show()
         #     self.corpus_visualizer_dock.show()
-        #     self.addDockWidget(Qt.RightDockWidgetArea, self.corpus_visualizer_result_dock, Qt.Horizontal)
-        #     self.addDockWidget(Qt.LeftDockWidgetArea, self.corpus_visualizer_dock, Qt.Horizontal)
+        #     self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.corpus_visualizer_result_dock, Qt.Orientation.Horizontal)
+        #     self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.corpus_visualizer_dock, Qt.Orientation.Horizontal)
 
         elif perspective == Perspective.WebApp:
             self.timeline.show()
@@ -1668,7 +1668,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.player_dock_widget.resize_dock(h=self.height() / 2)
 
     def changeEvent(self, event):
-        if event.type() == QEvent.ActivationChange:
+        if event.type() == QEvent.Type.ActivationChange:
             if self.isActiveWindow() == False and self.drawing_overlay.isActiveWindow()==False:
                 self.drawing_overlay.hide()
                 # self.set_darwin_player_visibility(False)
@@ -1702,7 +1702,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog = LetterBoxWidget(self, self)
             dialog.set_movie(self.project.movie_descriptor)
             dialog.show()
-            dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
+            dialog.view.fitInView(dialog.view.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def analysis_triggered(self, analysis:IAnalysisJob):
         analysis.max_width = self.settings.PROCESSING_WIDTH
@@ -2006,7 +2006,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dialog = LetterBoxWidget(self, self, self.dispatch_on_loaded)
             dialog.set_movie(self.project.movie_descriptor)
             dialog.show()
-            dialog.view.fitInView(dialog.view.sceneRect(), Qt.KeepAspectRatio)
+            dialog.view.fitInView(dialog.view.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
         else:
             self.dispatch_on_loaded()
 
@@ -2189,7 +2189,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.drawing_overlay.hide()
 
         self.update_overlay()
-        self.drawing_overlay.setAttribute(Qt.WA_TransparentForMouseEvents, not visibility)
+        self.drawing_overlay.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, not visibility)
 
     def create_analysis_list(self):
         self.analysis_list = []
@@ -2428,7 +2428,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return result
 
-    def show_info_popup(self, widget:QWidget, text, pos = Qt.TopRightCorner):
+    def show_info_popup(self, widget:QWidget, text, pos = Qt.Corner.TopRightCorner):
         """
         Shows a frameless popup with a given text and position to help the user understand the GUI
 
@@ -2675,7 +2675,7 @@ class DialogFirstStart(QtWidgets.QDialog):
 class InfoPopup(QMainWindow):
     def __init__(self, parent, text, pos):
         super(InfoPopup, self).__init__(parent)
-        self.setWindowFlags(Qt.Popup)
+        self.setWindowFlags(Qt.WindowType.Popup)
         self.setStyleSheet("QWidget { background-color: #303030; border: 4px solid #a92020; color:#ffffff; font-size: 12pt; }")
         self.move(pos)
         self.label = QLabel(text, self)

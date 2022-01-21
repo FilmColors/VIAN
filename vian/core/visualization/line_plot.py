@@ -3,10 +3,10 @@ import cv2
 import typing
 from functools import partial
 from collections import namedtuple
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QPainter, QPainterPath, QTransform
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF, QObject
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtGui import QColor, QImage, QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QPen, QFont, QPainter, QPainterPath, QTransform
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import QPoint, Qt, QRectF, pyqtSlot, pyqtSignal, QEvent, QSize, QPointF, QObject
 from scipy.signal import savgol_filter
 
 from vian.core.data.computation import *
@@ -19,7 +19,7 @@ class LinePlot(VIANPlot):
     onEntriesChanged = pyqtSignal(object)
 
     def __init__(self, parent, x_label_format = "value", y_label_format = "value"):
-        super(LinePlot, self).__init__(parent, aspect=Qt.KeepAspectRatio, x_label_format=x_label_format, y_label_format=y_label_format)
+        super(LinePlot, self).__init__(parent, aspect=Qt.AspectRatioMode.KeepAspectRatio, x_label_format=x_label_format, y_label_format=y_label_format)
         self.lines = []
         self.line_xs = []
         self.line_ys = []
@@ -238,19 +238,19 @@ class LineParamWidget(QWidget):
         hl4 = QHBoxLayout(self)
         hl4.addWidget(QLabel("Filter:", self))
 
-        slider_yscale = QSlider(Qt.Horizontal, self)
+        slider_yscale = QSlider(Qt.Orientation.Horizontal, self)
         slider_yscale.setRange(1, 1000)
         slider_yscale.setValue(100)
         slider_yscale.valueChanged.connect(self.onYScale.emit)
         hl2.addWidget(slider_yscale)
 
-        slider_xscale = QSlider(Qt.Horizontal, self)
+        slider_xscale = QSlider(Qt.Orientation.Horizontal, self)
         slider_xscale.setRange(1, 1000)
         slider_xscale.setValue(100)
         slider_xscale.valueChanged.connect(self.onXScale.emit)
         hl3.addWidget(slider_xscale)
 
-        slider_subsampling = QSlider(Qt.Horizontal, self)
+        slider_subsampling = QSlider(Qt.Orientation.Horizontal, self)
         slider_subsampling.setRange(1, 20)
         slider_subsampling.setValue(1)
         slider_subsampling.valueChanged.connect(self.onSubSampling.emit)

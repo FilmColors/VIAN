@@ -24,10 +24,10 @@ import logging
 import traceback as tb
 import subprocess
 
-import PyQt5
-from PyQt5.QtWidgets import QApplication, QSplashScreen, QMessageBox
-from PyQt5.QtCore import Qt, QObject, QEvent
-from PyQt5.QtGui import QPixmap, QIcon
+import PyQt6
+from PyQt6.QtWidgets import QApplication, QSplashScreen, QMessageBox
+from PyQt6.QtCore import Qt, QObject, QEvent
+from PyQt6.QtGui import QPixmap, QIcon
 
 
 from vian.core.data.settings import UserSettings
@@ -119,7 +119,7 @@ def set_style_sheet(app, path):
 
 if __name__ == '__main__':
     attributes = None
-    PyQt5.QtCore.qInstallMessageHandler(handler)
+    PyQt6.QtCore.qInstallMessageHandler(handler)
 
     sys._excepthook = sys.excepthook
     sys.excepthook = vian_exception_hook

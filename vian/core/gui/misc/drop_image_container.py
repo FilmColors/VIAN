@@ -1,8 +1,8 @@
 from functools import partial
 
-from PyQt5.QtGui import QPixmap, QDropEvent, QDragEnterEvent
-from PyQt5.QtWidgets import QWidget, QSizePolicy, QGridLayout, QPushButton, QVBoxLayout, QLabel
-from PyQt5.QtCore import pyqtSignal
+from PyQt6.QtGui import QPixmap, QDropEvent, QDragEnterEvent
+from PyQt6.QtWidgets import QWidget, QSizePolicy, QGridLayout, QPushButton, QVBoxLayout, QLabel
+from PyQt6.QtCore import pyqtSignal
 
 class DropImageContainer(QWidget):
     onChanged = pyqtSignal(object)
@@ -18,7 +18,7 @@ class DropImageContainer(QWidget):
         self.setLayout(self.lt)
         self.pos_x = 0
         self.pos_y = 0
-        self.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding))
         self.placeholder = DropImagePlaceholder(self)
         self.lt.addWidget(self.placeholder, 0, 0)
 

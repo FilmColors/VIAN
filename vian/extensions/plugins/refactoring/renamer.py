@@ -1,8 +1,8 @@
 import os
 import glob
-from PyQt5 import uic
-from PyQt5.QtWidgets import QFileDialog, QComboBox, QHBoxLayout, QMessageBox
-from PyQt5 import QtWidgets
+from PyQt6 import uic
+from PyQt6.QtWidgets import QFileDialog, QComboBox, QHBoxLayout, QMessageBox
+from PyQt6 import QtWidgets
 
 from vian.core.data.plugin import *
 from vian.core.data.interfaces import IConcurrentJob

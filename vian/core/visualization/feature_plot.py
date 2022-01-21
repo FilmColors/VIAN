@@ -2,10 +2,10 @@ import numpy as np
 import cv2
 from vian.core.container.project import VIANProject, SEGMENT
 from collections import namedtuple
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 
 from vian.core.visualization.basic_vis import IVIANVisualization
 from vian.core.visualization.image_plots import VIANPixmapGraphicsItem, VIANPixmapGraphicsItemSignals, ImagePlotRawData
@@ -21,7 +21,7 @@ class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
         QGraphicsView.__init__(self, parent)
         IVIANVisualization.__init__(self, naming_fields)
         self.naming_fields['plot_name'] = "keyword_timeline"
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
         self.project = project
@@ -56,7 +56,7 @@ class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
         self.create_title()
 
 
-        self.fitInView(QRectF(0, 0, 80, 80), Qt.KeepAspectRatio)
+        self.fitInView(QRectF(0, 0, 80, 80), Qt.AspectRatioMode.KeepAspectRatio)
 
     def add_grid(self):
         pass
@@ -156,14 +156,14 @@ class VIANFeaturePlot(QGraphicsView, IVIANVisualization):
         t.setDefaultTextColor(QColor(200, 200, 200, 200))
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = True
             event.ignore()
         else:
             event.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = False
         else:
             event.ignore()
@@ -219,7 +219,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         IVIANVisualization.__init__(self, naming_fields)
         self.naming_fields['plot_name'] = "keyword_timeline"
 
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
         self.setBackgroundBrush(QColor(30, 30, 30))
@@ -266,7 +266,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
 
         self.create_title()
 
-        self.fitInView(QRectF(0, 0, 80, 80), Qt.KeepAspectRatio)
+        self.fitInView(QRectF(0, 0, 80, 80), Qt.AspectRatioMode.KeepAspectRatio)
 
         self.horizontalScrollBar().valueChanged.connect(self.on_h_scroll)
 
@@ -334,7 +334,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         rect = QRectF(0, rect.y(), 2000 * self.x_scale, rect.height())
         rect.adjust(-100* self.x_scale, -100, 200* self.x_scale, 200)
         self.scene().setSceneRect(rect)
-        self.fitInView(rect, Qt.KeepAspectRatio)
+        self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def scale_images(self, new_scale):
         for s in self.images:
@@ -386,7 +386,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         rect = QRectF(0, rect.y(), 2000 * self.x_scale, rect.height())
         rect.adjust(-100* self.x_scale, -100, 200* self.x_scale, 200)
         self.scene().setSceneRect(rect)
-        self.fitInView(rect, Qt.KeepAspectRatio)
+        self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def create_title(self):
         if self.title == "":
@@ -398,16 +398,16 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         t.setDefaultTextColor(QColor(200, 200, 200, 200))
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = True
             event.ignore()
-        elif event.key() == Qt.Key_F:
+        elif event.key() == Qt.Key.Key_F:
             self.frame_default()
         else:
             event.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = False
         else:
             event.ignore()
@@ -494,7 +494,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
         t_size = self.sceneRect().size().toSize()
-        image = QImage(size, QImage.Format_ARGB32)
+        image = QImage(size, QImage.Format.Format_ARGB32)
         image.fill(Qt.transparent)
 
         painter = QPainter()
@@ -605,7 +605,7 @@ class FeaturesParamWidget(QWidget):
         self.setLayout(QVBoxLayout())
         self.param_list = QTreeWidget(self)
         self.layout().addWidget(self.param_list)
-        self.sl_x_scale = QSlider(Qt.Horizontal, self)
+        self.sl_x_scale = QSlider(Qt.Orientation.Horizontal, self)
         self.sl_x_scale.setRange(1, 100)
         self.sl_x_scale.setValue(10)
         self.hb_x_scale = QHBoxLayout(self)
@@ -613,7 +613,7 @@ class FeaturesParamWidget(QWidget):
         self.hb_x_scale.addWidget(self.sl_x_scale)
         self.sl_x_scale.valueChanged.connect(self.on_slider_x_scale)
 
-        self.sl_img_scale = QSlider(Qt.Horizontal, self)
+        self.sl_img_scale = QSlider(Qt.Orientation.Horizontal, self)
         self.sl_img_scale.setRange(1, 100)
         self.sl_img_scale.setValue(10)
         self.hb_img_scale = QHBoxLayout(self)

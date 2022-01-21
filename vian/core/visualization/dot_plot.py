@@ -1,7 +1,7 @@
 from vian.core.visualization.basic_vis import IVIANVisualization
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 import numpy as np
 from vian.core.data.computation import rotate
 from collections import namedtuple
@@ -13,7 +13,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         QGraphicsView.__init__(self, parent)
         IVIANVisualization.__init__(self, naming_fields)
         self.naming_fields['plot_name'] = "dot_plot"
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
         self.setBackgroundBrush(QColor(30, 30, 30))
@@ -186,7 +186,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         rect = self.scene().itemsBoundingRect()
         rect.adjust(-10, -10, 20, 20)
         self.scene().setSceneRect(rect)
-        self.fitInView(rect, Qt.KeepAspectRatio)
+        self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def create_title(self):
         if self.title == "":
@@ -198,16 +198,16 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         t.setDefaultTextColor(QColor(200, 200, 200, 200))
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = True
             event.ignore()
-        elif event.key() == Qt.Key_F:
+        elif event.key() == Qt.Key.Key_F:
             self.frame_default()
         else:
             event.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = False
         else:
             event.ignore()
@@ -366,7 +366,7 @@ class DotPlot(QGraphicsView, IVIANVisualization):
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
         t_size = self.sceneRect().size().toSize()
-        image = QImage(size, QImage.Format_ARGB32)
+        image = QImage(size, QImage.Format.Format_ARGB32)
         image.fill(background)
 
         painter = QPainter()
@@ -404,7 +404,7 @@ class DotPlotControls(QWidget):
         hl1 = QHBoxLayout(self)
         hl1.addWidget(QLabel("Range Scale:", self))
 
-        self.slider_xscale = QSlider(Qt.Horizontal, self)
+        self.slider_xscale = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_xscale.setRange(1, 1000)
         self.slider_xscale.setValue(100)
 
@@ -413,7 +413,7 @@ class DotPlotControls(QWidget):
         hl3 = QHBoxLayout(self)
         hl3.addWidget(QLabel("View Angle:", self))
 
-        self.slider_angle = QSlider(Qt.Horizontal, self)
+        self.slider_angle = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_angle.setRange(0, 360)
 
 
@@ -428,7 +428,7 @@ class DotPlotControls(QWidget):
         hl4 = QHBoxLayout(self)
         hl4.addWidget(QLabel("Dot Alpha:", self))
 
-        self.slider_alpha = QSlider(Qt.Horizontal, self)
+        self.slider_alpha = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_alpha.setRange(0, 255)
         self.slider_alpha.setValue(100)
 
@@ -443,7 +443,7 @@ class DotPlotControls(QWidget):
         hl5 = QHBoxLayout(self)
         hl5.addWidget(QLabel("Dot Size:", self))
 
-        self.slider_size = QSlider(Qt.Horizontal, self)
+        self.slider_size = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_size.setRange(1, 50)
         self.slider_size.setValue(plot.dot_size)
 

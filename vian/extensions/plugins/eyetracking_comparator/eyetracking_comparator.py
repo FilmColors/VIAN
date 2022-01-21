@@ -6,10 +6,10 @@ if __name__ == '__main__':
 import cv2
 import numpy as np
 
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5 import uic
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6 import uic
 import os
 from vian.core.data.plugin import *
 from vian.core.data.computation import numpy_to_pixmap, ms_to_frames
@@ -56,7 +56,7 @@ class EyetrackingComparator(QMainWindow):
         self.player = None
 
         self.timeline = TimelineContainer(self)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.timeline)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.timeline)
 
         self.fixations = None
         self.fixations_sampled = None
@@ -70,7 +70,7 @@ class EyetrackingComparator(QMainWindow):
         self.splitter = QSplitter()
         self.center.layout().addWidget(self.splitter)
 
-        self.slider = QSlider(self, orientation=Qt.Horizontal)
+        self.slider = QSlider(self, orientation=Qt.Orientation.Horizontal)
         self.center.layout().addWidget(self.slider)
 
         self.slider.valueChanged.connect(self.update_movie_position)

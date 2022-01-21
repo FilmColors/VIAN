@@ -2,9 +2,9 @@
 The Palette Widget can be used to display a Palette Asset
 """
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 import pickle
 import sys
 import cv2
@@ -29,12 +29,12 @@ class PaletteWidget(QWidget):
 
         self.setLayout(QVBoxLayout(self))
         self.view = PaletteView(self)
-        self.slider = QSlider(Qt.Horizontal, self.all_ctrls)
+        self.slider = QSlider(Qt.Orientation.Horizontal, self.all_ctrls)
         self.cb_mode = QComboBox(self.all_ctrls)
         self.cb_mode.addItems(['Layer', 'Full Tree'])
         self.lbl_mode_hint = QLabel("Layer Index:", self.all_ctrls)
         self.lbl_depth = QLabel("0", self.all_ctrls)
-        self.lbl_depth.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.lbl_depth.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.layout().addWidget(self.view)
         self.cb_show_grid = QCheckBox("Show Grid", self.all_ctrls)
 
@@ -51,9 +51,9 @@ class PaletteWidget(QWidget):
 
         self.hbox_ctrl.addWidget(QLabel("Mode: ", self.all_ctrls))
         self.hbox_ctrl.addWidget(self.cb_mode)
-        self.hbox_ctrl.addItem(QSpacerItem(0,0,QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.hbox_ctrl.addItem(QSpacerItem(0,0,QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
         self.hbox_ctrl.addWidget(self.cb_show_grid)
-        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
         self.hbox_ctrl.addWidget(QLabel("Sorting: ", self.all_ctrls))
         self.hbox_ctrl.addWidget(self.cb_sorting)
 
@@ -108,7 +108,7 @@ class PaletteView(QWidget, IVIANVisualization):
         self.image = None
         self.show_grid = False
         self.sorting = "Cluster"
-        self.setAttribute(Qt.WA_OpaquePaintEvent)
+        self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent)
 
     def draw_palette(self, target = None):
         if self.palette_layer is None:
@@ -131,7 +131,7 @@ class PaletteView(QWidget, IVIANVisualization):
             height = t_height / self.depth
             layers = layers_unique[:self.depth]
 
-        self.image = QImage(self.size(), QImage.Format_RGBA8888)
+        self.image = QImage(self.size(), QImage.Format.Format_RGBA8888)
 
         qp = QPainter()
         pen = QPen()
@@ -144,7 +144,7 @@ class PaletteView(QWidget, IVIANVisualization):
             qp.begin(target)
             t_width = target.width()
         qp.setPen(pen)
-        # qp.setRenderHint(QPainter.Antialiasing)
+        # qp.setRenderHint(QPainter.RenderHint.Antialiasing)
         y = 0
         for i in layers:
             indices = np.where(all_layers == i)
@@ -249,7 +249,7 @@ class DrawingThread(QObject):
         target = None
         if self.palette_layer is None:
             return
-        self.image = QImage(self.size, QImage.Format_RGBA8888)
+        self.image = QImage(self.size, QImage.Format.Format_RGBA8888)
         qp = QPainter()
         pen = QPen()
         pen.setWidthF(0.5)
@@ -263,7 +263,7 @@ class DrawingThread(QObject):
             t_width = target.width()
             t_height = target.height()
 
-        qp.setRenderHint(QPainter.Antialiasing)
+        qp.setRenderHint(QPainter.RenderHint.Antialiasing)
         if target is None:
             if self.background == "White":
                 qp.fillRect(self.rect, QColor(self.background))
@@ -344,7 +344,7 @@ class PaletteLABWidget(QWidget):
         self.view = PaletteLABView(self)
 
         self.w_ctrls2 = QWidget(self)
-        self.w_ctrls2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        self.w_ctrls2.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.w_ctrls2.setLayout(QVBoxLayout(self.w_ctrls2))
 
         self.cb_mode = QComboBox(self.w_ctrls2)
@@ -355,16 +355,16 @@ class PaletteLABWidget(QWidget):
         self.hbox_slider = QHBoxLayout(self.w_ctrls2)
         self.w_ctrls2.layout().addItem(self.hbox_slider)
 
-        self.slider = QSlider(Qt.Horizontal, self.w_ctrls2)
-        self.slider_size = QSlider(Qt.Horizontal, self.w_ctrls2)
+        self.slider = QSlider(Qt.Orientation.Horizontal, self.w_ctrls2)
+        self.slider_size = QSlider(Qt.Orientation.Horizontal, self.w_ctrls2)
         self.slider_size.setRange(1, 100)
-        self.slider_jitter = QSlider(Qt.Horizontal, self.w_ctrls2)
+        self.slider_jitter = QSlider(Qt.Orientation.Horizontal, self.w_ctrls2)
         self.slider_jitter.setRange(0, 100)
-        self.slider_scale = QSlider(Qt.Horizontal, self.w_ctrls2)
+        self.slider_scale = QSlider(Qt.Orientation.Horizontal, self.w_ctrls2)
         self.slider_scale.setRange(1, 30)
 
         self.lbl_depth = QLabel("0", self.w_ctrls2)
-        self.lbl_depth.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.lbl_depth.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
 
         self.cb_background = QComboBox(self.w_ctrls2)
         self.cb_background.addItems(['White', "Light-Gray", 'Dark-Gray', 'Black'])
@@ -374,9 +374,9 @@ class PaletteLABWidget(QWidget):
 
         self.hbox_ctrl.addWidget(QLabel("Mode: ", self.w_ctrls2))
         self.hbox_ctrl.addWidget(self.cb_mode)
-        self.hbox_ctrl.addItem(QSpacerItem(0,0,QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.hbox_ctrl.addItem(QSpacerItem(0,0,QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
         self.hbox_ctrl.addWidget(self.cb_show_grid)
-        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
         self.hbox_ctrl.addWidget(QLabel("Background: ", self.w_ctrls2))
         self.hbox_ctrl.addWidget(self.cb_background)
         self.btn_ctrls = QPushButton("Show Controls", self.w_ctrls2)
@@ -479,7 +479,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
         self.show_grid = True
         self.background = "Light-Gray"
         self.jitter = 10
-        self.setAttribute(Qt.WA_OpaquePaintEvent)
+        self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent)
         self.drawing_thread = QThread()
         self.drawing_worker = DrawingThread(self.width(), self.height(),
                                             self.background, self.rect(), self.size(), self.grid_color,
@@ -545,10 +545,10 @@ class PaletteTimeWidget(QWidget):
         self.view = PaletteTimeView(self)
         self.scroll_area.setWidget(self.view)
         self.scroll_area.setWidgetResizable(True)
-        self.slider = QSlider(Qt.Horizontal, self)
+        self.slider = QSlider(Qt.Orientation.Horizontal, self)
         self.lbl_mode_hint = QLabel("Layer Index:", self)
         self.lbl_depth = QLabel("0", self)
-        self.lbl_depth.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.lbl_depth.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         # self.layout().addWidget(self.view)
         self.cb_show_grid = QCheckBox("Show Grid", self)
         self.hbox_slider = QHBoxLayout(self)
@@ -559,9 +559,9 @@ class PaletteTimeWidget(QWidget):
         self.layout().addItem(self.hbox_ctrl)
         self.layout().addItem(self.hbox_slider)
 
-        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
         self.hbox_ctrl.addWidget(self.cb_show_grid)
-        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
         self.hbox_ctrl.addWidget(QLabel("Sorting: ", self))
         self.hbox_ctrl.addWidget(self.cb_sorting)
 
@@ -602,7 +602,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
         self.image = None
         self.show_grid = False
         self.sorting = "Cluster"
-        self.setAttribute(Qt.WA_OpaquePaintEvent)
+        self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent)
         self.resolution = 1
 
     def draw_palette(self, target=None):
@@ -615,7 +615,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
         pen.setWidthF(0.1)
         pen.setColor(QColor(0, 0, 0, 255))
         if target is None:
-            self.image = QImage(QSize(4000, 500), QImage.Format_RGBA8888)
+            self.image = QImage(QSize(4000, 500), QImage.Format.Format_RGBA8888)
             qp.begin(self.image)
             t_width = self.width()
             # self.resize(4000, 500)
@@ -649,7 +649,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
                 return
             layers = [layers_unique[self.depth]]
 
-            # qp.setRenderHint(QPainter.Antialiasing)
+            # qp.setRenderHint(QPainter.RenderHint.Antialiasing)
             y = 0
             for i in layers:
                 indices = np.where(all_layers == i)
@@ -673,7 +673,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
             x += b_width
         qp.end()
         itm = self.scene().addPixmap(QPixmap(self.image.size()).fromImage(self.image))
-        self.fitInView(itm.boundingRect(), Qt.KeepAspectRatio)
+        self.fitInView(itm.boundingRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.RightButton:
@@ -791,7 +791,7 @@ class MultiPaletteControls(QWidget):
     def __init__(self):
         super(MultiPaletteControls, self).__init__()
         self.setLayout(QHBoxLayout())
-        self.slider = QSlider(Qt.Horizontal, self)
+        self.slider = QSlider(Qt.Orientation.Horizontal, self)
         self.slider.setRange(1, 20)
         self.slider.setValue(10)
 

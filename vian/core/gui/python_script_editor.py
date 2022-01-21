@@ -6,9 +6,9 @@ from uuid import uuid4
 import importlib.util
 import traceback
 from vian.core.data.log import log_info, log_error, log_debug, log_warning
-from PyQt5.QtCore import QRegExp, pyqtSignal, Qt, pyqtSlot
-from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, \
+from PyQt6.QtCore import QRegularExpression, pyqtSignal, Qt, pyqtSlot
+from PyQt6.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter, QFontMetricsF, QStandardItem, QStandardItemModel
+from PyQt6.QtWidgets import QWidget, QPlainTextEdit, QMainWindow, QFileDialog, QDockWidget, QSplitter, \
     QCompleter,QSizePolicy, QDialog, QVBoxLayout, QLineEdit, QLabel, QPushButton, QComboBox
 from functools import partial
 from vian.core.analysis.pipeline_scripts.pipeline_script import PipelineScript
@@ -22,7 +22,7 @@ def format(r, g, b, style=''):
     _format = QTextCharFormat()
     _format.setForeground(_color)
     if 'bold' in style:
-        _format.setFontWeight(QFont.Bold)
+        _format.setFontWeight(QFont.Weight.Bold)
     if 'italic' in style:
         _format.setFontItalic(True)
 
@@ -58,7 +58,7 @@ class PythonScriptEditor(QWidget):
 
         self.pipeline_script = None #type: PipelineScript
 
-        self.central = QSplitter(Qt.Vertical, self.inner)
+        self.central = QSplitter(Qt.Orientation.Vertical, self.inner)
         self.central.setMaximumHeight(400)
         self.central.addWidget(self.editor)
         self.central.addWidget(self.output)
@@ -94,7 +94,7 @@ class PythonScriptEditor(QWidget):
         self.a_reload.triggered.connect(self.reload)
 
         self.editor.setFont(self.font)
-        self.editor.setTabStopWidth(int(QFontMetricsF(self.editor.font()).width(' ')) * 4)
+        self.editor.setTabStopDistance(int(QFontMetricsF(self.editor.font()).horizontalAdvance(' ')) * 4)
 
     def new(self):
         dialog = NewScriptDialog(self, self.main_window)
@@ -141,11 +141,11 @@ class PythonScriptEditor(QWidget):
         self.output.setPlainText(e)
         self.raise_()
 
-from PyQt5.QtGui import QTextOption
+from PyQt6.QtGui import QTextOption
 class CodePlainTextEditor(QPlainTextEdit):
     def __init__(self, parent):
         super(CodePlainTextEditor, self).__init__(parent)
-        self.setWordWrapMode(QTextOption.NoWrap)
+        self.setWordWrapMode(QTextOption.WrapMode.NoWrap)
 
 
 class PythonHighlighter (QSyntaxHighlighter):
@@ -188,8 +188,8 @@ class PythonHighlighter (QSyntaxHighlighter):
         # Multi-line strings (expression, flag, style)
         # FIXME: The triple-quotes in these two lines will mess up the
         # syntax highlighting from this point onward
-        self.tri_single = (QRegExp("'''"), 1, STYLES['string2'])
-        self.tri_double = (QRegExp('"""'), 2, STYLES['string2'])
+        self.tri_single = (QRegularExpression("'''"), 1, STYLES['string2'])
+        self.tri_double = (QRegularExpression('"""'), 2, STYLES['string2'])
 
         rules = []
 
@@ -228,7 +228,7 @@ class PythonHighlighter (QSyntaxHighlighter):
         ]
 
         # Build a QRegExp for each pattern
-        self.rules = [(QRegExp(pat), index, fmt)
+        self.rules = [(QRegularExpression(pat), index, fmt)
             for (pat, index, fmt) in rules]
 
 

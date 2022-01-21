@@ -3,11 +3,11 @@ import time
 import requests
 from functools import partial
 import cv2
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtWidgets import QFrame, QFileDialog, QMessageBox, QMenu
-# from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-# from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt6 import QtGui, QtCore, QtWidgets
+from PyQt6.QtWidgets import QFrame, QFileDialog, QMessageBox, QMenu
+# from PyQt6.QtMultimedia import QMediaPlayer, QMediaContent
+# from PyQt6.QtMultimediaWidgets import QVideoWidget
+from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
 
 from vian.core.gui.ewidgetbase import EDockWidget
 from vian.core.data.computation import parse_file_path, is_vian_light
@@ -55,7 +55,7 @@ class PlayerDockWidget(EDockWidget):
         self.a_spacial_frequency_lum_var.setCheckable(True)
         self.a_spacial_frequency_lum_var.triggered.connect(partial(self.on_spacial_frequency_changed, "luminance-var"))
 
-        self.setFeatures(EDockWidget.NoDockWidgetFeatures | EDockWidget.DockWidgetClosable)
+        self.setFeatures(EDockWidget.DockWidgetFeature.NoDockWidgetFeatures | EDockWidget.DockWidgetFeature.DockWidgetClosable)
 
     @pyqtSlot(object)
     def on_spatial_datasets_changed(self, datasets):
@@ -266,14 +266,14 @@ class Player_VLC(VideoPlayer):
         self.setLayout(self.vboxlayout)
 
         if sys.platform == "darwin":  # for MacOS
-            self.videoframe = QtWidgets.QMacCocoaViewContainer(0, None)
+            self.videoframe = QtWidgets.QWidget.createWindowContainer(QtGui.QWindow.fromWinId(0))
         else:
             self.videoframe = QtWidgets.QFrame()
 
 
         # self.videoframe.setParent(self)
         self.palette = self.videoframe.palette()
-        self.palette.setColor(QtGui.QPalette.Window, QtGui.QColor(0, 0, 0))
+        self.palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(0, 0, 0))
         self.videoframe.setPalette(self.palette)
         self.videoframe.setAutoFillBackground(True)
         # self.videoframe.setEnabled(True)
@@ -328,7 +328,7 @@ class Player_VLC(VideoPlayer):
             self.media_player.set_nsobject(int(self.videoframe.winId()))
             # self.videoframe.setCocoaView(self.media_player.get_nsobject())
 
-            self.videoframe.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+            self.videoframe.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
             # self.videoframe.setAttribute(Qt.WA_NativeWindow, True)
             # self.setAttribute(Qt.WA_DontCreateNativeAncestors, True)
 

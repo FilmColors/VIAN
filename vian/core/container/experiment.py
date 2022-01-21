@@ -15,8 +15,8 @@ from .hdf5_manager import get_analysis_by_name
 
 from vian.core.analysis.deep_learning.labels import LIPLabels
 
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QMessageBox
 
 from functools import partial
 

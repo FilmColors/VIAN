@@ -1,8 +1,8 @@
-from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal, QPoint, QPointF, QRect, QRectF, Qt
-from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QSpacerItem
-from PyQt5.QtGui import QLinearGradient, QColor, QGradient, QPixmap
+from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QPoint, QPointF, QRect, QRectF, Qt
+from PyQt6.QtWidgets import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QSpacerItem
+from PyQt6.QtGui import QLinearGradient, QColor, QGradient, QPixmap
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt6 import QtGui, QtWidgets, QtCore
 
 from .timeline_base import TimelineControl, TimebarSlice, TimelineBar
 from vian.core.container.project import Segmentation, UniqueKeyword, Segment, AnnotationBody
@@ -81,8 +81,8 @@ class TimelineControlParent(QWidget):
         self.lbl_title = QLabel(self.name, self)
         self.lbl_title.setStyleSheet("QWidget{background:transparent; }")
         self.lbl_title.setAlignment(Qt.AlignLeft)
-        self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.expander = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+        self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
+        self.expander = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
 
         self.vbox.addWidget(self.lbl_title)
         self.vbox.addItem(self.expander)
@@ -164,8 +164,8 @@ class TimelineSubSegmentationControl(QWidget):
         self.lbl_title = QLabel(self.name, self)
         self.lbl_title.setStyleSheet("QWidget{background:transparent; }")
         self.lbl_title.setAlignment(Qt.AlignLeft)
-        self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.expand = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+        self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
+        self.expand = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
         self.vbox.addWidget(self.lbl_title)
         self.vbox.addItem(self.expand)
 
@@ -261,7 +261,7 @@ class TimelineSubSegmentationControl(QWidget):
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255, 50))
         pen.setWidth(1)
         qp.setPen(pen)
@@ -423,7 +423,7 @@ class TimelineSubSegmentationBar(QWidget):
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(20, 20, 20, 50))
         pen.setWidth(1)
         qp.setPen(pen)
@@ -543,7 +543,7 @@ class TimebarSubSegmentationSlice(QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255))
         pen.setWidth(2)
         qp.setPen(pen)

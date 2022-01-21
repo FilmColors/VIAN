@@ -8,10 +8,11 @@ import requests
 
 import numpy as np
 
-from PyQt5.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
-from PyQt5.QtWidgets import QLabel
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEngineProfile, QWebEnginePage
-from PyQt5 import QtGui
+from PyQt6.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
+from PyQt6.QtWidgets import QLabel
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWebEngineCore import QWebEngineSettings, QWebEngineProfile, QWebEnginePage
+from PyQt6 import QtGui
 from flask import Flask, render_template, send_file, url_for, jsonify, request, make_response
 
 from vian.core.data.interfaces import IAnalysisJob

@@ -12,8 +12,8 @@ from collections import namedtuple
 from vian.core.data.log import *
 from vian.core.data.enums import ScreenshotNamingConventionOptions as naming
 from vian.core.container.corpus import Corpus
-from PyQt5.QtGui import QFont, QColor
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtGui import QFont, QColor
+from PyQt6.QtWidgets import QApplication
 
 COLORMAPS_SEQUENTIAL = [
             'viridis', 'plasma', 'inferno', 'magma', 'cividis',

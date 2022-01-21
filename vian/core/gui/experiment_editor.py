@@ -1,9 +1,9 @@
 import os
 from functools import partial
 
-from PyQt5 import uic
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt
+from PyQt6 import uic
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import Qt
 from vian.core.gui.ewidgetbase import EDockWidget
 
 from vian.core.data.interfaces import IProjectChangeNotify

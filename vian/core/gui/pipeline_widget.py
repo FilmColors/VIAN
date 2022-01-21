@@ -4,11 +4,11 @@ import sys
 import importlib
 
 from vian.core.gui.ewidgetbase import EDockWidget, EToolBar
-from PyQt5 import uic, QtWidgets
-from PyQt5.QtWidgets import *
-from PyQt5 import uic
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QRect, QRectF, QEvent, QTimer
-from PyQt5.QtGui import QColor, QPixmap, QIcon, QMouseEvent, QPaintEvent, QPainter, QPen, QTextOption
+from PyQt6 import uic, QtWidgets
+from PyQt6.QtWidgets import *
+from PyQt6 import uic
+from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot, QRect, QRectF, QEvent, QTimer
+from PyQt6.QtGui import QColor, QPixmap, QIcon, QMouseEvent, QPaintEvent, QPainter, QPen, QTextOption
 from vian.core.data.interfaces import IProjectChangeNotify
 
 from functools import partial
@@ -107,7 +107,7 @@ class PipelineToolbar(EToolBar):
 class ProgressWidget(QWidget):
     def __init__(self, parent, reference_widget):
         super(ProgressWidget, self).__init__(parent)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         self.reference_widget = reference_widget
         if self.reference_widget is not None:
@@ -152,8 +152,8 @@ class ProgressWidget(QWidget):
         pen.setWidth(5)
 
         qp.begin(self)
-        qp.setRenderHint(QPainter.Antialiasing)
-        qp.setRenderHint(QPainter.TextAntialiasing)
+        qp.setRenderHint(QPainter.RenderHint.Antialiasing)
+        qp.setRenderHint(QPainter.RenderHint.TextAntialiasing)
 
         qp.setPen(pen)
         r1 = self.rect()
@@ -202,7 +202,7 @@ class PipelineDock(EDockWidget):
         self.setWindowTitle("Pipeline Manager")
         self.editor = PythonScriptEditor(self.inner.centralWidget(), self.main_window)
         self.pipeline = PipelineWidget(self, event_manager, self.main_window, self.editor)
-        self.splitter = QSplitter(Qt.Horizontal)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
         self.inner.setCentralWidget(self.splitter)
         self.inner.centralWidget().setLayout(QHBoxLayout())
 

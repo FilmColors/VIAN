@@ -1,7 +1,6 @@
-from PyQt5.Qt import QApplication
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 import webbrowser
 
@@ -10,15 +9,15 @@ from vian.core.data.computation import pixmap_to_numpy, numpy_to_pixmap
 from vian.core.container.project import VIANProject
 import cv2
 from functools import partial
-from PyQt5 import uic
+from PyQt6 import uic
 import os
 from vian.core.gui.misc.utils import dialog_with_margin
 
 import sys
 # if sys.platform == "darwin":
-#     from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
+#     from PyQt6.QtWebEngineWidgets import QWebEngineView as QWebView
 # else:
-#     from PyQt5.QtWebKitWidgets import QWebView
+#     from PyQt6.QtWebKitWidgets import QWebView
 
 # from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 # from matplotlib.figure import Figure
@@ -27,8 +26,8 @@ import webbrowser
 def line_separator(Orientation):
     frame = QFrame()
     frame.setStyleSheet("QFrame{border: 1px solid black;}")
-    frame.setFrameStyle(QFrame.Box)
-    if Orientation == Qt.Horizontal:
+    frame.setFrameStyle(QFrame.Shape.Box)
+    if Orientation == Qt.Orientation.Horizontal:
         frame.setFixedHeight(1)
     else:
         frame.setFixedWidth(1)
@@ -43,7 +42,7 @@ class ExpandableWidget(QWidget):
         super(ExpandableWidget, self).__init__(parent)
         self.popup = popup
         self.expand_title = expand_title
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.setLayout(QVBoxLayout())
         self.btn_expand = QPushButton(expand_title, self)
         self.layout().addWidget(self.btn_expand)
@@ -118,8 +117,8 @@ class EDockWidget(QDockWidget):
     def __init__(self, main_window, limit_size = True, width = None, height = None):
         super(EDockWidget, self).__init__()
         self.main_window = main_window
-        self.setAttribute(Qt.WA_MacOpaqueSizeGrip, True)
-        # self.setAttribute(Qt.WA_AlwaysStackOnTop, False)
+        self.setAttribute(Qt.WidgetAttribute.WA_MacOpaqueSizeGrip, True)
+        # self.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop, False)
         self.limit_size = limit_size
         self.setLayout(QVBoxLayout(self))
         self.default_width = width
@@ -133,7 +132,7 @@ class EDockWidget(QDockWidget):
             #     width = 400
             # self.inner.setMaximumWidth(width)
             self.inner.size
-            self.inner.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+            self.inner.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Expanding)
 
         self.init = True
         self.setWidget(self.inner)
@@ -160,8 +159,8 @@ class EDockWidget(QDockWidget):
             h = self.widget().height()
 
         self.widget().resize(w, h)
-        self.main_window.resizeDocks([self], [w], Qt.Horizontal)
-        self.main_window.resizeDocks([self], [h], Qt.Vertical)
+        self.main_window.resizeDocks([self], [w], Qt.Orientation.Horizontal)
+        self.main_window.resizeDocks([self], [h], Qt.Orientation.Vertical)
 
     def setWidget(self, QWidget):
         if self.init:
@@ -200,11 +199,11 @@ class EDockWidget(QDockWidget):
 class EDialogWidget(QDialog):
     def __init__(self,  parent = None,  main_window = None, help_path = None):
         super(EDialogWidget, self).__init__(parent)
-        self.setAttribute(Qt.WA_MacOpaqueSizeGrip, True)
+        self.setAttribute(Qt.WidgetAttribute.WA_MacOpaqueSizeGrip, True)
         self.help_path = help_path
 
-        self.setAttribute(Qt.WA_AlwaysStackOnTop)
-        self.setWindowFlags(Qt.Dialog)
+        self.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
+        self.setWindowFlags(Qt.WindowType.Dialog)
         self.main_window = main_window
 
         if main_window is not None:
@@ -250,7 +249,7 @@ class EGraphicsView(QGraphicsView):
         super(EGraphicsView, self).resizeEvent(event)
         if self.pixmap is not None and self.auto_frame:
             rect = self.pixmap.sceneBoundingRect()
-            self.fitInView(rect, Qt.KeepAspectRatio)
+            self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.RightButton:
@@ -260,15 +259,15 @@ class EGraphicsView(QGraphicsView):
             super(EGraphicsView, self).mousePressEvent(event)
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.viewport().setCursor(QCursor(Qt.UpArrowCursor))
             self.ctrl_is_pressed = True
             event.ignore()
 
-        elif event.key() == Qt.Key_F:
+        elif event.key() == Qt.Key.Key_F:
             self.setSceneRect(QRectF())
             if self.keep_aspect_ratio:
-                self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+                self.fitInView(self.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
             else:
                 self.fitInView(self.sceneRect())
             self.curr_scale = 1.0
@@ -278,12 +277,12 @@ class EGraphicsView(QGraphicsView):
     def mouseDoubleClickEvent(self, event: QMouseEvent):
         if self.pixmap is not None and self.auto_frame:
             rect = self.pixmap.sceneBoundingRect()
-            self.fitInView(rect, Qt.KeepAspectRatio)
+            self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
         else:
             event.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.viewport().setCursor(QCursor(Qt.ArrowCursor))
             self.ctrl_is_pressed = False
         else:
@@ -370,7 +369,7 @@ class EMultiGraphicsView(QGraphicsView):
 
         if frame:
             rect = self.scene().itemsBoundingRect()
-            self.fitInView(rect, Qt.KeepAspectRatio)
+            self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def replace_image(self, item_id, pixmap):
         if item_id in self.id_map:
@@ -387,7 +386,7 @@ class EMultiGraphicsView(QGraphicsView):
         super(EMultiGraphicsView, self).resizeEvent(event)
         if len(self.pixmaps) > 0 and self.auto_frame:
             rect = self.scene().itemsBoundingRect()
-            self.fitInView(rect, Qt.KeepAspectRatio)
+            self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.RightButton:
@@ -397,14 +396,14 @@ class EMultiGraphicsView(QGraphicsView):
             super(EMultiGraphicsView, self).mousePressEvent(event)
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.viewport().setCursor(QCursor(Qt.UpArrowCursor))
             self.ctrl_is_pressed = True
             event.ignore()
 
-        elif event.key() == Qt.Key_F:
+        elif event.key() == Qt.Key.Key_F:
             self.setSceneRect(QRectF())
-            self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+            self.fitInView(self.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
             self.curr_scale = 1.0
         else:
             event.ignore()
@@ -412,12 +411,12 @@ class EMultiGraphicsView(QGraphicsView):
     def mouseDoubleClickEvent(self, event: QMouseEvent):
         if len(self.pixmaps) > 0 and self.auto_frame:
             rect = self.scene().itemsBoundingRect()
-            self.fitInView(rect, Qt.KeepAspectRatio)
+            self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
         else:
             event.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.viewport().setCursor(QCursor(Qt.ArrowCursor))
             self.ctrl_is_pressed = False
         else:
@@ -504,8 +503,8 @@ class EToolBar(QToolBar):
 
         qp.begin(self)
 
-        qp.setRenderHint(QPainter.Antialiasing)
-        qp.setRenderHint(QPainter.TextAntialiasing)
+        qp.setRenderHint(QPainter.RenderHint.Antialiasing)
+        qp.setRenderHint(QPainter.RenderHint.TextAntialiasing)
 
         pen.setColor(self.indicator_color)
         pen.setWidth(5)
@@ -530,7 +529,7 @@ class ImagePreviewPopup(QMainWindow):
         self.view = EGraphicsView(self)
         self.setCentralWidget(self.view)
         self.view.set_image(pixmap)
-        self.setWindowFlags(Qt.Popup|Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.Popup|Qt.WindowType.FramelessWindowHint)
         self.show()
         self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
 
@@ -544,7 +543,7 @@ class TextEditPopup(QMainWindow):
         self.view = QPlainTextEdit(self)
         self.view.setPlainText(text)
         self.setCentralWidget(self.view)
-        self.setWindowFlags(Qt.Popup|Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.Popup|Qt.WindowType.FramelessWindowHint)
         self.onFinished.connect(on_finished)
 
         self.show()
@@ -563,7 +562,7 @@ class TextEditPopup(QMainWindow):
         super(TextEditPopup, self).closeEvent(a0)
 
     def keyPressEvent(self, a0: QKeyEvent):
-        if a0.key() == Qt.Key_Enter:
+        if a0.key() == Qt.Key.Key_Enter:
             self.close()
 
 
@@ -662,7 +661,7 @@ class VIANMovableGraphicsItem(QGraphicsPixmapItem):
         super(VIANMovableGraphicsItem, self).__init__(pixmap)
         if hover_text != None:
             self.setToolTip(hover_text)
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
         self.abs_pos = None
         self.signals = VIANMoveableGraphicsItemSignals()
         self.pos_scale = 1.0
@@ -796,7 +795,7 @@ class MultiItemTextInputItem(QWidget):
 class CreateSegmentationPopup(QMainWindow):
     def __init__(self, parent, project, name = "New Segmentation", callback = None):
         super(CreateSegmentationPopup, self).__init__(parent)
-        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
         self.line_name = QLineEdit(self)
         self.line_name.setText(name)
         self.project = project
@@ -822,7 +821,7 @@ class CreateSegmentationPopup(QMainWindow):
 class CreateAnnotationLayerPopup(QMainWindow):
     def __init__(self, parent, project, name="New AnnotationLayer", callback = None):
         super(CreateAnnotationLayerPopup, self).__init__(parent)
-        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
         self.line_name = QLineEdit(self)
         self.line_name.setText(name)
         self.project = project
@@ -848,7 +847,7 @@ class CreateAnnotationLayerPopup(QMainWindow):
 class CreateScreenshotGroupPopup(QMainWindow):
     def __init__(self, parent, project, name="New ScreenshotGroup", callback=None):
         super(CreateScreenshotGroupPopup, self).__init__(parent)
-        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint)
         self.line_name = QLineEdit(self)
         self.line_name.setText(name)
         self.project = project

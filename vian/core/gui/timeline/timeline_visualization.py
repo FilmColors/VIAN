@@ -1,7 +1,7 @@
-from PyQt5 import QtGui
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import QSlider, QLabel
+from PyQt6 import QtGui
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import QSlider, QLabel
 from vian.core.gui.timeline.timeline_base import TimelineControl, TimelineBar, QPushButton
 
 from vian.core.data.interfaces import TimelineDataset
@@ -13,7 +13,7 @@ class TimelineVisualizationControl(TimelineControl):
 
     def __init__(self, parent, timeline, item = None, name = "No Name"):
         super(TimelineVisualizationControl, self).__init__(parent,timeline, item, name)
-        self.sp_filter = QSlider(Qt.Horizontal)
+        self.sp_filter = QSlider(Qt.Orientation.Horizontal)
         self.sp_filter.setMinimum(1)
         self.sp_filter.setMaximum(20)
 
@@ -62,7 +62,7 @@ class TimelineVisualization(TimelineBar):
 
         self.last_data = data, ms
 
-        qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
+        qimage = QtGui.QImage(self.size(), QtGui.QImage.Format.Format_ARGB32_Premultiplied)
         qimage.fill(QtCore.Qt.transparent)
         qp = QtGui.QPainter(qimage)
 
@@ -70,8 +70,8 @@ class TimelineVisualization(TimelineBar):
 
         qp.setPen(pen)
         qp.begin(qimage)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing, True)
 
         rect = QRect(self.rect().x(),
                      self.rect().y(),

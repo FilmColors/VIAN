@@ -2,9 +2,9 @@ import glob
 import os
 import cv2
 
-from PyQt5 import uic
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QCompleter, QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea, QComboBox
+from PyQt6 import uic
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QCompleter, QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea, QComboBox
 from vian.core.container.project import VIANProject, VIAN_PROJECT_EXTENSION
 from vian.core.data.enums import MovieSource
 from vian.core.gui.ewidgetbase import EDialogWidget

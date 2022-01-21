@@ -7,7 +7,7 @@ requirements = [
     'sqlalchemy',
     'opencv-contrib-python-headless',
     'requests',
-    'PyQt5==5.14.2',
+    'PyQt6==5.14.2',
     'PyQtWebEngine==5.14',
     'scikit-learn',
     'flask',

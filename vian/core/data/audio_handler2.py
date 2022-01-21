@@ -10,7 +10,7 @@ import numpy as np
 from vian.core.misc.ffmpeg_executor import ffmpeg_convert
 from moviepy.editor import *
 from typing import List, Tuple
-from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal
 from vian.core.data.interfaces import TimelineDataset
 from vian.core.data.log import log_error, log_info, log_warning, log_debug
 from vian.core.container.project import VIANProject

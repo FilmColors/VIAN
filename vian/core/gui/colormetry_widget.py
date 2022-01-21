@@ -1,7 +1,7 @@
 from vian.core.gui.ewidgetbase import EDockWidget
-from PyQt5 import uic, QtWidgets
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6 import uic, QtWidgets
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 from vian.core.data.interfaces import IProjectChangeNotify
 from vian.core.data.log import log_error, log_info
 from vian.core.analysis.colorimetry.hilbert import create_hilbert_transform, hilbert_mapping_3d, HilbertMode
@@ -117,11 +117,11 @@ class ColorimetryLiveWidget(EDockWidget, IProjectChangeNotify):
             self.a_hist.triggered.connect(t4.show)
             self.a_spatial.triggered.connect(t5.show)
 
-            self.inner.addDockWidget(Qt.LeftDockWidgetArea, t1, Qt.Horizontal)
-            self.inner.addDockWidget(Qt.RightDockWidgetArea, t2, Qt.Horizontal)
-            self.inner.addDockWidget(Qt.BottomDockWidgetArea, t3, Qt.Horizontal)
-            self.inner.addDockWidget(Qt.RightDockWidgetArea, t4, Qt.Horizontal)
-            self.inner.addDockWidget(Qt.RightDockWidgetArea, t5, Qt.Horizontal)
+            self.inner.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, t1, Qt.Orientation.Horizontal)
+            self.inner.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, t2, Qt.Orientation.Horizontal)
+            self.inner.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, t3, Qt.Orientation.Horizontal)
+            self.inner.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, t4, Qt.Orientation.Horizontal)
+            self.inner.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, t5, Qt.Orientation.Horizontal)
 
             t3.hide()
             t4.hide()

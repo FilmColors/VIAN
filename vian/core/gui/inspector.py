@@ -9,7 +9,7 @@ from vian.core.gui.misc.filmography_widget import FilmographyWidget2
 
 from vian.core.container.project import *
 from vian.core.gui.tag_widget import TagWidget
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 
 
 class Inspector(EDockWidget, IProjectChangeNotify):
@@ -24,13 +24,13 @@ class Inspector(EDockWidget, IProjectChangeNotify):
         self.textEdit_Notes.textChanged.connect(self.set_notes)
 
         self.completer = QCompleter()
-        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.btn_VocMatrix.clicked.connect(self.main_window.create_vocabulary_matrix)
 
         self.visibilityChanged.connect(self.on_visibility_changed)
         self.lineEdit_Vocabulary.setCompleter(self.completer)
 
-        # self.widget().setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+        # self.widget().setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Expanding)
         # self.widget().setMaximumWidth(self.max_width)
         # self.widget().setMinimumWidth(self.max_width // 2)
 
@@ -52,7 +52,7 @@ class Inspector(EDockWidget, IProjectChangeNotify):
             self.item.set_notes(self.textEdit_Notes.toPlainText())
 
     def vocabulary_key_press(self, QKeyEvent):
-        if QKeyEvent.key() == Qt.Key_Tab:
+        if QKeyEvent.key() == Qt.Key.Key_Tab:
             self.lineEdit_Vocabulary.setText(self.completer.currentCompletion())
 
     def set_voc_words(self):
@@ -472,7 +472,7 @@ class AttributesMediaObject(QWidget):
 
 
     def keyPressEvent(self, a0: QtGui.QKeyEvent):
-        if a0.key() == Qt.Key_Delete:
+        if a0.key() == Qt.Key.Key_Delete:
             idx = self.listWidget_AttachedMedia.currentIndex()
             self.descriptor.remove_media_object(self.descriptor.media_objects[idx])
             self.update_list()
@@ -524,7 +524,7 @@ class AttributesAnalysis(QWidget):
 
         # Vis could be none because of a failed Visualization creation
         if self.vis is not None:
-            self.vis.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred))
+            self.vis.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred))
             self.layout().addWidget(self.vis)
         self.show()
 
@@ -626,9 +626,9 @@ class DefaultValueVector(AttributesNodeDefaultValues):
         self.lineEdit.setText(text)
 
         self.lineEdit.textChanged.connect(self.on_value_changed)
-        validator = QRegExpValidator()
-        regex = QRegExp("^[0-9]+[.]?[0-9]*(,[0-9]+[.]?[0-9]*)*$")
-        validator.setRegExp(regex)
+        validator = QRegularExpressionValidator()
+        regex = QRegularExpression("^[0-9]+[.]?[0-9]*(,[0-9]+[.]?[0-9]*)*$")
+        validator.setRegularExpression(regex)
         self.lineEdit.setValidator(validator)
 
 

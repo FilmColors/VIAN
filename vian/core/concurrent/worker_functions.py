@@ -1,7 +1,7 @@
 import json
 
-from PyQt5 import QtGui
-from PyQt5.QtCore import Qt
+from PyQt6 import QtGui
+from PyQt6.QtCore import Qt
 
 from vian.core import version
 from vian.core.gui.main_window import *
@@ -248,8 +248,8 @@ def render_annotations(frame, annotation_dicts):
     qimage, qpixmap = numpy_to_qt_image(frame)
     qp = QtGui.QPainter(qimage)
     try:
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
 
         for a in annotation_dicts:
             position = a['orig_position']  # orig position has been modified depending on the keys

@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
 import pickle
 import typing
 import sys
@@ -201,7 +201,7 @@ class VocabularyGraph(QWidget, IVIANVisualization):
         self.current_selection = obj
 
         if obj is not None:
-            self.view.setRenderHint(QPainter.Antialiasing, True)
+            self.view.setRenderHint(QPainter.RenderHint.Antialiasing, True)
             obj.set_selected(True)
             self.onSelectionChanged.emit(obj)
 
@@ -211,7 +211,7 @@ class VocabularyGraph(QWidget, IVIANVisualization):
 
             self.highlight(h_nodes, h_edges)
         else:
-            self.view.setRenderHint(QPainter.Antialiasing, False)
+            self.view.setRenderHint(QPainter.RenderHint.Antialiasing, False)
 
     def highlight(self, nodes, edges):
         for n in self.nodes:
@@ -357,7 +357,7 @@ class VocabularyGraph(QWidget, IVIANVisualization):
                 lbl.setPos(itm[0] * scale + (dot_size * s / 2) - lbl.textWidth(),
                            itm[1] * scale + (dot_size * s / 2))
                 lbl.setDefaultTextColor(QColor(200,200,200))
-                lbl.setFlag(QGraphicsItem.ItemIgnoresTransformations)
+                lbl.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations)
                 self.labels.append(lbl)
                 self.node_weights.append(s)
                 self.nodes[counter].label = lbl
@@ -511,11 +511,11 @@ class GraphControls(QWidget):
 
         self.layout().addWidget(self.node_query_ctrl)
         self.layout().addWidget(self.n_depth_ctrl)
-        self.layout().addWidget(line_separator(Qt.Horizontal))
+        self.layout().addWidget(line_separator(Qt.Orientation.Horizontal))
         self.layout().addWidget(self.thresholds_nodes_ctrl)
         self.layout().addWidget(self.thresholds_edges_ctrl)
         self.layout().addWidget(self.btn_reload)
-        self.layout().addItem(QSpacerItem(1,1,QSizePolicy.Fixed, QSizePolicy.Expanding))
+        self.layout().addItem(QSpacerItem(1,1,QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding))
 
     def on_query(self):
         self.node_query_line.completer().complete()

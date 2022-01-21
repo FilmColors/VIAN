@@ -2,7 +2,7 @@
 https://gist.github.com/Cysu/7461066
 """
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt6 import QtGui, QtCore, QtWidgets
 
 
 class FlowLayout(QtWidgets.QLayout):
@@ -73,14 +73,14 @@ class FlowLayout(QtWidgets.QLayout):
         for item in self.itemList:
             wid = item.widget()
             spaceX = self.spacing() + wid.style().layoutSpacing(
-                QtWidgets.QSizePolicy.PushButton,
-                QtWidgets.QSizePolicy.PushButton,
-                QtCore.Qt.Horizontal)
+                QtWidgets.QSizePolicy.ControlType.PushButton,
+                QtWidgets.QSizePolicy.ControlType.PushButton,
+                QtCore.Qt.Orientation.Horizontal)
 
             spaceY = self.spacing() + wid.style().layoutSpacing(
-                QtWidgets.QSizePolicy.PushButton,
-                QtWidgets.QSizePolicy.PushButton,
-                QtCore.Qt.Vertical)
+                QtWidgets.QSizePolicy.ControlType.PushButton,
+                QtWidgets.QSizePolicy.ControlType.PushButton,
+                QtCore.Qt.Orientation.Vertical)
 
             nextX = x + item.sizeHint().width() + spaceX
             if nextX - spaceX > rect.right() and lineHeight > 0:

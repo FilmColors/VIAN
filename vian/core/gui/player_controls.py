@@ -1,8 +1,8 @@
 import os
 
 import numpy as np
-from PyQt5 import QtCore, uic
-from PyQt5.QtWidgets import QComboBox, QSpinBox, QLayout
+from PyQt6 import QtCore, uic
+from PyQt6.QtWidgets import QComboBox, QSpinBox, QLayout
 
 from vian.core.data.log import log_error, log_info
 from vian.core.data.computation import ms_to_string

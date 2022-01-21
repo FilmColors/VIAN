@@ -1,7 +1,7 @@
-from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt6 import QtWidgets, QtGui
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
 
 from vian.core.data.interfaces import TimelineDataset
 from vian.core.container.project import *
@@ -45,17 +45,17 @@ class TimelineControl(QtWidgets.QWidget):
         self.layout().setSpacing(2)
         self.lbl_title = QLabel(self)
         self.lbl_title.setStyleSheet("QWidget{background:transparent; margin:0pt;}")
-        self.lbl_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.lbl_title.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         self.layout().addWidget(self.lbl_title,0, 1, 1, 3)
 
         self.btn_pin = QPushButton(create_icon("qt_ui/icons/icon_pin.png"), "", self)
-        self.btn_pin.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.btn_pin.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.btn_pin.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
         self.layout().addWidget(self.btn_pin, 0, 0)
 
         self.btn_pin.clicked.connect(self.toggle_pin)
 
-        self.expand = QSpacerItem(1,1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+        self.expand = QSpacerItem(1,1, QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
 
         self.bottom_line = None
         self.btn_lock = None
@@ -65,7 +65,7 @@ class TimelineControl(QtWidgets.QWidget):
         self.set_name()
         self._add_spacer()
 
-        h = 4 * QtWidgets.QDesktopWidget().fontMetrics().height()
+        h = 4 * QtWidgets.QApplication.activeWindow().fontMetrics().height()
 
         if self.item.strip_height == -1:
             self.resize(self.width(), h )
@@ -79,7 +79,7 @@ class TimelineControl(QtWidgets.QWidget):
         if isinstance(self.item, ILockable):
             self.btn_lock = QPushButton(create_icon("qt_ui/icons/icon_locked2.png"), "", self)
             self.btn_lock.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
-            self.btn_lock.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+            self.btn_lock.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
             self.layout().addWidget(self.btn_lock,1,0,1,1)
 
             if self.item.is_locked():
@@ -92,13 +92,13 @@ class TimelineControl(QtWidgets.QWidget):
         if isinstance(self.item, Segmentation):
             self.btn_classification = QPushButton(create_icon("qt_ui/icons/icon_classification"), "", self)
             self.btn_classification.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
-            self.btn_classification.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+            self.btn_classification.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
             self.layout().addWidget(self.btn_classification,1,1,1,1)
             self.btn_classification.clicked.connect(self.toggle_classification)
 
             self.btn_vocabulary = QPushButton(create_icon("qt_ui/icons/icon_vocabulary"), "", self)
             self.btn_vocabulary.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
-            self.btn_vocabulary.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+            self.btn_vocabulary.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
             self.layout().addWidget(self.btn_vocabulary, 1, 3, 1, 1)
             self.btn_vocabulary.clicked.connect(self.show_vocabulary_setup)
 
@@ -222,7 +222,7 @@ class TimelineControl(QtWidgets.QWidget):
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255, 50))
         pen.setWidth(1)
         qp.setPen(pen)
@@ -292,7 +292,7 @@ class TimelineBar(QtWidgets.QFrame):
         self.control.onHeightChanged.connect(self.on_height_changed)
         self.is_selected = False
 
-        self.setFrameStyle(QFrame.Box)
+        self.setFrameStyle(QFrame.Shape.Box)
 
         self.slices = []
         self.slices_index = dict()
@@ -376,7 +376,7 @@ class TimelineBar(QtWidgets.QFrame):
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(20, 20, 20, 50))
         pen.setWidth(1)
         qp.setPen(pen)
@@ -529,7 +529,7 @@ class TimebarSlice(QtWidgets.QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255))
         pen.setWidth(2)
         qp.setPen(pen)
@@ -846,7 +846,7 @@ class MediaObjectWidget(QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255))
         pen.setWidth(2)
         qp.setPen(pen)
@@ -892,7 +892,7 @@ class TimebarKey(QtWidgets.QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255))
         pen.setWidth(2)
         qp.setPen(pen)
@@ -915,9 +915,9 @@ class TimelineScrubber(QtWidgets.QWidget):
         self.timeline = timeline
         self.player = player
         self.resize(10, r.height())
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        # self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
+        # self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
         self.is_hovered = False
         self.was_playing = False
         self.offset = 0
@@ -981,7 +981,7 @@ class TimelineScrubber(QtWidgets.QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 0, 0))
         pen.setWidth(2)
         qp.setPen(pen)
@@ -998,10 +998,10 @@ class TimelineScrubber(QtWidgets.QWidget):
 class TimelineTimemark(QtWidgets.QWidget):
     def __init__(self, parent, color = QColor(255,255,255,50)):
         super(TimelineTimemark, self).__init__(parent)
-        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.color = color
         self.setFixedWidth(5)
-        self.setAttribute(Qt.WA_AlwaysStackOnTop)
+        self.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
         self.show()
 
     def paintEvent(self, a0: QtGui.QPaintEvent):
@@ -1009,7 +1009,7 @@ class TimelineTimemark(QtWidgets.QWidget):
         pen = QtGui.QPen()
         qp.begin(self)
 
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(self.color)
         pen.setWidth(3)
         qp.setPen(pen)

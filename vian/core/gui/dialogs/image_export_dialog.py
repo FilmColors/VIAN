@@ -1,11 +1,11 @@
 import os
 import cv2
 
-from PyQt5 import uic
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QPoint
+from PyQt6 import uic
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import Qt, QPoint
 from vian.core.data.computation import pixmap_to_numpy
 from vian.core.data.log import log_error
 from vian.core.gui.ewidgetbase import EDialogWidget, EGraphicsView, FileBrowseBar
@@ -346,7 +346,7 @@ class ExportPreviewWidget(QGraphicsView):
     def frame_image(self):
         if self.image_item is not None:
             rect = self.image_item.sceneBoundingRect()
-            self.fitInView(rect, Qt.KeepAspectRatio)
+            self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def resizeEvent(self, event: QResizeEvent):
         super(ExportPreviewWidget, self).resizeEvent(event)

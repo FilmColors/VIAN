@@ -8,7 +8,7 @@ from .container_interfaces import BaseProjectEntity, IHasName, ITimeRange, ISele
 from vian.core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
 from .analysis import SemanticSegmentationAnalysisContainer
 from .annotation_body import Annotatable
-from PyQt5.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal
 import datetime
 from vian.core.data.computation import resize_with_aspect
 

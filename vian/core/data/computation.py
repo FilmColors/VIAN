@@ -4,9 +4,9 @@ These operations can be of arbitrary type and are not categorized.
 """
 from datetime import datetime
 
-from PyQt5.QtGui import QImage, QPixmap, QIcon
+from PyQt6.QtGui import QImage, QPixmap, QIcon
 from vian.core.data.log import *
-import PyQt5.QtCore as QtCore
+import PyQt6.QtCore as QtCore
 import subprocess
 import inspect
 import importlib
@@ -237,10 +237,10 @@ def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_al
         arr = cv2.resize(arr, None, None, factor, factor, cv2.INTER_CUBIC)
 
     if not with_alpha:
-        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 3, QImage.Format_RGB888)
+        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 3, QImage.Format.Format_RGB888)
         qpixmap = QPixmap(qimage)
     else:
-        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 4, QImage.Format_RGBA8888)
+        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 4, QImage.Format.Format_RGBA8888)
         qpixmap = QPixmap(qimage)
     return qimage, qpixmap
 
@@ -263,10 +263,10 @@ def numpy_to_pixmap(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alph
         arr = cv2.resize(arr, None, None, factor, factor, cv2.INTER_CUBIC)
 
     if not with_alpha or arr.shape[2] < 4:
-        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 3, QImage.Format_RGB888)
+        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 3, QImage.Format.Format_RGB888)
         qpixmap = QPixmap(qimage)
     else:
-        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 4, QImage.Format_RGBA8888)
+        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 4, QImage.Format.Format_RGBA8888)
         qpixmap = QPixmap(qimage)
 
     return qpixmap
@@ -278,7 +278,7 @@ def pixmap_to_numpy(pixmap: QPixmap):
     :param pixmap: the Pixmap
     :return: a numpy array
     """
-    return convertQImageToMat(pixmap.toImage().convertToFormat(QImage.Format_ARGB32_Premultiplied))
+    return convertQImageToMat(pixmap.toImage().convertToFormat(QImage.Format.Format_ARGB32_Premultiplied))
 
 
 def convertQImageToMat(qimage):
@@ -290,7 +290,7 @@ def convertQImageToMat(qimage):
     ptr = qimage.bits()
     ptr.setsize(qimage.byteCount())
 
-    if qimage.format() == QImage.Format_ARGB32_Premultiplied:
+    if qimage.format() == QImage.Format.Format_ARGB32_Premultiplied:
         arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
     else:
         arr = np.array(ptr).reshape(height, width, 3)

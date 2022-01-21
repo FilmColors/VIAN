@@ -11,7 +11,7 @@ from typing import Dict
 from shutil import rmtree
 
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 
 from .project import VIANProject, merge_experiment
 from .container_interfaces import IHasName

@@ -1,8 +1,8 @@
 from functools import partial
 import os
-from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton, QTableWidgetItem, QTableWidget, QHBoxLayout, QProgressBar, QScrollArea
-from PyQt5 import uic
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt6.QtWidgets import QWidget, QLabel, QGridLayout, QPushButton, QTableWidgetItem, QTableWidget, QHBoxLayout, QProgressBar, QScrollArea
+from PyQt6 import uic
+from PyQt6.QtCore import pyqtSlot, pyqtSignal
 
 from vian.core.gui.ewidgetbase import EDockWidget
 from vian.core.data.interfaces import IProjectChangeNotify
