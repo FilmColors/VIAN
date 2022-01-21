@@ -325,7 +325,7 @@ class ApplySegmentationWindow(QMainWindow):
     def __init__(self, parent, clusterings, frames, indices, fps, frame_resolution, cluster_range):
         super(ApplySegmentationWindow, self).__init__(parent)
         self.setWindowTitle("Apply Segmentation")
-        self.setWindowFlags(Qt.Tool)
+        self.setWindowFlags(Qt.WindowType.Tool)
         self.project = parent.project
         self.clusterings = clusterings
         self.frames = frames

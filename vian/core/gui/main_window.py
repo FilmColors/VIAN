@@ -646,7 +646,7 @@ class MainWindow(QtWidgets.QMainWindow):
             worker.signals.callback.connect(self.on_colormetry_push_back)
             worker.signals.finished.connect(self.on_colormetry_finished)
             self.abortAllConcurrentThreads.connect(job.abort)
-            self.thread_pool.start(worker, QThread.HighPriority)
+            self.thread_pool.start(worker, 4) # 4 equals QThread.Priority.HighPriority
             self.colormetry_job = job
             self.colormetry_running = True
         else:
@@ -2438,11 +2438,11 @@ class MainWindow(QtWidgets.QMainWindow):
         :return:
         """
         loc = widget.parent().mapToGlobal(widget.pos())
-        if pos == Qt.TopRightCorner:
+        if pos == Qt.Corner.TopRightCorner:
             loc += QPoint(widget.width(), 0)
-        elif pos == Qt.BottomRightCorner:
+        elif pos == Qt.Corner.BottomRightCorner:
             loc += QPoint(widget.width(), widget.height())
-        elif pos == Qt.BottomLeftCorner:
+        elif pos == Qt.Corner.BottomLeftCorner:
             loc += QPoint(0, widget.height())
 
         w = InfoPopup(self, text, loc)

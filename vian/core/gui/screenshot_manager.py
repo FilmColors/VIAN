@@ -1,7 +1,7 @@
 from functools import partial
 
 from PyQt6 import QtGui, QtWidgets
-from PyQt6.QtCore import Qt, QPoint, QRectF, pyqtSlot
+from PyQt6.QtCore import Qt, QPoint, QPointF, QRectF, pyqtSlot
 from PyQt6.QtGui import QFont, QColor
 from PyQt6.QtWidgets import *
 from vian.core.data.enums import *
@@ -582,7 +582,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 current_sm_object.segm_images.append(item_image)
 
                 scr_lbl = self.scene.addText(str(s.shot_id_segm), self.font_captions)
-                scr_lbl.setPos(item_image.pos() + QPoint(10, item_image.qpixmap.height()))
+                scr_lbl.setPos(item_image.pos() + QPointF(10, item_image.qpixmap.height()))
                 scr_lbl.setDefaultTextColor(self.color)
                 # scr_lbl.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations)
                 current_sm_object.scr_captions.append(scr_lbl)
@@ -667,7 +667,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     img.setPos(x, y + int(img_height/5))
                     img.setScale(self.curr_image_scale)
                     img.selection_rect = QtCore.QRect(x, y + int(img_height/5), img_width, img_height)
-                    segm.scr_captions[i].setPos(img.pos() + segm.scr_caption_offset)
+                    segm.scr_captions[i].setPos(img.pos() + QPointF(segm.scr_caption_offset))
 
                 y += (2 * img_height)
         else:

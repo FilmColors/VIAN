@@ -63,7 +63,7 @@ class TimelineVisualization(TimelineBar):
         self.last_data = data, ms
 
         qimage = QtGui.QImage(self.size(), QtGui.QImage.Format.Format_ARGB32_Premultiplied)
-        qimage.fill(QtCore.Qt.transparent)
+        qimage.fill(QtCore.Qt.GlobalColor.transparent)
         qp = QtGui.QPainter(qimage)
 
         pen = QtGui.QPen()
@@ -203,7 +203,7 @@ class TimelineLinePlot(TimelineVisualization):
             d = self.hover_dot_size
             hd = self.hover_dot_size / 2
             qp.drawEllipse(QRectF(float(point.x() - hd), float(point.y() - hd), d, d))
-            p = QPoint(d,0) + point
+            p = QPointF(d,0.0) + point
             qp.drawText(p, self.dataset.name + ": {v}".format(v=round(val, 2)))
 
             c = QColor(self.dataset.vis_color.rgb())

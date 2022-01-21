@@ -60,7 +60,7 @@ class AnnotationEditor(QSplitter):
             self.comboBox_Type.addItem(k)
 
         self.comboBox_Type.currentTextChanged.connect(self.on_mimetype_changed)
-        self.annotationList.setSelectionMode(QListWidget.SingleSelection)
+        self.annotationList.setSelectionMode(QListWidget.SelectionMode.SingleSelection)
 
         self.entries = dict()
         self.entries_lst = []
