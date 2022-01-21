@@ -495,7 +495,7 @@ class MediaObjectsList(QListWidget):
 
     def mousePressEvent(self, e: QtGui.QMouseEvent):
         super(MediaObjectsList, self).mousePressEvent(e)
-        if e.button() == Qt.RightButton:
+        if e.button() == Qt.MouseButton.RightButton:
             self.attr_widget.context_menu(self.mapToGlobal(e.pos()))
 
 
@@ -511,7 +511,7 @@ class AttributesAnalysis(QWidget):
             clobj_name = self.descriptor.target_classification_object.name
 
         title = QLabel("Analysis: " + descriptor.name.replace("_", " "))
-        title.setAlignment(Qt.AlignCenter)
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setStyleSheet("font-weight: bold;")
         self.layout().addWidget(title)
         self.layout().addWidget(QLabel("Target: " + clobj_name))

@@ -150,7 +150,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hdf5_cache = HDF5Cache(self.settings.DIR_ROOT + "/scr_cache.hdf5")
 
         self.clipboard_data = []
-        # loading_screen.showMessage("Checking ELAN Connection", Qt.AlignHCenter|Qt.AlignBottom,
+        # loading_screen.showMessage("Checking ELAN Connection", Qt.AlignmentFlag.AlignHCenter|Qt.AlignmentFlag.AlignBottom,
         #                            QColor(200,200,200,100))
 
         # self.updater = VianUpdater(self, self.version)
@@ -1198,7 +1198,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 action = self.menuRecently_Opened.addAction(recent)
                 action.triggered.connect(partial(self.open_recent, i))
                 if i == 0:
-                    action.setShortcut(QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key.Key_O))
+                    action.setShortcut(QKeySequence(Qt.Modifier.CTRL | Qt.Modifier.SHIFT | Qt.Key.Key_O))
 
         except:
             self.settings.recent_files_path = []
@@ -1243,9 +1243,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.set_overlay_visibility(False)
         if self.project is not None and self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-            if answer == QMessageBox.Yes:
+            if answer == QMessageBox.StandardButton.Yes:
                 self.on_save_project(sync=True)
-            elif answer == QMessageBox.No:
+            elif answer == QMessageBox.StandardButton.No:
                 pass
             else:
                 self.set_overlay_visibility(True)
@@ -1411,10 +1411,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_backup(self):
         answer = QMessageBox.question(self, "Backup", "Do you want to store the Backup into the default Directory?",
-                                      buttons=QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel)
-        if answer == QMessageBox.No:
+                                      buttons=QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No|QMessageBox.StandardButton.Cancel)
+        if answer == QMessageBox.StandardButton.No:
             path = QFileDialog.getExistingDirectory(self, caption="Select Directory to store Backup", directory = self.settings.DIR_ROOT)[0] + "/"
-        elif answer == QMessageBox.Yes:
+        elif answer == QMessageBox.StandardButton.Yes:
             path = self.settings.DIR_BACKUPS
         else:
             return
@@ -1937,7 +1937,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if self.project is not None and self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-            if answer == QMessageBox.Yes:
+            if answer == QMessageBox.StandardButton.Yes:
                 self.on_save_project()
 
 
@@ -2013,7 +2013,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_load_project(self):
         if self.project is not None and self.project.undo_manager.has_modifications():
             answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-            if answer == QMessageBox.Yes:
+            if answer == QMessageBox.StandardButton.Yes:
                 self.on_save_project()
 
         self.check_overlay_visibility()
@@ -2035,7 +2035,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if self.project.undo_manager.has_modifications():
                 answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-                if answer == QMessageBox.Yes:
+                if answer == QMessageBox.StandardButton.Yes:
                     self.on_save_project(sync=True)
 
             self.flask_server.on_closed()
@@ -2521,7 +2521,7 @@ class MainWindow(QtWidgets.QMainWindow):
             #                                   "\n\n"
             #                                   "Hint: The Colormetry will be needed for several Tools in VIAN,\n"
             #                                   "but will need quite some resources of your computer.")
-            #     if answer == QMessageBox.Yes:
+            #     if answer == QMessageBox.StandardButton.Yes:
             #         run_colormetry = True
             #     self.open_dialogs.remove("Dummy")
             #     self.check_overlay_visibility()

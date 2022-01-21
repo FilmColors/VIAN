@@ -361,7 +361,7 @@ class OutlinerTreeWidget(QTreeWidget):
         self.editor = QOutlinerLineEdit(self, self.currentItem())
         self.editor.move(self.mapToParent(pos))
         self.editor.resize(QtCore.QSize(rect.width(), rect.height()))
-        self.editor.setFocus(Qt.OtherFocusReason)
+        self.editor.setFocus(Qt.FocusReason.OtherFocusReason)
 
     def on_selection_changed(self):
         if self.selection_dispatch:
@@ -386,7 +386,7 @@ class OutlinerTreeWidget(QTreeWidget):
 
     def mousePressEvent(self, QMouseEvent):
         super(OutlinerTreeWidget, self).mousePressEvent(QMouseEvent)
-        if QMouseEvent.buttons() == Qt.RightButton:
+        if QMouseEvent.buttons() == Qt.MouseButton.RightButton:
             if len(self.selectedIndexes()) <= 1:
                 super(OutlinerTreeWidget, self).mousePressEvent(QMouseEvent)
 

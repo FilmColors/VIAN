@@ -133,7 +133,7 @@ class AnalysisResultsWidget(QWidget, IProjectChangeNotify):
                         scroll.setWidget(w)
                         w.setLayout(QGridLayout())
                         scroll.setWidgetResizable(True)
-                        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+                        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
                         tabs[analysis.get_name()] = dict(widget=w, x = 0, y = 0)
                         tabs_widget.addTab(scroll, analysis.get_name())
 
@@ -549,8 +549,8 @@ class AnalysisFullScreenFilterSection(QWidget):
         self.scrollarea.widget().layout().addItem(QSpacerItem(10,10, QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding))
 
         self.scrollarea.widget().resize(self.fullscreen_window.filter_width - 20, (100 * len(self.main_window.project.vocabularies)))
-        self.scrollarea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scrollarea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollarea.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scrollarea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.show()
 
     def add_filter_menu(self):
@@ -642,7 +642,7 @@ class FilterCategory(QFrame):
             self.expand()
 
     def on_filter(self, word, state):
-        if state == Qt.Checked:
+        if state == Qt.CheckState.Checked:
             self.filter_section.fullscreen_window.add_filter(word)
         else:
             self.filter_section.fullscreen_window.remove_filter(word)

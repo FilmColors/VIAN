@@ -449,7 +449,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
                     break
         if has_been_used:
             answer = delete_even_if_connected_msgbox("voc")
-            if answer == QMessageBox.Yes:
+            if answer == QMessageBox.StandardButton.Yes:
                 self.delete()
             else:
                 return
@@ -549,7 +549,7 @@ class VocabularyWord(BaseProjectEntity, IHasName):
                 break
         if has_been_used:
             answer = delete_even_if_connected_msgbox("word")
-            if answer == QMessageBox.Yes:
+            if answer == QMessageBox.StandardButton.Yes:
                 self.delete()
             else:
                 return

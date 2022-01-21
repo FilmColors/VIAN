@@ -236,7 +236,7 @@ class ColorField(QWidget):
         self.v = v
 
     def mousePressEvent(self, a0: QMouseEvent):
-        if a0.button() == Qt.RightButton:
+        if a0.button() == Qt.MouseButton.RightButton:
             self.colorRightClicked.emit((self.h,self.s,self.v))
         else:
             self.colorClicked.emit((self.h,self.s,self.v))

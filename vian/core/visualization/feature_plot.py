@@ -413,7 +413,7 @@ class GenericFeaturePlot(QGraphicsView, IVIANVisualization):
             event.ignore()
 
     def mousePressEvent(self, event: QtGui.QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)
@@ -648,7 +648,7 @@ class FeaturesParamWidget(QWidget):
                 curr_class_itm.addChild(curr_voc_itm)
 
             itm = QTreeWidgetItem([f.name])
-            itm.setCheckState(0, Qt.Unchecked)
+            itm.setCheckState(0, Qt.CheckState.Unchecked)
 
             curr_voc_itm.addChild(itm)
             self.features.append((itm, f))
@@ -664,6 +664,6 @@ class FeaturesParamWidget(QWidget):
     def on_clicked(self):
         result = []
         for f in self.features:
-            if f[0].checkState(0) == Qt.Checked:
+            if f[0].checkState(0) == Qt.CheckState.Checked:
                 result.append(f[1])
         self.onFeatureActivated.emit(result)

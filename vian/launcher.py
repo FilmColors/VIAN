@@ -95,7 +95,7 @@ def vian_exception_hook(exctype, value, traceback):
                                                           "Also, don't forget to send us the log files in /Your/VIAN/Directory/log-files/\n "
                                                                     "Do you want to open the folder now?")
 
-        if answer == QMessageBox.Yes:
+        if answer == QMessageBox.StandardButton.Yes:
             if sys.platform == "win32":
                 subprocess.run("explorer log-files", shell=True)
             elif sys.platform == "darwin":
@@ -136,8 +136,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     print("ApplicationDone")
 
-    app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)
 
     print("Setting UI")
     print(os.getcwd())
@@ -148,9 +147,9 @@ if __name__ == '__main__':
     # Splash Screen during loading
     screen = app.desktop().screenGeometry()
     pixmap = QPixmap("qt_ui/images/loading_screen_round.png")
-    pixmap = pixmap.scaled(screen.height() / 2, screen.height() / 2, transformMode=Qt.SmoothTransformation)
+    pixmap = pixmap.scaled(screen.height() / 2, screen.height() / 2, transformMode=Qt.TransformationMode.SmoothTransformation)
     splash = QSplashScreen(pixmap)
-    splash.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.SplashScreen)
+    splash.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint|Qt.WindowType.SplashScreen)
     splash.show()
     app.processEvents()
 

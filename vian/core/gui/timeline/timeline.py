@@ -1073,7 +1073,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
     #endregion
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.button() == Qt.LeftButton:
+        if QMouseEvent.button() == Qt.MouseButton.LeftButton:
             if self.shift_pressed:
                 if self.selector is None:
                     self.start_selector(self.time_scrubber.pos())
@@ -1081,7 +1081,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
                 else:
                     self.move_selector(QMouseEvent.pos())
 
-        if QMouseEvent.button() == Qt.RightButton:
+        if QMouseEvent.button() == Qt.MouseButton.RightButton:
             if self.is_cutting:
                 self.abort_cutting()
             else:
@@ -1097,7 +1097,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             self.end_selector()
 
     def mouseMoveEvent(self, QMouseEvent):
-        if QMouseEvent.buttons() & Qt.RightButton or self.shift_pressed:
+        if QMouseEvent.buttons() & Qt.MouseButton.RightButton or self.shift_pressed:
             pos = self.round_to_grid(QMouseEvent.pos() - self.frame_Bars.pos())
             self.move_selector(pos)
 
@@ -1310,13 +1310,13 @@ class TimebarDrawing(QtWidgets.QWidget):
 
     def mouseReleaseEvent(self, QMouseEvent):
         self.timeline.set_time_indicator_visibility(False)
-        if QMouseEvent.button() == Qt.LeftButton:
+        if QMouseEvent.button() == Qt.MouseButton.LeftButton:
             if self.was_playing:
                 self.timeline.main_window.player.play()
             if self.timeline.selector is not None:
                 self.timeline.end_selector()
 
-        if QMouseEvent.button() == Qt.RightButton:
+        if QMouseEvent.button() == Qt.MouseButton.RightButton:
             if self.timeline.selector is not None:
                 self.timeline.end_selector()
             QMouseEvent.ignore()
@@ -1324,7 +1324,7 @@ class TimebarDrawing(QtWidgets.QWidget):
     def mousePressEvent(self, QMouseEvent):
         self.was_playing = self.timeline.main_window.player.is_playing()
         self.timeline.set_time_indicator_visibility(True)
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             if self.was_playing:
                 self.timeline.main_window.player.pause()
             pos = self.mapToParent(QMouseEvent.pos()).x()
@@ -1333,11 +1333,11 @@ class TimebarDrawing(QtWidgets.QWidget):
             if self.timeline.shift_pressed:
                 self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
 
-        if QMouseEvent.buttons() & Qt.RightButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.RightButton:
             self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
 
     def mouseMoveEvent(self, QMouseEvent):
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             pos = self.mapToParent(QMouseEvent.pos()).x()
             pos += 1 # offset correction
             self.timeline.move_scrubber(pos)
@@ -1346,7 +1346,7 @@ class TimebarDrawing(QtWidgets.QWidget):
             if self.timeline.shift_pressed and self.timeline.selector is not None:
                 self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
 
-        if QMouseEvent.buttons() & Qt.RightButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.RightButton:
             if self.timeline.selector is not None:
                 self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
             else:

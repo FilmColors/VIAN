@@ -19,7 +19,7 @@ class DataType(object):
         # self.name.move(0,0)
         # self.name.resize(self.width(), self.height() / 2.0)
         # self.name.setAttribute(Qt.WA_TranslucentBackground)
-        # self.name.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
+        # self.name.setAlignment(Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
         # self.show()
 
     def set_value(self, value):

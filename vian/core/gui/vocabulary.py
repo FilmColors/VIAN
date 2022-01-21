@@ -180,7 +180,7 @@ class VocabularyTreeView(QWidget):
         if not self.mode == self.MODE_EDITING:
             return
 
-        if QMouseEvent.buttons() == Qt.RightButton:
+        if QMouseEvent.buttons() == Qt.MouseButton.RightButton:
 
             menu = QMenu(self.tree)
             a_new = menu.addAction("New Collection")
@@ -226,7 +226,7 @@ class CollectionTreeWidget(QTreeWidget):
 
     def mousePressEvent(self, QMouseEvent):
         super(CollectionTreeWidget, self).mousePressEvent(QMouseEvent)
-        if QMouseEvent.buttons() == Qt.RightButton:
+        if QMouseEvent.buttons() == Qt.MouseButton.RightButton:
             self.onContextMenu.emit(QMouseEvent, self.mapToParent(QMouseEvent.pos()))
 
 
@@ -258,13 +258,13 @@ class CollectionItem(QTreeWidgetItem):
     def set_check_status(self, vocabularies:List[Vocabulary]):
         uuids = [v.unique_id for v in vocabularies]
         for k, itm in self.items.items():
-            itm.setCheckState(0, Qt.Checked if k in uuids else Qt.Unchecked)
+            itm.setCheckState(0, Qt.CheckState.Checked if k in uuids else Qt.CheckState.Unchecked)
 
     def get_check_state(self, result):
         for k, itm in self.items.items():
             result.append(dict(
                 vocabulary=itm.vocabulary,
-                state = itm.checkState(0) == Qt.Checked
+                state = itm.checkState(0) == Qt.CheckState.Checked
             ))
         return result
 
@@ -336,7 +336,7 @@ class WordsList(QListWidget):
 
     def mousePressEvent(self, QMouseEvent):
         super(WordsList, self).mousePressEvent(QMouseEvent)
-        if QMouseEvent.buttons() == Qt.RightButton:
+        if QMouseEvent.buttons() == Qt.MouseButton.RightButton:
 
             if self.vocabulary is None:
                 return

@@ -463,7 +463,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         h = final_h
 
         qimage = QtGui.QImage(QtCore.QSize(final_w, final_h), QtGui.QImage.Format.Format_ARGB32_Premultiplied)
-        qimage.fill(QtCore.Qt.transparent)
+        qimage.fill(QtCore.Qt.GlobalColor.transparent)
         qp = QtGui.QPainter(qimage)
 
         for a in self.project.current_annotation_layer.annotations:
@@ -825,7 +825,7 @@ class DrawingBase(QtWidgets.QWidget):
             qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
             pen.setColor(QtGui.QColor(200,200,200))
             pen.setWidth(2)
-            pen.setStyle(QtCore.Qt.DashDotDotLine)
+            pen.setStyle(QtCore.Qt.PenStyle.DashDotDotLine)
             pen.setJoinStyle(Qt.BevelJoin)
             pen.setCapStyle(Qt.RoundCap)
             qp.setPen(pen)
@@ -913,7 +913,7 @@ class DrawingBase(QtWidgets.QWidget):
             qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
             pen.setColor(QtGui.QColor(200, 200, 200))
             pen.setWidth(2)
-            pen.setStyle(QtCore.Qt.DashDotDotLine)
+            pen.setStyle(QtCore.Qt.PenStyle.DashDotDotLine)
             pen.setJoinStyle(Qt.BevelJoin)
             pen.setCapStyle(Qt.RoundCap)
             qp.setPen(pen)
@@ -973,7 +973,7 @@ class DrawingBase(QtWidgets.QWidget):
 
     def mousePressEvent(self, QMouseEvent):
         if self.is_active and not self.overlay.main_window.player.is_playing():
-            if QMouseEvent.button() == Qt.LeftButton:
+            if QMouseEvent.button() == Qt.MouseButton.LeftButton:
                 self.curr_loc = self.pos() / self.scale
                 self.offset = QMouseEvent.pos()
                 self.curr_size = self.size().width(), self.size().height()
@@ -982,7 +982,7 @@ class DrawingBase(QtWidgets.QWidget):
                 self.select()
                 self.executed_handle = self.current_handle
                 return
-            if QMouseEvent.button() == Qt.RightButton:
+            if QMouseEvent.button() == Qt.MouseButton.RightButton:
                 open_context_menu(self.overlay.main_window, self.mapToGlobal(QMouseEvent.pos()), [self.annotation_object], self.overlay.project)
 
     def select(self, dispatch = True):
@@ -1002,7 +1002,7 @@ class DrawingBase(QtWidgets.QWidget):
             return
 
         self.current_handle = get_mouse_handle_by_location(QMouseEvent.pos(), self.rect(),0.2,0.2)
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             if self.executed_handle == "Center":
                 pos = (QMouseEvent.pos() - self.offset)
                 target = self.mapToParent(pos) / self.scale
@@ -1128,7 +1128,7 @@ class DrawingBase(QtWidgets.QWidget):
                 self.scale_widget()
                 return
 
-        if QMouseEvent.buttons() & Qt.RightButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.RightButton:
             delta = self.mapToParent(QMouseEvent.pos() - self.offset) / self.scale
             x = delta.x() - self.pos().x() / self.scale + self.curr_size[0] / self.scale
             y = delta.y() - self.pos().y() / self.scale + self.curr_size[1] / self.scale
@@ -1259,7 +1259,7 @@ class DrawingFreeHand(DrawingBase):
         if not self.is_drawing:
             super(DrawingFreeHand, self).mousePressEvent(QMouseEvent)
         else:
-            if QMouseEvent.button() == Qt.LeftButton:
+            if QMouseEvent.button() == Qt.MouseButton.LeftButton:
                 self.current_line_width = self.overlay.current_line_thickness
                 self.current_color = self.overlay.current_color
                 self.pen_location = QMouseEvent.pos()
@@ -1352,9 +1352,9 @@ class DrawingEditorWidget(QtWidgets.QMainWindow):
         path = os.path.abspath("qt_ui/DrawingEditorWidget.ui")
         uic.loadUi(path, self)
         self.drawing = drawing
-        self.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.WindowType.FramelessWindowHint|Qt.WindowType.Popup)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint|Qt.WindowType.FramelessWindowHint|Qt.WindowType.Popup)
 
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         x = drawing.width()/2
         y = drawing.height()
         if drawing.pos().x() > drawing.parent().width()/2:

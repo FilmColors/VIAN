@@ -175,7 +175,7 @@ class ProgressWidget(QWidget):
             qp.drawArc(r3, self.root_angle * 16, int(((1.0 * 360) * 16)))
             pen.setColor(QColor(255, 255, 255, 150))
             qp.setPen(pen)
-            qp.drawText(QRectF(self.rect()), Qt.AlignCenter, "Pipe\nline")
+            qp.drawText(QRectF(self.rect()), Qt.AlignmentFlag.AlignCenter, "Pipe\nline")
         else:
             qp.drawArc(r1, self.root_angle * 16, int(((self.px * 360) * 16)))
             pen.setColor(QColor(135, 85, 200))
@@ -186,7 +186,7 @@ class ProgressWidget(QWidget):
             qp.drawArc(r3, self.root_angle * 16, int(((self.pz * 360) * 16)))
             pen.setColor(QColor(255, 255, 255, 150))
             qp.setPen(pen)
-            qp.drawText(QRectF(self.rect()),Qt.AlignCenter, str(np.round((np.mean(self.px / 1.0 + self.py / 1.0 + self.pz / 1.0) / 3.0) * 100, 2)) + "%")
+            qp.drawText(QRectF(self.rect()),Qt.AlignmentFlag.AlignCenter, str(np.round((np.mean(self.px / 1.0 + self.py / 1.0 + self.pz / 1.0) / 3.0) * 100, 2)) + "%")
 
         # qp.drawArc(self.rect(), 0, 120 * 16)
         # qp.fillRect(self.rect(), QColor(200,100,0))
@@ -625,7 +625,7 @@ class PipelineListWidget(QListWidget):
     def mousePressEvent(self, e: QMouseEvent) -> None:
         super(PipelineListWidget, self).mousePressEvent(e)
         self.pipeline_widget.on_pipeline_selected()
-        if e.button() == Qt.RightButton:
+        if e.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_edit = menu.addAction("Edit Script")
             a_edit.triggered.connect(self.pipeline_widget.edit_script)

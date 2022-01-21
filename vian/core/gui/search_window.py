@@ -122,9 +122,9 @@ class SearchWindow(QMainWindow):
                 self.keyword_mapping["Keyword:" + k.get_full_name()] = k
 
         self.completer = QCompleter(self.keyword_mapping.keys())
-        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
-        self.completer.setFilterMode(Qt.MatchContains)
-        self.completer.setCompletionMode(QCompleter.PopupCompletion)
+        self.completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.completer.setFilterMode(Qt.MatchFlag.MatchContains)
+        self.completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
         self.line_edit_input.setCompleter(self.completer)
 
         self.line_edit_input.setFocus()

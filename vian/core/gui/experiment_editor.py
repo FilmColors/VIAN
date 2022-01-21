@@ -161,7 +161,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
                 itm = VocabularyListItem(self.listView_Vocabularies, voc)
                 self.listView_Vocabularies.addItem(itm)
                 if voc in self.selected_class_object.obj.get_vocabularies():
-                    itm.setCheckState(Qt.Checked)
+                    itm.setCheckState(Qt.CheckState.Checked)
                 self.voc_items.append(itm)
 
     def update_classification_object_tree(self):
@@ -200,21 +200,21 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         for c in self.main_window.project.segmentation:
             itm = TargetItem(self.listTargets, c, "All Segments of " + c.get_name())
             if c in self.selected_class_object.obj.target_container:
-                itm.setCheckState(Qt.Checked)
+                itm.setCheckState(Qt.CheckState.Checked)
             self.listTargets.addItem(itm)
             self.target_items.append(itm)
 
         for c in self.main_window.project.annotation_layers:
             itm = TargetItem(self.listTargets, c, "All Annotations of " + c.get_name())
             if c in self.selected_class_object.obj.target_container:
-                itm.setCheckState(Qt.Checked)
+                itm.setCheckState(Qt.CheckState.Checked)
             self.listTargets.addItem(itm)
             self.target_items.append(itm)
 
         for c in self.main_window.project.screenshot_groups:
             itm = TargetItem(self.listTargets, c, "All Screenshots of " + c.get_name())
             if c in self.selected_class_object.obj.target_container:
-                itm.setCheckState(Qt.Checked)
+                itm.setCheckState(Qt.CheckState.Checked)
             self.listTargets.addItem(itm)
             self.target_items.append(itm)
 
@@ -272,7 +272,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         if self.inhibit_ui_signals:
             return
         for itm in self.voc_items:
-            if itm.checkState() == Qt.Checked:
+            if itm.checkState() == Qt.CheckState.Checked:
                 if itm.voc not in self.selected_class_object.obj.get_vocabularies():
                     self.selected_class_object.obj.add_vocabulary(itm.voc)
             else:
@@ -300,7 +300,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
     def update_target_list_in_object(self):
         if self.selected_class_object is not None:
             for itm in self.target_items:
-                if itm.checkState() == Qt.Checked:
+                if itm.checkState() == Qt.CheckState.Checked:
                     if itm.target_item not in self.selected_class_object.obj.target_container:
                         self.selected_class_object.obj.target_container.append(itm.target_item)
                 else:
@@ -340,7 +340,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
                 self.current_dataset_label_checkboxes.append(itm)
                 if old_ds[0] == VIAN_SEGMENTATION_DATASETS[idx - 1][0]:
                     if itm.label.value in self.selected_class_object.obj.semantic_segmentation_labels[1]:
-                        itm.setCheckState(Qt.Checked)
+                        itm.setCheckState(Qt.CheckState.Checked)
 
         self.comboBox_Dataset.currentTextChanged.connect(self.on_dataset_changed)
         self.listWidget_Labels.itemChanged.connect(self.update_dataset_in_object)
@@ -348,9 +348,9 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
     def select_all_labels(self, state):
         for s in self.current_dataset_label_checkboxes:
             if state:
-                s.setCheckState(Qt.Checked)
+                s.setCheckState(Qt.CheckState.Checked)
             else:
-                s.setCheckState(Qt.Unchecked)
+                s.setCheckState(Qt.CheckState.Unchecked)
 
     def on_dataset_changed(self):
         self.listWidget_Labels.itemChanged.disconnect(self.update_dataset_in_object)
@@ -374,7 +374,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
                 self.current_dataset_label_checkboxes.append(itm)
                 if old_ds[0] == VIAN_SEGMENTATION_DATASETS[idx - 1][0]:
                     if itm.label.value in self.selected_class_object.obj.semantic_segmentation_labels[1]:
-                        itm.setCheckState(Qt.Checked)
+                        itm.setCheckState(Qt.CheckState.Checked)
 
         self.listWidget_Labels.itemChanged.connect(self.update_dataset_in_object)
 
@@ -382,7 +382,7 @@ class ExperimentEditor(QWidget, IProjectChangeNotify):
         if self.selected_class_object is not None:
             self.selected_class_object.obj.set_dataset(self.comboBox_Dataset.currentText())
             for cb in self.current_dataset_label_checkboxes:
-                if cb.checkState() == Qt.Checked:
+                if cb.checkState() == Qt.CheckState.Checked:
                     self.selected_class_object.obj.add_dataset_label(cb.label.value)
 
     # endregion
@@ -486,18 +486,18 @@ class ClassificationObjectItem(QTreeWidgetItem):
 
 class VocabularyListItem(QListWidgetItem):
     def __init__(self, parent, voc):
-        super(VocabularyListItem, self).__init__(parent, Qt.ItemIsUserCheckable)
+        super(VocabularyListItem, self).__init__(parent, Qt.ItemFlag.ItemIsUserCheckable)
         self.voc = voc
         self.setText(voc.name)
-        self.setCheckState(Qt.Unchecked)
+        self.setCheckState(Qt.CheckState.Unchecked)
 
 
 class LabelListItem(QListWidgetItem):
     def __init__(self, parent, label):
-        super(LabelListItem, self).__init__(parent, Qt.ItemIsUserCheckable)
+        super(LabelListItem, self).__init__(parent, Qt.ItemFlag.ItemIsUserCheckable)
         self.label = label
         self.setText(label.name)
-        self.setCheckState(Qt.Unchecked)
+        self.setCheckState(Qt.CheckState.Unchecked)
 
 
 class AnalysisItem(QListWidgetItem):
@@ -515,4 +515,4 @@ class TargetItem(QListWidgetItem):
         super(TargetItem, self).__init__(parent, Qt.ItemIsUserCheckable)
         self.target_item = target_item
         self.setText(text)
-        self.setCheckState(Qt.Unchecked)
+        self.setCheckState(Qt.CheckState.Unchecked)

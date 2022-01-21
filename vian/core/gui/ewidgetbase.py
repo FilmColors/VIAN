@@ -98,7 +98,7 @@ class EProgressPopup(QDialog):
         super(EProgressPopup, self).__init__(parent)
         path = os.path.abspath("qt_ui/ProgressPopup.ui")
         uic.loadUi(path, self)
-        self.setWindowModality(Qt.ApplicationModal)
+        self.setWindowModality(Qt.WindowModality.ApplicationModal)
 
     @pyqtSlot(float, str)
     def on_progress(self, value, info):
@@ -252,7 +252,7 @@ class EGraphicsView(QGraphicsView):
             self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             if self.has_context_menu:
                 self.create_context_menu(event.pos())
         else:
@@ -260,7 +260,7 @@ class EGraphicsView(QGraphicsView):
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key.Key_Control:
-            self.viewport().setCursor(QCursor(Qt.UpArrowCursor))
+            self.viewport().setCursor(QCursor(Qt.CursorShape.UpArrowCursor))
             self.ctrl_is_pressed = True
             event.ignore()
 
@@ -283,7 +283,7 @@ class EGraphicsView(QGraphicsView):
 
     def keyReleaseEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key.Key_Control:
-            self.viewport().setCursor(QCursor(Qt.ArrowCursor))
+            self.viewport().setCursor(QCursor(Qt.CursorShape.ArrowCursor))
             self.ctrl_is_pressed = False
         else:
             event.ignore()
@@ -389,7 +389,7 @@ class EMultiGraphicsView(QGraphicsView):
             self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             if self.has_context_menu:
                 self.create_context_menu(event.pos())
         else:
@@ -397,7 +397,7 @@ class EMultiGraphicsView(QGraphicsView):
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key.Key_Control:
-            self.viewport().setCursor(QCursor(Qt.UpArrowCursor))
+            self.viewport().setCursor(QCursor(Qt.CursorShape.UpArrowCursor))
             self.ctrl_is_pressed = True
             event.ignore()
 
@@ -417,7 +417,7 @@ class EMultiGraphicsView(QGraphicsView):
 
     def keyReleaseEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key.Key_Control:
-            self.viewport().setCursor(QCursor(Qt.ArrowCursor))
+            self.viewport().setCursor(QCursor(Qt.CursorShape.ArrowCursor))
             self.ctrl_is_pressed = False
         else:
             event.ignore()
@@ -602,7 +602,7 @@ class EditableListWidget(QWidget):
         self.btn_Remove.clicked.connect(self.on_remove)
 
     def mousePressEvent(self, a0: QMouseEvent) -> None:
-        if a0.button() == Qt.RightButton:
+        if a0.button() == Qt.MouseButton.RightButton:
 
             def remove_all(itms):
                 for r in itms:

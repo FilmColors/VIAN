@@ -328,7 +328,7 @@ class VocabularyGraph(QWidget, IVIANVisualization):
 
         pen = QPen(COL_NODE_DES)
         font = QFont("Consolas", self.text_size)
-        brush = QBrush(BRUSH_NODE_DES, Qt.SolidPattern)
+        brush = QBrush(BRUSH_NODE_DES, Qt.BrushStyle.SolidPattern)
 
         counter = 0
         print("Drawing Nodes")
@@ -413,7 +413,7 @@ class VocabularyGraph(QWidget, IVIANVisualization):
                 return n
 
     def mousePressEvent(self, a0: QMouseEvent):
-        if a0.button() == Qt.RightButton:
+        if a0.button() == Qt.MouseButton.RightButton:
             self.on_selection(None)
         else:
             a0.ignore()

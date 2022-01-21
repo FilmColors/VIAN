@@ -88,7 +88,7 @@ def vian_exception_hook(exctype, value, traceback):
                                                           "Also, don't forget to send us the log files in /Your/VIAN/Directory/log-files/\n "
                                                                     "Do you want to open the folder now?")
 
-        if answer == QMessageBox.Yes:
+        if answer == QMessageBox.StandardButton.Yes:
             if sys.platform == "win32":
                 subprocess.run("explorer log-files", shell=True)
             elif sys.platform == "darwin":

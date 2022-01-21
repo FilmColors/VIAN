@@ -116,11 +116,11 @@ class TimebarPicture(QtWidgets.QWidget):
         qp.end()
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             modifiers = QtWidgets.QApplication.keyboardModifiers()
-            self.item.select(multi_select=modifiers == QtCore.Qt.ShiftModifier)
+            self.item.select(multi_select=modifiers == QtCore.Qt.KeyboardModifier.ShiftModifier)
 
-        if QMouseEvent.buttons() & Qt.RightButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.RightButton:
             open_context_menu(self.timeline.main_window, self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
 
     def enterEvent(self, QEvent):

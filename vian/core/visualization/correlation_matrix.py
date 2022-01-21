@@ -244,7 +244,7 @@ class FeatureMatrixParamWidget(QWidget):
                 curr_class_itm.addChild(curr_voc_itm)
 
             itm = QTreeWidgetItem([f.name])
-            itm.setCheckState(0, Qt.Unchecked)
+            itm.setCheckState(0, Qt.CheckState.Unchecked)
 
             curr_voc_itm.addChild(itm)
             self.features.append((itm, f))
@@ -260,6 +260,6 @@ class FeatureMatrixParamWidget(QWidget):
     def on_clicked(self):
         result = []
         for f in self.features:
-            if f[0].checkState(0) == Qt.Checked:
+            if f[0].checkState(0) == Qt.CheckState.Checked:
                 result.append(f[1])
         self.onFeatureActivated.emit(result)

@@ -479,7 +479,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             lbl = QLabel()
             movie = QtGui.QMovie(os.path.abspath("qt_ui/icons/spinner4.gif"))
             lbl.setMovie(movie)
-            lbl.setAttribute(Qt.WA_NoSystemBackground)
+            lbl.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
             movie.start()
 
             font = QFont("Bahnschrift", 36)
@@ -911,7 +911,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key.Key_Control:
-            self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.UpArrowCursor))
+            self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.UpArrowCursor))
             self.ctrl_is_pressed = True
 
         elif event.key() == QtCore.Qt.Key.Key_A and self.ctrl_is_pressed:
@@ -938,7 +938,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def keyReleaseEvent(self, event):
         if event.key() == QtCore.Qt.Key.Key_Control:
-            self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+            self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor))
             self.ctrl_is_pressed = False
         elif event.key() == QtCore.Qt.Key.Key_Shift:
             self.shift_is_pressed = False
@@ -948,7 +948,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def mouseReleaseEvent(self, QMouseEvent):
         if self.rubberband_rect.width() > 20 and self.rubberband_rect.height() > 20:
             modifiers = QtWidgets.QApplication.keyboardModifiers()
-            if not modifiers == QtCore.Qt.ShiftModifier:
+            if not modifiers == QtCore.Qt.KeyboardModifier.ShiftModifier:
                 self.project.set_selected(None, [])
 
             for i in self.images_plain:
@@ -1013,6 +1013,6 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
 
     def mousePressEvent(self, *args, **kwargs):
         modifiers = QtWidgets.QApplication.keyboardModifiers()
-        self.screenshot_obj.select(modifiers == QtCore.Qt.ShiftModifier)
+        self.screenshot_obj.select(modifiers == QtCore.Qt.KeyboardModifier.ShiftModifier)
 
 

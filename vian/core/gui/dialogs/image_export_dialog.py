@@ -264,9 +264,9 @@ class ExportImageDialog(EDialogWidget):
             msgBox = QMessageBox()
             msgBox.setText("A File with this name already exists, "
                                                       "how do you want to proceed. ")
-            msgBox.addButton(QPushButton('Overwrite'), QMessageBox.YesRole)
-            msgBox.addButton(QPushButton('Create Unique Name'), QMessageBox.NoRole)
-            msgBox.addButton(QPushButton('Cancel'), QMessageBox.RejectRole)
+            msgBox.addButton(QPushButton('Overwrite'), QMessageBox.StandardButton.YesRole)
+            msgBox.addButton(QPushButton('Create Unique Name'), QMessageBox.ButtonRole.NoRole)
+            msgBox.addButton(QPushButton('Cancel'), QMessageBox.ButtonRole.RejectRole)
 
             ret = msgBox.exec_()
 

@@ -113,7 +113,7 @@ class BarPlot(QGraphicsView, IVIANVisualization):
             event.ignore()
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)

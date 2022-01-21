@@ -1253,8 +1253,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
                                                             "VIAN uses a directory System since 0.2.10,\n "
                                                             "do you want to move the Project to the new System now?")
             else:
-                answer = QMessageBox.Yes
-            if answer == QMessageBox.Yes:
+                answer = QMessageBox.StandardButton.Yes
+            if answer == QMessageBox.StandardButton.Yes:
                 try:
                     old_path = self.path
 
@@ -1745,7 +1745,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                            "as in the project, are these the same vocabularies?".format(name=v.name)
                     if is_gui():
                         state = QMessageBox.question(main_window,  "Import into Library", msg)
-                        if state == QMessageBox.Yes:
+                        if state == QMessageBox.StandardButton.Yes:
                             mode = "Update"
                         else:
                             mode = "Import"
@@ -1764,7 +1764,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     if is_gui():
                         state = QMessageBox.question(main_window,  "Import into Library", msg)
                         print(state)
-                        if state == QMessageBox.Yes:
+                        if state == QMessageBox.StandardButton.Yes:
                             mode = "Update"
                         else:
                             mode = "Import"

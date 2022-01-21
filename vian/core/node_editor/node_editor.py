@@ -389,12 +389,12 @@ class NodeEditor(QWidget, IProjectChangeNotify):
         if self.is_connecting:
             self.abort_connection()
         else:
-            if QMouseEvent.buttons() & Qt.LeftButton:
+            if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
                 self.set_selected([], True)
                 self.marquee_selection_frame = QRect(QMouseEvent.pos().x(),QMouseEvent.pos().y(), 0 ,0)
                 self.is_marquee_selecting = True
 
-            if QMouseEvent.buttons() & Qt.RightButton:
+            if QMouseEvent.buttons() & Qt.MouseButton.RightButton:
                  menu = NodeEditorContextMenu(self, self.mapToGlobal(QMouseEvent.pos()), QMouseEvent.pos())
 
             if QMouseEvent.buttons() & Qt.MiddleButton:
@@ -585,7 +585,7 @@ class Node(QWidget, IHasName):
         self.lbl_title = QLabel(self.operation.name, self)
         self.lbl_title.move(0,0)
         self.lbl_title.resize(self.width(), self.header_height)
-        self.lbl_title.setAlignment(Qt.AlignCenter| Qt.AlignVCenter)
+        self.lbl_title.setAlignment(Qt.AlignmentFlag.AlignCenter| Qt.AlignmentFlag.AlignVCenter)
         self.lbl_title.setAttribute(Qt.WA_TranslucentBackground)
 
 
@@ -821,7 +821,7 @@ class Node(QWidget, IHasName):
             field.scale(scale)
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.button() == Qt.LeftButton:
+        if QMouseEvent.button() == Qt.MouseButton.LeftButton:
                 self.offset = QMouseEvent.pos()
                 self.is_dragging = True
                 if not self.is_selected:
@@ -833,7 +833,7 @@ class Node(QWidget, IHasName):
             QMouseEvent.ignore()
 
     def mouseMoveEvent(self, QMouseEvent):
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             if self.is_dragging:
                 pos = (QMouseEvent.pos() - self.offset)
                 target = self.mapToParent(pos)
@@ -895,11 +895,11 @@ class Node(QWidget, IHasName):
             qp.setPen(pen)
 
             cache_widget = QRect(10 * scale, self.height() - 45 * scale, self.width(), 20 * scale)
-            qp.drawText(cache_widget, Qt.AlignLeft | Qt.AlignVCenter, str(round(float(self.cache_size) / 1000000,2)) + " MB")
+            qp.drawText(cache_widget, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, str(round(float(self.cache_size) / 1000000,2)) + " MB")
 
         # if self.operation.is_in_loop_node:
         #     loop_widget = QRect(40 * scale, self.height() - 45 * scale, self.width(), 20 * scale)
-        #     qp.drawText(loop_widget, Qt.AlignLeft | Qt.AlignVCenter, "Loop Node")
+        #     qp.drawText(loop_widget, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, "Loop Node")
 
         if self.is_running:
             path = QPainterPath()
@@ -1093,7 +1093,7 @@ class NodeField(QWidget):
         font.setPointSize(self.font_size * self.node.node_editor.scale)
         qp.setFont(font)
         qp.setPen(pen)
-        qp.drawText(self.info_widget,Qt.AlignCenter|Qt.AlignVCenter, self.data_type_slot.name)
+        qp.drawText(self.info_widget,Qt.AlignmentFlag.AlignCenter|Qt.AlignmentFlag.AlignVCenter, self.data_type_slot.name)
 
 
 
@@ -1181,11 +1181,11 @@ class NodePin(QWidget):
         self.field = parent
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             self.field.node.node_editor.on_pin_clicked(self.field)
 
 
-        elif QMouseEvent.buttons() & Qt.RightButton:
+        elif QMouseEvent.buttons() & Qt.MouseButton.RightButton:
             pass
 
     def scale(self, scale):

@@ -196,7 +196,7 @@ class PaletteView(QWidget, IVIANVisualization):
         qp.end()
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)
@@ -451,7 +451,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
         qp.end()
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)
@@ -615,7 +615,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
         self.fitInView(itm.boundingRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)
