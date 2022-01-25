@@ -16,7 +16,7 @@ import os
 
 # Comment this out for the full VIAN Version
 # os.environ['VIAN_LIGHT'] = "1"
-
+os.environ["IMAGEIO_FFMPEG_EXE"] = "ffmpeg" #todo: needed for m1 chip, not clear why...
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))

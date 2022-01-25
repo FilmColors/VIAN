@@ -30,4 +30,5 @@ dependencies:
       - python-vlc
       - XlsxWriter
       - openpyxl
+      - ffmpeg
 
