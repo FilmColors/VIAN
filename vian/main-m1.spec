@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 import glob
+import shutil
 import sys
 import json
 import os
@@ -8,12 +9,29 @@ from PyInstaller.utils.hooks import collect_submodules, collect_data_files, coll
 
 block_cipher = None
 
+os.environ["IMAGEIO_FFMPEG_EXE"] = "/Users/pascalforny/mambaforge/envs/vian-conda/lib/python3.8/site-packages"
+
 mp_hidden_imports =  collect_submodules('moviepy')
 flask_hidden_imports = collect_submodules('flask_server')
 sklearn_hidden_imports = collect_submodules('sklearn')
 
-binaries = collect_dynamic_libs("pymediainfo")
+# Pyinstallers looks for the dynlibs in the site-packages directory due to how
+# pymediainfo loads the libraries. They are however installed in the libs folder, hence we have to copy them manually
 
+# If the dynlibs are not locaterd in site-packages/pymediainfo,
+# copy them from /Users/pascalforny/mambaforge/pkgs/libmediainfo-21.09-hb918e4c_2/lib/
+CONDA_ROOT = os.path.abspath(os.environ['CONDA_EXE'] + '/../../')
+to_copy = f'{CONDA_ROOT}/pkgs/libmediainfo-21.09-hb918e4c_2/lib/'
+if not os.path.isdir(to_copy):
+    raise ValueError(f'{to_copy} does not exist in the conda isntallation. '
+                     'have you updated pymediainfo?')
+
+for f in glob.glob(to_copy + '/*.dylib'):
+    dest = f'{CONDA_ROOT}/envs/vian-conda/lib/python3.8/site-packages/pymediainfo/{os.path.basename(f)}'
+    shutil.copy(f, dest)
+
+
+binaries = [('/Users/pascalforny/mambaforge/pkgs/libmediainfo-21.09-hb918e4c_2/lib/', 'pymediainfo/')]
 
 hiddenimports = mp_hidden_imports \
                 + flask_hidden_imports \
@@ -24,8 +42,8 @@ data_paths = [
     ('qt_ui', 'qt_ui'),
     ('flask_server/static', 'static'),
     ('flask_server/templates', 'templates'),
-    ('/Users/pascalforny/venv/lib/python3.8/site-packages/librosa/util/example_data', 'librosa/util/example_data'),
-    ('/Users/pascalforny/Downloads/libsndfile-master/libsndfile.dylib', '_soundfile_data')
+    ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/python3.8/site-packages/librosa/util/example_data', 'librosa/util/example_data'),
+    ('/Users/pascalforny/Downloads/libsndfile-master/libsndfile.dylib', '_soundfile_data') 
 ] + collect_data_files('librosa')
 
 
