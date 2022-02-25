@@ -58,6 +58,7 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
 
         self.frame_width = -1
         self.frame_height = -1
+        self.frame_count: typing.Union[None, int] = None
         self.parse_movie()
 
     def set_letterbox_rect(self, rect):
@@ -139,11 +140,13 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         if os.path.isfile(self.get_movie_path()):
             cap = cv2.VideoCapture(self.get_movie_path())
             self.fps = cap.get(cv2.CAP_PROP_FPS)
+            self.frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
             self.display_width, self.display_height = self.get_frame_dimensions()
         else:
             self.fps = 30
             self.display_height = None
             self.display_width = None
+            self.frame_count = None
 
     def get_frame_dimensions(self) -> Tuple[int, int]:
         """
