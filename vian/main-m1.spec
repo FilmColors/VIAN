@@ -43,7 +43,16 @@ data_paths = [
     ('flask_server/static', 'static'),
     ('flask_server/templates', 'templates'),
     ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/python3.8/site-packages/librosa/util/example_data', 'librosa/util/example_data'),
-    ('/Users/pascalforny/Downloads/libsndfile-master/libsndfile.dylib', '_soundfile_data') 
+    ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/libsndfile.dylib', '_soundfile_data'),
+    ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/libogg.0.dylib','_soundfile_data'),
+    ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/libFLAC.8.3.0.dylib','_soundfile_data'),
+    ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/libFLAC.8.dylib','_soundfile_data'),
+    ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/libvorbis.0.4.9.dylib','_soundfile_data'),
+    ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/libvorbis.0.dylib','_soundfile_data'),
+    ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/libvorbisenc.2.0.12.dylib','_soundfile_data'),
+    ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/libopus.0.dylib','_soundfile_data'),
+    ('/Users/pascalforny/mambaforge/envs/vian-conda/lib/libvorbisenc.2.dylib','_soundfile_data')
+
 ] + collect_data_files('librosa')
 
 
