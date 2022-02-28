@@ -158,71 +158,8 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
 
     def set_manager(self, screenshot_manager):
-        # self.tab = QTabWidget(self.inner)
-        # self.tab.addTab(screenshot_manager, "Screenshot Manager")
-        # self.manager_dock = ESimpleDockWidget(self.inner,
-        #                                       screenshot_manager,
-        #                                       "Screenshots")
-        # self.inner.setCentralWidget(self.screenshot_manager)
-        # screenshot_manager.show()
-        self.inner.setCentralWidget(screenshot_manager)
-        # self.inner.addDockWidget(Qt.TopDockWidgetArea, self.manager_dock, Qt.Horizontal)
-        # t = QWidget()
-        # t.setMinimumHeight(1)
-        # t.setMinimumWidth(1)
-        # self.inner.setCentralWidget(t)
-
-        # self.ab_view = ImagePlotCircular(self)
-        # self.ab_ctrls = self.ab_view.get_param_widget()
-        # w = QWidget(self.tab)
-        # w.setLayout(QVBoxLayout())
-        # w.layout().addWidget(self.ab_view)
-        # w.layout().addWidget(ExpandableWidget(w, "Plot Controls", self.ab_ctrls, popup=True))
-        # # self.tab.addTab(w, "AB-Plane")
-        # self.la_dock = ESimpleDockWidget(self.inner, w, "LA-View")
-        # self.inner.addDockWidget(Qt.TopDockWidgetArea, self.la_dock, Qt.Horizontal)
-        #
-        # self.color_dt = ImagePlotTime(self)
-        # self.color_dt_ctrls = self.color_dt.get_param_widget()
-        # # hl4 = QHBoxLayout(self.color_dt_ctrls)
-        # # hl4.addWidget(QLabel("Channel:", self.color_dt_ctrls))
-        # # self.color_dt_ctrls.layout().addItem(hl4)
-        # # cbox_channel = QComboBox(self.color_dt_ctrls)
-        # # cbox_channel.addItems(["Saturation", "Hue", "Chroma", "Luminance", "A", "B"])
-        # # cbox_channel.currentTextChanged.connect(self.color_dt_mode_changed)
-        # # hl4.addWidget(cbox_channel)
-        #
-        # self.lc_view = ImagePlotPlane(self, range_y=[0, 255])
-        # self.color_lc_view = self.lc_view.get_param_widget()
-        # w3 = QWidget()
-        # w3.setLayout(QVBoxLayout())
-        # w3.layout().addWidget(self.lc_view)
-        # w3.layout().addWidget(ExpandableWidget(w3, "Plot Controls", self.color_lc_view, popup=True))
-        # self.lc_dock = ESimpleDockWidget(self.inner, w3, "LC-View")
-        # self.inner.addDockWidget(Qt.TopDockWidgetArea, self.lc_dock, Qt.Horizontal)
-        # # self.tab.addTab(w3, "LC-Plane")
-        #
-        # w2 = QWidget()
-        # w2.setLayout(QVBoxLayout())
-        # w2.layout().addWidget(self.color_dt)
-        # w2.layout().addWidget(ExpandableWidget(w2, "Plot Controls", self.color_dt_ctrls, popup=True))
-        # self.dt_dock = ESimpleDockWidget(self.inner, w2, "Color-dT")
-        # self.inner.addDockWidget(Qt.BottomDockWidgetArea, self.dt_dock, Qt.Horizontal)
-        # # self.tab.addTab(w2, "Color-dt")
-        #
-        # self.setWidget(self.tab)
-        #
-        # self.inner.tabifyDockWidget(self.manager_dock, self.la_dock)
-        # self.inner.tabifyDockWidget(self.la_dock, self.lc_dock)
-        # self.manager_dock.raise_()
-        # self.dt_dock.hide()
         self.screenshot_manager = screenshot_manager
         self.create_bottom_bar()
-
-        # self.a_scr_plot.triggered.connect(self.manager_dock.show)
-        # self.a_ab_plot.triggered.connect(self.la_dock.show)
-        # self.a_lc_plot.triggered.connect(self.lc_dock.show)
-        # self.a_dt_plot.triggered.connect(self.dt_dock.show)
 
         self.a_increase_size.triggered.connect(partial(self.screenshot_manager.modify_image_size, 1.0))
         self.a_decrease_size.triggered.connect(partial(self.screenshot_manager.modify_image_size, -1.0))
@@ -241,9 +178,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def remove_screenshot(self, scr):
         pass
-        # self.color_dt.remove_image_by_uid(scr.unique_id)
-        # self.ab_view.remove_image_by_uid(scr.unique_id)
-        # self.lc_view.remove_image_by_uid(scr.unique_id)
 
     def on_loaded(self, project:VIANProject):
         project.onScreenshotGroupAdded.connect(self.connect_scr_group)
@@ -255,24 +189,10 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def on_closed(self):
         pass
-        # self.color_dt.clear_view()
-        # self.ab_view.clear_view()
-        # self.ab_view.add_grid()
-        # self.lc_view.clear_view()
-        # self.lc_view.add_grid()
 
     @pyqtSlot(object)
     def on_screenshots_highlighted(self, screenshots):
         pass
-        # if len(screenshots) == 0:
-        #     self.color_dt.set_highlighted([], True)
-        #     self.ab_view.set_highlighted([], True)
-        #     self.lc_view.set_highlighted([], True)
-        # else:
-        #     uids = [scr.unique_id for scr in screenshots]
-        #     self.color_dt.set_highlighted_by_uid(uids)
-        #     self.ab_view.set_highlighted_by_uid(uids)
-        #     self.lc_view.set_highlighted_by_uid(uids)
 
     def connect_scr_group(self, grp):
         grp.onScreenshotAdded.connect(self.add_screenshot)
@@ -281,96 +201,10 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     @pyqtSlot(object)
     def add_screenshot(self, scr:Screenshot):
         pass
-        # scr.onAnalysisAdded.connect(self.on_analysis_added)
-        # scr.onAnalysisRemoved.connect(self.on_analysis_removed)
-        # self.update_screenshot(scr)
-
-    # def on_analysis_added(self, a):
-    #     self.update_screenshot(a.target_container)
-    #
-    # def on_analysis_removed(self, a):
-    #     self.update_screenshot(a.target_container)
 
     @pyqtSlot(object, object, object)
     def update_screenshot(self, scr, ndarray=None, pixmap=None):
         return
-        # if self.main_window.project is None:
-        #     return
-        # clobj = self.main_window.project.active_classification_object
-        # if clobj is None:
-        #     try:
-        #         a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)["default"][0].get_adata()
-        #     except Exception as e:
-        #         # Analysis is missing or not yet computed
-        #         a = None
-        # else:
-        #     try:
-        #         a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[clobj][0].get_adata()
-        #     except Exception as e:
-        #         a = None
-        # if a is None:
-        #     self.lc_view.remove_image_by_uid(scr.unique_id)
-        #     self.ab_view.remove_image_by_uid(scr.unique_id)
-        #     self.color_dt.remove_image_by_uid(scr.unique_id)
-        #     return
-        # x = scr.movie_timestamp
-        # sat = a['saturation_l']
-        # lab = a['color_lab']
-        # lch = lab_to_lch(lab)
-        #
-        # if self.color_dt_mode == "Saturation":
-        #     y = sat * 100
-        # elif self.color_dt_mode == "Luminance":
-        #     y = lab[0] * 100
-        # elif self.color_dt_mode == "Chroma":
-        #     y = lch[1] * 100
-        # elif self.color_dt_mode == "A":
-        #     y = lab[1] / 255 * 100
-        # elif self.color_dt_mode == "B":
-        #     y = lab[2] / 255 * 100
-        # elif self.color_dt_mode == "Hue":
-        #     y = lch[2] / (2 * np.pi) * 100
-        # else:
-        #     y = sat
-        #
-        # if pixmap is None:
-        #     ndarray = scr.get_img_movie(ignore_cl_obj=False)
-        #     if ndarray.shape[2] == 3:
-        #         pixmap = numpy_to_pixmap(ndarray)
-        #     else:
-        #          pixmap = numpy_to_pixmap(ndarray, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
-        #
-        # try:
-        #     exists = self.color_dt.update_item(scr.unique_id, [x, y], pixmap)
-        #     if not exists:
-        #         self.color_dt.add_image(x,
-        #                                 y,
-        #                                 ndarray,
-        #                                 uid=scr.unique_id,
-        #                                 convert=False,
-        #                                 channels=dict(chroma=lch[1],
-        #                                               luminance=lch[0],
-        #                                               hue=((lch[2] + np.pi) / (2 * np.pi) * 100),
-        #                                               saturation=y))
-        #     exists = self.ab_view.update_item(scr.unique_id, [128 - lab[1], 128 - lab[2]], pixmap)
-        #     if not exists:
-        #         self.ab_view.add_image(128 - lab[1],
-        #                                128 - lab[2],
-        #                                ndarray,
-        #                                to_float=True,
-        #                                convert=False,
-        #                                uid=scr.unique_id)
-        #     exists = self.lc_view.update_item(scr.unique_id, [lab[1], lab[0], lab[2]], pixmap)
-        #     if not exists:
-        #         self.lc_view.add_image(lab[1],
-        #                                lab[0],
-        #                                ndarray,
-        #                                convert=False,
-        #                                uid=scr.unique_id,
-        #                                z=lab[2])
-        # except Exception as e:
-        #     log_error(e)
-
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
