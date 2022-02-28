@@ -57,7 +57,6 @@ class TimebarPicture(QtWidgets.QWidget):
         self.color = (123, 86, 32, 100)
         self.pic_height = height
         qimage, qpixmap = screenshot.get_preview()
-        self.pixmap = qpixmap
         self.qimage = qimage
         self.size = (screenshot.get_img_movie(ignore_cl_obj = True).shape[0],
                      screenshot.get_img_movie(ignore_cl_obj = True).shape[1])
@@ -73,8 +72,8 @@ class TimebarPicture(QtWidgets.QWidget):
 
     @pyqtSlot(object, object, object)
     def on_image_set(self, screenshot, ndarray, pixmap):
+        print("Received")
         qimage, qpixmap = screenshot.get_preview()
-        self.pixmap = qpixmap
         self.qimage = qimage
         self.update()
 
