@@ -352,36 +352,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             if s.unique_id in last_items:
                 item_image = last_items[s.unique_id]
             else:
-                # Should we use the Annotated Screenshot?
-                if s.annotation_is_visible and s.img_blend is not None:
-                    image = s.img_blend
-                else:
-                    image = s.get_img_movie()
-
-                if image is None:
-                    continue
-                # Convert to Pixmap
-                # Cache the converted QPixamps if these are not the initial place holders
-                # if image.shape[0] > 100:
-                #     # Check if the Image is already in the cache
-                #     # if str(s.unique_id) in self.qimage_cache:
-                #     #     qpixmap = self.qimage_cache[str(s.unique_id)]
-                #     # else:
-                #     try:
-                #         if image.shape[2] == 4:
-                #             qpixmap = numpy_to_pixmap(image, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
-                #         else:
-                #             qpixmap = numpy_to_pixmap(image)
-                #
-                #         self.qimage_cache[str(s.unique_id)] = qpixmap
-                #     except Exception as e:
-                #         log_error(e)
-                #         continue
-                #     # new_qimage_cache[str(s.unique_id)] = qpixmap
-                # else:
-                #     qpixmap = numpy_to_pixmap(image)
-
                 item_image = ScreenshotManagerPixmapItems(None, self, s)
+            item_image.set_pixmap()
             self.scene.addItem(item_image)
 
             self.images_plain.append(item_image)
@@ -794,7 +766,6 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
         self.is_selected = False
 
         # self.qpixmap = qpixmap
-        self.screenshot_obj.project.movie_descriptor.onLetterBoxChanged.connect(partial(self.set_pixmap))
         self.screenshot_obj.onImageSet.connect(self.set_pixmap)
         self.screenshot_obj.onSelectedChanged.connect(self.on_selected_changed)
 

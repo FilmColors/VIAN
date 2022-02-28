@@ -1,3 +1,5 @@
+from functools import partial
+
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import *
 
@@ -46,6 +48,8 @@ class TimebarPicture(QtWidgets.QWidget):
         super(TimebarPicture, self).__init__(parent)
         self.item = screenshot
         self.item.onImageSet.connect(self.on_image_set)
+        self.item.project.movie_descriptor.onLetterBoxChanged.connect(partial(self.update))
+
         self.timeline = timeline
         self.has_classification = len(self.item.tag_keywords)
         self.item.onClassificationChanged.connect(self.on_classification_changed)
