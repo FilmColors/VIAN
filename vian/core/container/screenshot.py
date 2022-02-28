@@ -76,9 +76,17 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         self.timeline_visibility = True
 
         self._preview_cache = None
+        self._preview_cache_letterbox = None # We keep this to keep track on the letterbox,
+        # if it changes, we clear the cache
         self.curr_size = 1.0
 
+        self._original_to_cache_scale = 1.0
         self._masked_cache = dict()
+
+        #the original size of the image in the movie storage
+        self._storage_width = None
+        self._storage_height = None
+
 
     def display_width(self):
         if self.project is None:
@@ -120,15 +128,37 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         except:
             self.img_blend = np.zeros_like(self.img_movie)
 
-    def get_preview(self, scale=0.2):
+    def get_preview(self, scale=0.2, apply_letterbox = False):
         """
         Returns a resized tuple (qimage, qpixmap) from the movie-image. 
         THe Preview will be cached for fast updated
-        :param scale: 
+        :param apply_letterbox: If true, returns a cropped image
+        :param scale:
         :return: 
         """
-        if self._preview_cache is None and self.img_movie.shape[0] > 100:
-            self._preview_cache = numpy_to_qt_image(self.img_movie)
+        clear_cache = False
+        letterbox = self.project.movie_descriptor.get_letterbox_rect(as_coords=True)
+        if apply_letterbox and letterbox is not None:
+            clear_cache = letterbox != self._preview_cache_letterbox
+
+        if (self._preview_cache is None or clear_cache) and self.img_movie.shape[0] > 100:
+            img = self.img_movie
+            if apply_letterbox:
+                margins = letterbox
+                self._preview_cache_letterbox = margins
+                if margins is not None:
+                    x1, y1, x2, y2 = margins
+                    # If there is a difference between the display_width and the storage width, we have
+                    # to project the letterbox (in storage units) to the display width
+                    if self.display_width() is not None and self.display_height() is not None:
+                        width_scaling = (self.display_width() / self._storage_width) * (CACHE_WIDTH / self.display_width())
+                        height_scaling = (self.display_height() / self._storage_height) * (CACHE_WIDTH / self.display_width())
+
+                        x1, y1, x2, y2 = tuple(np.floor([x1 * width_scaling, y1 * height_scaling,
+                                                         x2 * width_scaling, y2 * height_scaling]).astype(int).tolist())
+                    img = img[y1:y2, x1:x2]
+            self._preview_cache = numpy_to_qt_image(img)
+
         if self._preview_cache is None:
             return numpy_to_qt_image(self.img_movie)
         return self._preview_cache
@@ -187,12 +217,15 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         if self.project is not None and self.project.headless_mode:
             return
 
+        self._storage_width = img.shape[1]
+        self._storage_height = img.shape[0]
         # Resize the image to the correct display aspect
         if self.display_width() is not None and self.display_height() is not None:
             img = cv2.resize(img, (self.display_width(), self.display_height()),
                                         interpolation=cv2.INTER_CUBIC)
 
         # Resize the image to the CACHE_WIDTH (250px wide)
+
         self.img_movie = resize_with_aspect(img, width = CACHE_WIDTH)
 
         if self.receivers(self.onImageSet) > 0:

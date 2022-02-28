@@ -159,6 +159,7 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def set_manager(self, screenshot_manager):
         self.screenshot_manager = screenshot_manager
+        self.inner.setCentralWidget(screenshot_manager)
         self.create_bottom_bar()
 
         self.a_increase_size.triggered.connect(partial(self.screenshot_manager.modify_image_size, 1.0))
@@ -275,8 +276,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.n_per_row = 10
 
         self.n_images = 0
-
-        # self.setBaseSize(500,500)
         self.rubberBandChanged.connect(self.rubber_band_selection)
 
         self.qimage_cache = dict()
@@ -363,26 +362,26 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     continue
                 # Convert to Pixmap
                 # Cache the converted QPixamps if these are not the initial place holders
-                if image.shape[0] > 100:
-                    # Check if the Image is already in the cache
-                    # if str(s.unique_id) in self.qimage_cache:
-                    #     qpixmap = self.qimage_cache[str(s.unique_id)]
-                    # else:
-                    try:
-                        if image.shape[2] == 4:
-                            qpixmap = numpy_to_pixmap(image, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
-                        else:
-                            qpixmap = numpy_to_pixmap(image)
+                # if image.shape[0] > 100:
+                #     # Check if the Image is already in the cache
+                #     # if str(s.unique_id) in self.qimage_cache:
+                #     #     qpixmap = self.qimage_cache[str(s.unique_id)]
+                #     # else:
+                #     try:
+                #         if image.shape[2] == 4:
+                #             qpixmap = numpy_to_pixmap(image, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
+                #         else:
+                #             qpixmap = numpy_to_pixmap(image)
+                #
+                #         self.qimage_cache[str(s.unique_id)] = qpixmap
+                #     except Exception as e:
+                #         log_error(e)
+                #         continue
+                #     # new_qimage_cache[str(s.unique_id)] = qpixmap
+                # else:
+                #     qpixmap = numpy_to_pixmap(image)
 
-                        self.qimage_cache[str(s.unique_id)] = qpixmap
-                    except Exception as e:
-                        log_error(e)
-                        continue
-                    # new_qimage_cache[str(s.unique_id)] = qpixmap
-                else:
-                    qpixmap = numpy_to_pixmap(image)
-
-                item_image = ScreenshotManagerPixmapItems(qpixmap, self, s)
+                item_image = ScreenshotManagerPixmapItems(None, self, s)
             self.scene.addItem(item_image)
 
             self.images_plain.append(item_image)
@@ -390,11 +389,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 current_sm_object.segm_images.append(item_image)
 
                 scr_lbl = self.scene.addText(str(s.shot_id_segm), self.font_captions)
-                scr_lbl.setPos(item_image.pos() + QPoint(10, item_image.qpixmap.height()))
+                scr_lbl.setPos(item_image.pos() + QPoint(10, item_image.get_qpixmap().height()))
                 scr_lbl.setDefaultTextColor(self.color)
                 # scr_lbl.setFlag(QGraphicsItem.ItemIgnoresTransformations)
                 current_sm_object.scr_captions.append(scr_lbl)
-                current_sm_object.scr_caption_offset = QPoint(10, item_image.qpixmap.height())
+                current_sm_object.scr_caption_offset = QPoint(10, item_image.get_qpixmap().height())
                 self.scr_captions.append(scr_lbl)
 
         if current_sm_object is not None:
@@ -417,6 +416,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         for img in self.images_plain:
             self.scene.removeItem(img)
+
         self.images_plain = []
         self.clear_captions()
 
@@ -653,6 +653,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.clear_manager()
         self.setEnabled(True)
         self.project = project
+        self.project.movie_descriptor.onLetterBoxChanged.connect(partial(self.update_manager))
         self.update_manager()
 
     def on_changed(self, project, item):
@@ -784,26 +785,32 @@ class ScreenshotsManagerScene(QGraphicsScene):
 
 class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
     def __init__(self, qpixmap, manager, obj:Screenshot, selection_rect = QtCore.QRect(0,0,0,0)):
-        super(ScreenshotManagerPixmapItems, self).__init__(qpixmap)
-        self.manager = manager
         self.screenshot_obj = obj
+
+        super(ScreenshotManagerPixmapItems, self).__init__(self.get_qpixmap())
+        self.manager = manager
+
         self.selection_rect = selection_rect
         self.is_selected = False
 
-        self.qpixmap = qpixmap
-
+        # self.qpixmap = qpixmap
+        self.screenshot_obj.project.movie_descriptor.onLetterBoxChanged.connect(partial(self.set_pixmap))
         self.screenshot_obj.onImageSet.connect(self.set_pixmap)
         self.screenshot_obj.onSelectedChanged.connect(self.on_selected_changed)
 
+    def get_qpixmap(self):
+        _, qpixmap = self.screenshot_obj.get_preview(apply_letterbox=True)
+        return qpixmap
+
     def boundingRect(self) -> QtCore.QRectF:
-        if self.qpixmap is None:
+        if self.get_qpixmap() is None:
             return QRectF()
-        return QRectF(self.qpixmap.rect())
+        return QRectF(self.get_qpixmap().rect())
 
     # @pyqtSlot(object, object, object)
-    def set_pixmap(self, scr, ndarray, pixmap):
-        self.setPixmap(pixmap)
-        self.qpixmap = pixmap
+    def set_pixmap(self, scr=None, ndarray=None, pixmap=None):
+        self.setPixmap(self.get_qpixmap())
+        # self.qpixmap = pixmap
 
     # @pyqtSlot(bool)
     def on_selected_changed(self, state):
@@ -817,7 +824,7 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
             pen.setColor(QtGui.QColor(255, 160, 74, 150))
             pen.setWidth(10)
             painter.setPen(pen)
-            painter.drawRect(self.qpixmap.rect())
+            painter.drawRect(self.get_qpixmap().rect())
 
     def mousePressEvent(self, *args, **kwargs):
         modifiers = QtWidgets.QApplication.keyboardModifiers()

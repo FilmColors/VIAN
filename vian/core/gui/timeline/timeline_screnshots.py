@@ -56,8 +56,6 @@ class TimebarPicture(QtWidgets.QWidget):
         self.item.onSelectedChanged.connect(self.on_selected_changed)
         self.color = (123, 86, 32, 100)
         self.pic_height = height
-        qimage, qpixmap = screenshot.get_preview()
-        self.qimage = qimage
         self.size = (screenshot.get_img_movie(ignore_cl_obj = True).shape[0],
                      screenshot.get_img_movie(ignore_cl_obj = True).shape[1])
         width = self.size[1] * self.pic_height // self.size[0]
@@ -73,8 +71,6 @@ class TimebarPicture(QtWidgets.QWidget):
     @pyqtSlot(object, object, object)
     def on_image_set(self, screenshot, ndarray, pixmap):
         print("Received")
-        qimage, qpixmap = screenshot.get_preview()
-        self.qimage = qimage
         self.update()
 
     def on_height_changed(self, height):
@@ -105,13 +101,15 @@ class TimebarPicture(QtWidgets.QWidget):
         pen.setWidth(w)
         qp.setPen(pen)
 
-        qp.drawImage(self.img_rect, self.qimage)
+        qimage, _ = self.item.get_preview(apply_letterbox=True)
+
+        qp.drawImage(self.img_rect, qimage)
         qp.drawRect(self.img_rect)
+
         if self.has_classification:
             pen.setColor(QtGui.QColor(0, 255, 0))
             qp.setPen(pen)
             qp.drawEllipse(QRectF(self.width() - 10, 5, 5, 5))
-
         qp.end()
 
     def mousePressEvent(self, QMouseEvent):
