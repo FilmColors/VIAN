@@ -75,10 +75,10 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         self.annotation_is_visible = False
         self.timeline_visibility = True
 
-        self.preview_cache = None
+        self._preview_cache = None
         self.curr_size = 1.0
 
-        self.masked_cache = dict()
+        self._masked_cache = dict()
 
     def display_width(self):
         if self.project is None:
@@ -127,15 +127,15 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         :param scale: 
         :return: 
         """
-        if self.preview_cache is None and self.img_movie.shape[0] > 100:
-            self.preview_cache = numpy_to_qt_image(self.img_movie)
-        if self.preview_cache is None:
+        if self._preview_cache is None and self.img_movie.shape[0] > 100:
+            self._preview_cache = numpy_to_qt_image(self.img_movie)
+        if self._preview_cache is None:
             return numpy_to_qt_image(self.img_movie)
-        return self.preview_cache
+        return self._preview_cache
 
     def set_classification_object(self, clobj, recompute=False, hdf5_cache=None):
-        if not recompute and clobj.unique_id in self.masked_cache:
-            result = self.masked_cache[clobj.unique_id]
+        if not recompute and clobj.unique_id in self._masked_cache:
+            result = self._masked_cache[clobj.unique_id]
         elif clobj is None or clobj.semantic_segmentation_labels[0] == "":
             result = self.img_movie
         else:
@@ -156,23 +156,33 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
             else:
                 result = cached
         if result is not None:
-            self.masked_cache[clobj.unique_id] = result
+            self._masked_cache[clobj.unique_id] = result
             self.onImageSet.emit(self, result, numpy_to_pixmap(result, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
         return result
 
     def get_img_movie(self, ignore_cl_obj=False):
         if not ignore_cl_obj:
             try:
-                return self.masked_cache[self.project.active_classification_object.unique_id]
+                return self._masked_cache[self.project.active_classification_object.unique_id]
             except:
                 return self.img_movie
         else:
             return self.img_movie
 
     def set_img_movie(self, img):
+        """
+        Sets the image displayed for this screenshot.
+
+        :param img:
+        :return:
+        """
         if img is None:
             self.img_movie = None
             return
+
+        # Clearing the Screenshot caches
+        self._preview_cache = None
+        self._masked_cache = dict()
 
         if self.project is not None and self.project.headless_mode:
             return
