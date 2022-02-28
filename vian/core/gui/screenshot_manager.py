@@ -100,25 +100,13 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.a_show_only_current.setChecked(False)
         self.a_show_only_current.triggered.connect(self.on_toggle_show_current)
 
-        # self.m_plots = self.inner.menuBar().addMenu("Visualizations")
-        # self.a_scr_plot = self.m_plots.addAction("Screenshot Manager")
-        # self.a_ab_plot = self.m_plots.addAction("AB-Plot")
-        # self.a_lc_plot = self.m_plots.addAction("LC-Plot")
-        # self.a_dt_plot = self.m_plots.addAction("Color-dT")
-
-        # self.inner.resize(400, self.height())
         self.tab = None
-        # self.ab_view = None
-        # self.lc_view = None
-        # self.color_dt = None
         self.slider_image_size = None
         self.lbl_slider_size = None
         self.screenshot_manager = None
 
         self.color_dt_mode = "Saturation"
         self.ab_view_mean_cache = dict()
-
-        # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
 
     def on_static(self):
         self.screenshot_manager.scaling_mode = SCALING_MODE_NONE
@@ -167,21 +155,7 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.lbl_n = QLabel("\t" + str(self.slider_n_per_row.value()))
         bar.addPermanentWidget(self.lbl_n)
         self.inner.setStatusBar(bar)
-        #
-        # self.slider_image_size = QSlider(Qt.Horizontal, self)
-        # self.slider_image_size.setRange(1, 200)
-        # self.slider_image_size.setValue(10)
-        # self.slider_image_size.setStyleSheet("QSlider{padding: 2px; margin: 2px; background: transparent}")
-        #
-        # self.slider_image_size.valueChanged.connect(self.on_image_size_changed)
-        # self.lbl_slider_size = QLabel("Image-Size::")
-        # self.lbl_slider_size.setStyleSheet("QLabel{padding: 2px; margin: 2px; background: transparent}")
-        # bar.addPermanentWidget(self.lbl_slider_size)
-        # bar.addPermanentWidget(self.slider_image_size)
-        # self.slider_image_size.setVisible(False)
-        # self.lbl_slider_size.setVisible(False)
-        # self.inner.setStatusBar(bar)
-        # self.bar_row_column = bar
+
 
     def set_manager(self, screenshot_manager):
         # self.tab = QTabWidget(self.inner)
@@ -306,16 +280,16 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     @pyqtSlot(object)
     def add_screenshot(self, scr:Screenshot):
-        scr.onImageSet.connect(self.update_screenshot)
-        scr.onAnalysisAdded.connect(self.on_analysis_added)
-        scr.onAnalysisRemoved.connect(self.on_analysis_removed)
-        self.update_screenshot(scr)
+        pass
+        # scr.onAnalysisAdded.connect(self.on_analysis_added)
+        # scr.onAnalysisRemoved.connect(self.on_analysis_removed)
+        # self.update_screenshot(scr)
 
-    def on_analysis_added(self, a):
-        self.update_screenshot(a.target_container)
-
-    def on_analysis_removed(self, a):
-        self.update_screenshot(a.target_container)
+    # def on_analysis_added(self, a):
+    #     self.update_screenshot(a.target_container)
+    #
+    # def on_analysis_removed(self, a):
+    #     self.update_screenshot(a.target_container)
 
     @pyqtSlot(object, object, object)
     def update_screenshot(self, scr, ndarray=None, pixmap=None):
