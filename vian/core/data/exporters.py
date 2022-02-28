@@ -55,7 +55,7 @@ class ScreenshotExporter(IExportDevice):
             if len(self.selection) == 0:
                 self.selection = project.screenshots
 
-        margins = project.movie_descriptor.get_letterbox_rect()
+        margins = project.movie_descriptor.get_letterbox_rect(as_coords=True)
         for s in self.selection:
             name = self.build_file_name(self.naming, s, project.movie_descriptor)
             file_name = os.path.join(path, name)
