@@ -58,7 +58,7 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         # self.display_height = display_height
 
         self.img_movie = None
-        self.set_img_movie(image)
+
 
         # TODO this is related to containers.Annotations and no longer of any use,
         #  it contained the rendered svg over the image
@@ -86,6 +86,8 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         #the original size of the image in the movie storage
         self._storage_width = None
         self._storage_height = None
+
+        self.set_img_movie(image)
 
 
     def display_width(self):
