@@ -62,6 +62,15 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         self.parse_movie()
 
     def set_letterbox_rect(self, rect):
+        """
+        Can either be a tuple with (x1, y1, x2, y2) or a dictionary with
+        dict(left:int, right:int, top:int, bottom:int)
+        :param rect:
+        :return:
+        """
+        if isinstance(rect, dict):
+            rect = (rect['left'], rect['top'],  rect['right'], rect['bottom'])
+
         self.letterbox_rect = rect
 
     def get_letterbox_rect(self):
