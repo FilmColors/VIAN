@@ -34,9 +34,12 @@ class ExperimentEditorDock(EDockWidget):
         self.a_help.triggered.connect(self.on_help)
 
     def on_help(self):
-        import webbrowser
-        webbrowser.open("http://ercwebapp.westeurope.cloudapp.azure.com/static/manual/step_by_step/step_by_step.html")
-
+        import webbrowser, sys
+        url = "http://ercwebapp.westeurope.cloudapp.azure.com/static/manual/step_by_step/step_by_step.html"
+        if sys.platform == 'darwin':
+            os.system(f"open \"\" {url}")
+        else:
+            webbrowser.open(url)
 
 class ExperimentEditor(QWidget, IProjectChangeNotify):
     def __init__(self, main_window):

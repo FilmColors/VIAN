@@ -1821,7 +1821,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.update()
 
     def open_documentation(self):
-        webbrowser.open("https://www.vian.app/static/manual/index.html")
+        doc_url = "https://www.vian.app/static/manual/index.html"
+        if sys.platform == 'darwin':
+            os.system(f"open \"\" {doc_url}")
+        else:
+            webbrowser.open(doc_url)
 
     def on_about(self):
         about = ""
@@ -1901,7 +1905,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.project.export(SequenceProtocolExporter(export_format="excel"), p)
 
     def on_browser_visualization(self):
-        webbrowser.open("http://127.0.0.1:{p}/screenshot_vis/".format(p=VIAN_PORT))
+        url = "http://127.0.0.1:{p}/screenshot_vis/".format(p=VIAN_PORT)
+        if sys.platform == 'darwin':
+            os.system(f"open \"\" {url}")
+        else:
+            webbrowser.open(url)
 
     def on_project_summary(self):
         self.summary_dock.set_url("http://127.0.0.1:{p}/summary/".format(p=VIAN_PORT))

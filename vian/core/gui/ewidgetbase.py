@@ -220,8 +220,10 @@ class EDialogWidget(QDialog):
 
     def on_help(self):
         if self.help_path is not None:
-            webbrowser.open(self.help_path)
-
+            if sys.platform == 'darwin':
+                os.system(f"open \"\" {self.help_path}")
+            else:
+                webbrowser.open(self.help_path)
 
 class EGraphicsView(QGraphicsView):
     onScaleEvent = pyqtSignal(float)
