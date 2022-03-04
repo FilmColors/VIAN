@@ -72,16 +72,29 @@ class TimebarPicture(QtWidgets.QWidget):
         self.is_selected = state
         self.update()
 
+    def resize_with_aspect(self):
+        """Computes the width of this image widget and resizes"""
+
+        qimage, _ = self.item.get_preview(apply_letterbox=True)
+        self.size = (qimage.height(),
+                     qimage.width())
+
+        width = self.size[1] * self.pic_height // self.size[0]
+        self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
+        self.resize(width, self.pic_height)
+
+
     @pyqtSlot(object, object, object)
     def on_image_set(self, screenshot, ndarray, pixmap):
-        print("Received")
+        # Adjust the screenshot size
+        self.resize_with_aspect()
+        # Redraw
         self.update()
 
     def on_height_changed(self, height):
         self.pic_height = height
-        width = self.size[1] * self.pic_height // self.size[0]
-        self.resize(width, self.pic_height)
-        self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
+        self.resize_with_aspect()
+
 
     @pyqtSlot(object)
     def on_classification_changed(self, keywords):
@@ -106,6 +119,9 @@ class TimebarPicture(QtWidgets.QWidget):
         qp.setPen(pen)
 
         qimage, _ = self.item.get_preview(apply_letterbox=True)
+
+        if qimage.width() != self.size[0]:
+            self.resize_with_aspect()
 
         qp.drawImage(self.img_rect, qimage)
         qp.drawRect(self.img_rect)
