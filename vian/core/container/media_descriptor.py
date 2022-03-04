@@ -61,7 +61,8 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         self.frame_count: typing.Union[None, int] = None
         self.parse_movie()
 
-    def set_letterbox_rect(self, rect):
+
+    def set_letterbox_rect(self, rect:typing.Tuple[int, int, int, int]):
         """
         Can either be a tuple with (x1, y1, x2, y2) or a dictionary with
         dict(left:int, right:int, top:int, bottom:int)
@@ -73,8 +74,21 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
 
         self.letterbox_rect = rect
 
-    def get_letterbox_rect(self):
-        return self.letterbox_rect
+
+    def get_letterbox_rect(self, as_coords=False) -> typing.Tuple[int, int, int, int]:
+        """
+        Get the letterbox rect which marks the dark borders of a frame.
+
+        :param bool as_coords: if true, returns the extends as coordinates instead of width and height. default: False
+        :return tuple: returns the letterbox rect.
+                either as Tuple[x, y, width, height]
+                ort as Tuple[x1, y1, x2, y2] if as_coords is set to True
+        """
+        x, y, w, h = self.letterbox_rect
+        if as_coords:
+            return x, y, x + w, y + h
+
+        return x, y, w, h
 
     def serialize(self):
         data = dict(

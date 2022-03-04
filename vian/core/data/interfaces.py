@@ -248,7 +248,7 @@ class IAnalysisJob(QObject):
                     end=ms_to_frames(t.get_end(), fps),
                     movie_path=project.movie_descriptor.movie_path,
                     target=t.get_id(),
-                    margins=project.movie_descriptor.get_letterbox_rect(),
+                    margins=project.movie_descriptor.get_letterbox_rect(as_coords=True),
                     semseg=semseg
                 ))
         return targets, args
