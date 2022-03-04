@@ -1,6 +1,6 @@
 import os
 import typing
-
+from PyQt5.QtCore import pyqtSignal
 from pymediainfo import MediaInfo
 
 from typing import Tuple
@@ -34,6 +34,8 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
     :var fps: The float FPS
 
     """
+    onLetterBoxChanged = pyqtSignal(tuple)
+
     def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id="0_0_0", year=1800, source="",
                  duration=100, fps = 30, unique_id = -1):
         BaseProjectEntity.__init__(self, unique_id=unique_id)
@@ -50,7 +52,7 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         # self.is_relative = False
         self.meta_data = dict()
 
-        # Pixel coordinates of the four square points x0 x1 y0 y1
+        # Pixel coordinates of the four square points x0 x1 w, h in storage coordinates
         self.letterbox_rect: typing.Tuple[int, int, int, int] | None = None
 
         self.display_width = None
@@ -65,8 +67,9 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         :param tuple rect: A tuple with [left, top, width, height]
         """
         self.letterbox_rect = rect
+        self.onLetterBoxChanged.emit(self.get_letterbox_rect())
 
-    def get_letterbox_rect(self, as_coords=False) -> typing.Tuple[int, int, int, int]:
+    def get_letterbox_rect(self, as_coords=False) -> typing.Union[typing.Tuple[int, int, int, int], None]:
         """
         Get the letterbox rect which marks the dark borders of a frame.
 
@@ -75,7 +78,13 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
                 either as Tuple[x, y, width, height]
                 ort as Tuple[x1, y1, x2, y2] if as_coords is set to True
         """
+        if self.letterbox_rect is None:
+            return None
+
         x, y, w, h = self.letterbox_rect
+        if w <= 0 or h <= 0:
+            return None
+
         if as_coords:
             return x, y, x + w, y + h
 

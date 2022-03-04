@@ -100,25 +100,13 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.a_show_only_current.setChecked(False)
         self.a_show_only_current.triggered.connect(self.on_toggle_show_current)
 
-        # self.m_plots = self.inner.menuBar().addMenu("Visualizations")
-        # self.a_scr_plot = self.m_plots.addAction("Screenshot Manager")
-        # self.a_ab_plot = self.m_plots.addAction("AB-Plot")
-        # self.a_lc_plot = self.m_plots.addAction("LC-Plot")
-        # self.a_dt_plot = self.m_plots.addAction("Color-dT")
-
-        # self.inner.resize(400, self.height())
         self.tab = None
-        # self.ab_view = None
-        # self.lc_view = None
-        # self.color_dt = None
         self.slider_image_size = None
         self.lbl_slider_size = None
         self.screenshot_manager = None
 
         self.color_dt_mode = "Saturation"
         self.ab_view_mean_cache = dict()
-
-        # self.inner.addToolBar(ScreenshotsToolbar(main_window, self.main_window.screenshots_manager))
 
     def on_static(self):
         self.screenshot_manager.scaling_mode = SCALING_MODE_NONE
@@ -167,88 +155,12 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         self.lbl_n = QLabel("\t" + str(self.slider_n_per_row.value()))
         bar.addPermanentWidget(self.lbl_n)
         self.inner.setStatusBar(bar)
-        #
-        # self.slider_image_size = QSlider(Qt.Horizontal, self)
-        # self.slider_image_size.setRange(1, 200)
-        # self.slider_image_size.setValue(10)
-        # self.slider_image_size.setStyleSheet("QSlider{padding: 2px; margin: 2px; background: transparent}")
-        #
-        # self.slider_image_size.valueChanged.connect(self.on_image_size_changed)
-        # self.lbl_slider_size = QLabel("Image-Size::")
-        # self.lbl_slider_size.setStyleSheet("QLabel{padding: 2px; margin: 2px; background: transparent}")
-        # bar.addPermanentWidget(self.lbl_slider_size)
-        # bar.addPermanentWidget(self.slider_image_size)
-        # self.slider_image_size.setVisible(False)
-        # self.lbl_slider_size.setVisible(False)
-        # self.inner.setStatusBar(bar)
-        # self.bar_row_column = bar
+
 
     def set_manager(self, screenshot_manager):
-        # self.tab = QTabWidget(self.inner)
-        # self.tab.addTab(screenshot_manager, "Screenshot Manager")
-        # self.manager_dock = ESimpleDockWidget(self.inner,
-        #                                       screenshot_manager,
-        #                                       "Screenshots")
-        # self.inner.setCentralWidget(self.screenshot_manager)
-        # screenshot_manager.show()
-        self.inner.setCentralWidget(screenshot_manager)
-        # self.inner.addDockWidget(Qt.TopDockWidgetArea, self.manager_dock, Qt.Horizontal)
-        # t = QWidget()
-        # t.setMinimumHeight(1)
-        # t.setMinimumWidth(1)
-        # self.inner.setCentralWidget(t)
-
-        # self.ab_view = ImagePlotCircular(self)
-        # self.ab_ctrls = self.ab_view.get_param_widget()
-        # w = QWidget(self.tab)
-        # w.setLayout(QVBoxLayout())
-        # w.layout().addWidget(self.ab_view)
-        # w.layout().addWidget(ExpandableWidget(w, "Plot Controls", self.ab_ctrls, popup=True))
-        # # self.tab.addTab(w, "AB-Plane")
-        # self.la_dock = ESimpleDockWidget(self.inner, w, "LA-View")
-        # self.inner.addDockWidget(Qt.TopDockWidgetArea, self.la_dock, Qt.Horizontal)
-        #
-        # self.color_dt = ImagePlotTime(self)
-        # self.color_dt_ctrls = self.color_dt.get_param_widget()
-        # # hl4 = QHBoxLayout(self.color_dt_ctrls)
-        # # hl4.addWidget(QLabel("Channel:", self.color_dt_ctrls))
-        # # self.color_dt_ctrls.layout().addItem(hl4)
-        # # cbox_channel = QComboBox(self.color_dt_ctrls)
-        # # cbox_channel.addItems(["Saturation", "Hue", "Chroma", "Luminance", "A", "B"])
-        # # cbox_channel.currentTextChanged.connect(self.color_dt_mode_changed)
-        # # hl4.addWidget(cbox_channel)
-        #
-        # self.lc_view = ImagePlotPlane(self, range_y=[0, 255])
-        # self.color_lc_view = self.lc_view.get_param_widget()
-        # w3 = QWidget()
-        # w3.setLayout(QVBoxLayout())
-        # w3.layout().addWidget(self.lc_view)
-        # w3.layout().addWidget(ExpandableWidget(w3, "Plot Controls", self.color_lc_view, popup=True))
-        # self.lc_dock = ESimpleDockWidget(self.inner, w3, "LC-View")
-        # self.inner.addDockWidget(Qt.TopDockWidgetArea, self.lc_dock, Qt.Horizontal)
-        # # self.tab.addTab(w3, "LC-Plane")
-        #
-        # w2 = QWidget()
-        # w2.setLayout(QVBoxLayout())
-        # w2.layout().addWidget(self.color_dt)
-        # w2.layout().addWidget(ExpandableWidget(w2, "Plot Controls", self.color_dt_ctrls, popup=True))
-        # self.dt_dock = ESimpleDockWidget(self.inner, w2, "Color-dT")
-        # self.inner.addDockWidget(Qt.BottomDockWidgetArea, self.dt_dock, Qt.Horizontal)
-        # # self.tab.addTab(w2, "Color-dt")
-        #
-        # self.setWidget(self.tab)
-        #
-        # self.inner.tabifyDockWidget(self.manager_dock, self.la_dock)
-        # self.inner.tabifyDockWidget(self.la_dock, self.lc_dock)
-        # self.manager_dock.raise_()
-        # self.dt_dock.hide()
         self.screenshot_manager = screenshot_manager
+        self.inner.setCentralWidget(screenshot_manager)
         self.create_bottom_bar()
-
-        # self.a_scr_plot.triggered.connect(self.manager_dock.show)
-        # self.a_ab_plot.triggered.connect(self.la_dock.show)
-        # self.a_lc_plot.triggered.connect(self.lc_dock.show)
-        # self.a_dt_plot.triggered.connect(self.dt_dock.show)
 
         self.a_increase_size.triggered.connect(partial(self.screenshot_manager.modify_image_size, 1.0))
         self.a_decrease_size.triggered.connect(partial(self.screenshot_manager.modify_image_size, -1.0))
@@ -267,9 +179,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def remove_screenshot(self, scr):
         pass
-        # self.color_dt.remove_image_by_uid(scr.unique_id)
-        # self.ab_view.remove_image_by_uid(scr.unique_id)
-        # self.lc_view.remove_image_by_uid(scr.unique_id)
 
     def on_loaded(self, project:VIANProject):
         project.onScreenshotGroupAdded.connect(self.connect_scr_group)
@@ -281,24 +190,10 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     def on_closed(self):
         pass
-        # self.color_dt.clear_view()
-        # self.ab_view.clear_view()
-        # self.ab_view.add_grid()
-        # self.lc_view.clear_view()
-        # self.lc_view.add_grid()
 
     @pyqtSlot(object)
     def on_screenshots_highlighted(self, screenshots):
         pass
-        # if len(screenshots) == 0:
-        #     self.color_dt.set_highlighted([], True)
-        #     self.ab_view.set_highlighted([], True)
-        #     self.lc_view.set_highlighted([], True)
-        # else:
-        #     uids = [scr.unique_id for scr in screenshots]
-        #     self.color_dt.set_highlighted_by_uid(uids)
-        #     self.ab_view.set_highlighted_by_uid(uids)
-        #     self.lc_view.set_highlighted_by_uid(uids)
 
     def connect_scr_group(self, grp):
         grp.onScreenshotAdded.connect(self.add_screenshot)
@@ -306,97 +201,11 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
     @pyqtSlot(object)
     def add_screenshot(self, scr:Screenshot):
-        scr.onImageSet.connect(self.update_screenshot)
-        scr.onAnalysisAdded.connect(self.on_analysis_added)
-        scr.onAnalysisRemoved.connect(self.on_analysis_removed)
-        self.update_screenshot(scr)
-
-    def on_analysis_added(self, a):
-        self.update_screenshot(a.target_container)
-
-    def on_analysis_removed(self, a):
-        self.update_screenshot(a.target_container)
+        pass
 
     @pyqtSlot(object, object, object)
     def update_screenshot(self, scr, ndarray=None, pixmap=None):
         return
-        # if self.main_window.project is None:
-        #     return
-        # clobj = self.main_window.project.active_classification_object
-        # if clobj is None:
-        #     try:
-        #         a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)["default"][0].get_adata()
-        #     except Exception as e:
-        #         # Analysis is missing or not yet computed
-        #         a = None
-        # else:
-        #     try:
-        #         a = scr.get_connected_analysis(ColorFeatureAnalysis, as_clobj_dict=True)[clobj][0].get_adata()
-        #     except Exception as e:
-        #         a = None
-        # if a is None:
-        #     self.lc_view.remove_image_by_uid(scr.unique_id)
-        #     self.ab_view.remove_image_by_uid(scr.unique_id)
-        #     self.color_dt.remove_image_by_uid(scr.unique_id)
-        #     return
-        # x = scr.movie_timestamp
-        # sat = a['saturation_l']
-        # lab = a['color_lab']
-        # lch = lab_to_lch(lab)
-        #
-        # if self.color_dt_mode == "Saturation":
-        #     y = sat * 100
-        # elif self.color_dt_mode == "Luminance":
-        #     y = lab[0] * 100
-        # elif self.color_dt_mode == "Chroma":
-        #     y = lch[1] * 100
-        # elif self.color_dt_mode == "A":
-        #     y = lab[1] / 255 * 100
-        # elif self.color_dt_mode == "B":
-        #     y = lab[2] / 255 * 100
-        # elif self.color_dt_mode == "Hue":
-        #     y = lch[2] / (2 * np.pi) * 100
-        # else:
-        #     y = sat
-        #
-        # if pixmap is None:
-        #     ndarray = scr.get_img_movie(ignore_cl_obj=False)
-        #     if ndarray.shape[2] == 3:
-        #         pixmap = numpy_to_pixmap(ndarray)
-        #     else:
-        #          pixmap = numpy_to_pixmap(ndarray, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
-        #
-        # try:
-        #     exists = self.color_dt.update_item(scr.unique_id, [x, y], pixmap)
-        #     if not exists:
-        #         self.color_dt.add_image(x,
-        #                                 y,
-        #                                 ndarray,
-        #                                 uid=scr.unique_id,
-        #                                 convert=False,
-        #                                 channels=dict(chroma=lch[1],
-        #                                               luminance=lch[0],
-        #                                               hue=((lch[2] + np.pi) / (2 * np.pi) * 100),
-        #                                               saturation=y))
-        #     exists = self.ab_view.update_item(scr.unique_id, [128 - lab[1], 128 - lab[2]], pixmap)
-        #     if not exists:
-        #         self.ab_view.add_image(128 - lab[1],
-        #                                128 - lab[2],
-        #                                ndarray,
-        #                                to_float=True,
-        #                                convert=False,
-        #                                uid=scr.unique_id)
-        #     exists = self.lc_view.update_item(scr.unique_id, [lab[1], lab[0], lab[2]], pixmap)
-        #     if not exists:
-        #         self.lc_view.add_image(lab[1],
-        #                                lab[0],
-        #                                ndarray,
-        #                                convert=False,
-        #                                uid=scr.unique_id,
-        #                                z=lab[2])
-        # except Exception as e:
-        #     log_error(e)
-
 
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
@@ -467,8 +276,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.n_per_row = 10
 
         self.n_images = 0
-
-        # self.setBaseSize(500,500)
         self.rubberBandChanged.connect(self.rubber_band_selection)
 
         self.qimage_cache = dict()
@@ -545,36 +352,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             if s.unique_id in last_items:
                 item_image = last_items[s.unique_id]
             else:
-                # Should we use the Annotated Screenshot?
-                if s.annotation_is_visible and s.img_blend is not None:
-                    image = s.img_blend
-                else:
-                    image = s.get_img_movie()
-
-                if image is None:
-                    continue
-                # Convert to Pixmap
-                # Cache the converted QPixamps if these are not the initial place holders
-                if image.shape[0] > 100:
-                    # Check if the Image is already in the cache
-                    # if str(s.unique_id) in self.qimage_cache:
-                    #     qpixmap = self.qimage_cache[str(s.unique_id)]
-                    # else:
-                    try:
-                        if image.shape[2] == 4:
-                            qpixmap = numpy_to_pixmap(image, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True)
-                        else:
-                            qpixmap = numpy_to_pixmap(image)
-
-                        self.qimage_cache[str(s.unique_id)] = qpixmap
-                    except Exception as e:
-                        log_error(e)
-                        continue
-                    # new_qimage_cache[str(s.unique_id)] = qpixmap
-                else:
-                    qpixmap = numpy_to_pixmap(image)
-
-                item_image = ScreenshotManagerPixmapItems(qpixmap, self, s)
+                item_image = ScreenshotManagerPixmapItems(None, self, s)
+            item_image.set_pixmap()
             self.scene.addItem(item_image)
 
             self.images_plain.append(item_image)
@@ -582,11 +361,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 current_sm_object.segm_images.append(item_image)
 
                 scr_lbl = self.scene.addText(str(s.shot_id_segm), self.font_captions)
-                scr_lbl.setPos(item_image.pos() + QPoint(10, item_image.qpixmap.height()))
+                scr_lbl.setPos(item_image.pos() + QPoint(10, item_image.get_qpixmap().height()))
                 scr_lbl.setDefaultTextColor(self.color)
                 # scr_lbl.setFlag(QGraphicsItem.ItemIgnoresTransformations)
                 current_sm_object.scr_captions.append(scr_lbl)
-                current_sm_object.scr_caption_offset = QPoint(10, item_image.qpixmap.height())
+                current_sm_object.scr_caption_offset = QPoint(10, item_image.get_qpixmap().height())
                 self.scr_captions.append(scr_lbl)
 
         if current_sm_object is not None:
@@ -609,6 +388,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         for img in self.images_plain:
             self.scene.removeItem(img)
+
         self.images_plain = []
         self.clear_captions()
 
@@ -845,6 +625,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.clear_manager()
         self.setEnabled(True)
         self.project = project
+        self.project.movie_descriptor.onLetterBoxChanged.connect(partial(self.update_manager))
         self.update_manager()
 
     def on_changed(self, project, item):
@@ -976,26 +757,31 @@ class ScreenshotsManagerScene(QGraphicsScene):
 
 class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
     def __init__(self, qpixmap, manager, obj:Screenshot, selection_rect = QtCore.QRect(0,0,0,0)):
-        super(ScreenshotManagerPixmapItems, self).__init__(qpixmap)
-        self.manager = manager
         self.screenshot_obj = obj
+
+        super(ScreenshotManagerPixmapItems, self).__init__(self.get_qpixmap())
+        self.manager = manager
+
         self.selection_rect = selection_rect
         self.is_selected = False
 
-        self.qpixmap = qpixmap
-
+        # self.qpixmap = qpixmap
         self.screenshot_obj.onImageSet.connect(self.set_pixmap)
         self.screenshot_obj.onSelectedChanged.connect(self.on_selected_changed)
 
+    def get_qpixmap(self):
+        _, qpixmap = self.screenshot_obj.get_preview(apply_letterbox=True)
+        return qpixmap
+
     def boundingRect(self) -> QtCore.QRectF:
-        if self.qpixmap is None:
+        if self.get_qpixmap() is None:
             return QRectF()
-        return QRectF(self.qpixmap.rect())
+        return QRectF(self.get_qpixmap().rect())
 
     # @pyqtSlot(object, object, object)
-    def set_pixmap(self, scr, ndarray, pixmap):
-        self.setPixmap(pixmap)
-        self.qpixmap = pixmap
+    def set_pixmap(self, scr=None, ndarray=None, pixmap=None):
+        self.setPixmap(self.get_qpixmap())
+        # self.qpixmap = pixmap
 
     # @pyqtSlot(bool)
     def on_selected_changed(self, state):
@@ -1009,7 +795,7 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
             pen.setColor(QtGui.QColor(255, 160, 74, 150))
             pen.setWidth(10)
             painter.setPen(pen)
-            painter.drawRect(self.qpixmap.rect())
+            painter.drawRect(self.get_qpixmap().rect())
 
     def mousePressEvent(self, *args, **kwargs):
         modifiers = QtWidgets.QApplication.keyboardModifiers()

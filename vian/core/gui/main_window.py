@@ -1229,8 +1229,9 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.show()
 
     def on_movie_opened(self):
-        # TODO What is this for??
-        self.player_controls.on_play()
+        self.screenshots_manager.set_loading(True)
+        job = LoadScreenshotsJob(self.project)
+        self.run_job_concurrent(job)
 
     def on_remove_all_analyses(self):
         if self.project is not None:
@@ -2499,9 +2500,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.frame_update_worker.set_movie_path(self.project.movie_descriptor.get_movie_path())
         self.frame_update_worker.set_project(self.project)
 
-        self.screenshots_manager.set_loading(True)
-        job = LoadScreenshotsJob(self.project)
-        self.run_job_concurrent(job)
+        # self.screenshots_manager.set_loading(True)
+        # job = LoadScreenshotsJob(self.project)
+        # self.run_job_concurrent(job)
 
         self.setWindowTitle("VIAN Project:" + str(self.project.path))
         self.dispatch_on_timestep_update(-1)
