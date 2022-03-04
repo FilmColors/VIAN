@@ -215,8 +215,8 @@ class BaseProjectEntity(QObject):
 
             # if there is already an object with this uuid in the project
             # and it is not this object, then we raise an exception
-            elif elem is not self:
-                raise ValueError(f"UUID already exists {self.unique_id}")
+            # elif elem is not self:
+            #     raise ValueError(f"UUID already exists {self.unique_id}")
 
     def dispatch_on_changed(self, receiver=None, item=None):
         if self.project is not None:

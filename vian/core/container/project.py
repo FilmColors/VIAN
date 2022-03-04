@@ -1301,9 +1301,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.vocabularies = []
         for v in my_dict['vocabularies']:
             voc = Vocabulary("voc").deserialize(v, self)
-            self.add_vocabulary(voc)
-
-        # If the vocabularies are merged by name, we have to update the unique ids in the keywords later
+            try:
+                self.add_vocabulary(voc)
+            except ValueError as e:
+                logging.info(e)
+                continue
+        # If the vocabularies are merged by name,
+        # we have to update the unique ids in the keywords later
 
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
