@@ -107,6 +107,8 @@ class HDF5Manager():
 
             pos = self._index[dataset_name]
             if pos > 0 and pos % DEFAULT_SIZE[0] == 0:
+                new_dim = pos % DEFAULT_SIZE[0]
+                # TODO This has to resize to larger numbers
                 self.h5_file[dataset_name].resize((pos + DEFAULT_SIZE[0], ) + self.h5_file[dataset_name].shape[1:])
             self.h5_file[dataset_name][pos] = d
 

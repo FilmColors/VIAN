@@ -50,7 +50,7 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         # self.is_relative = False
         self.meta_data = dict()
 
-        # Pixel coordinates of the four square points x0 x1 y0 y1
+        # Pixel coordinates of the four square points x, y, width, height
         self.letterbox_rect: typing.Tuple[int, int, int, int] | None = None
 
         self.display_width = None
@@ -66,11 +66,23 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         """
         Can either be a tuple with (x1, y1, x2, y2) or a dictionary with
         dict(left:int, right:int, top:int, bottom:int)
+        or a dictionary with
+        dict(left:int, right:int, width:int, height:int)
         :param rect:
         :return:
         """
         if isinstance(rect, dict):
-            rect = (rect['left'], rect['top'],  rect['right'], rect['bottom'])
+            left, top = rect['left'], rect['top']
+
+            if "right" in rect:
+                width =  rect['right'] - rect['left']
+            else:
+                width = rect['width']
+            if "bottom" in rect:
+                height = rect['bottom'] - rect['top']
+            else:
+                height = rect['height']
+            rect = (left, top, width, height)
 
         self.letterbox_rect = rect
 
