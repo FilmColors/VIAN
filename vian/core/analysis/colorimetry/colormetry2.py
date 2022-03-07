@@ -44,7 +44,7 @@ class ColormetryJob2(QObject):
             frame_duration,
             self.resolution,
             project.movie_descriptor.fps,
-            project.movie_descriptor.get_letterbox_rect()
+            project.movie_descriptor.get_letterbox_rect(as_coords=True)
         ]
 
     def run_concurrent(self, args, callback):

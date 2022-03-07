@@ -53,7 +53,7 @@ class ZProjectionAnalysis(IAnalysisJob):
                          end=ms_to_frames(tgt.get_end(), fps),
                          movie_path=project.movie_descriptor.movie_path,
                          target=tgt.get_id(),
-                         margins=project.movie_descriptor.get_letterbox_rect(),
+                         margins=project.movie_descriptor.get_letterbox_rect(as_coords=True),
                          semseg=semseg))
         return args
 
