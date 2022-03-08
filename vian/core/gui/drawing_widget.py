@@ -1387,7 +1387,7 @@ class DrawingEditorWidget(QtWidgets.QMainWindow):
         self.fontComboBox.currentFontChanged.connect(self.on_font_changed)
 
         self.show()
-        self.setFocus(Qt.MouseFocusReason)
+        self.setFocus(Qt.FocusReason.MouseFocusReason)
 
     def on_text_change(self):
         text = self.textEdit.toPlainText()

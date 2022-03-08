@@ -533,7 +533,7 @@ class ImagePreviewPopup(QMainWindow):
         self.view.set_image(pixmap)
         self.setWindowFlags(Qt.WindowType.Popup|Qt.WindowType.FramelessWindowHint)
         self.show()
-        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
+        self.move(QApplication.instance().primaryScreen().geometry().center() - self.rect().center())
 
 
 class TextEditPopup(QMainWindow):
@@ -551,7 +551,7 @@ class TextEditPopup(QMainWindow):
         self.show()
 
         if pos is None:
-            self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
+            self.move(QApplication.instance().primaryScreen().geometry().center() - self.rect().center())
         else:
             self.move(pos)
 
@@ -811,7 +811,7 @@ class CreateSegmentationPopup(QMainWindow):
         self.centralWidget().layout().addWidget(self.btn_ok)
         self.setMinimumWidth(300)
         self.show()
-        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
+        self.move(QApplication.instance().primaryScreen().geometry().center() - self.rect().center())
 
     def on_ok(self):
         segm = self.project.create_segmentation(self.line_name.text())
@@ -837,7 +837,7 @@ class CreateAnnotationLayerPopup(QMainWindow):
         self.centralWidget().layout().addWidget(self.btn_ok)
         self.setMinimumWidth(300)
         self.show()
-        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
+        self.move(QApplication.instance().primaryScreen().geometry().center() - self.rect().center())
 
     def on_ok(self):
         layer = self.project.create_annotation_layer(self.line_name.text(), 0, 1000)
@@ -863,7 +863,7 @@ class CreateScreenshotGroupPopup(QMainWindow):
         self.centralWidget().layout().addWidget(self.btn_ok)
         self.setMinimumWidth(300)
         self.show()
-        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
+        self.move(QApplication.instance().primaryScreen().geometry().center() - self.rect().center())
 
     def on_ok(self):
         grp = self.project.add_screenshot_group(self.line_name.text())
