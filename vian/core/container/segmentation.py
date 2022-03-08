@@ -384,7 +384,7 @@ class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.ID = ID
 
         # Ensure that start and end is not an nd.array
-        self.start: int = int(start)
+        self.start: int = max(0, start)
         self.end: int = int(end)
         self.name: str = name
 
