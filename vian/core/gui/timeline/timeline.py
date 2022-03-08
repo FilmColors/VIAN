@@ -1403,7 +1403,6 @@ class SelectorContextMenu(QtWidgets.QMenu):
         self.timeline = parent
 
         self.project = self.timeline.project()
-        self.setAttribute(Qt.WA_MacNoClickThrough)
 
         if self.timeline.selected is not None:
             if self.timeline.selected.get_type() == SEGMENTATION:

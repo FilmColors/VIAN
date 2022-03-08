@@ -83,7 +83,6 @@ class ContextMenu(QMenu):
     def __init__(self, parent, pos):
         super(ContextMenu, self).__init__(parent)
         self.main_window = parent
-        self.setAttribute(Qt.WA_MacNoClickThrough, True)
 
 
 class SegmentationContextMenu(ContextMenu):

@@ -1386,7 +1386,6 @@ class DrawingEditorWidget(QtWidgets.QMainWindow):
         self.fontComboBox.setCurrentFont(QFont(self.drawing.annotation_object.font))
         self.fontComboBox.currentFontChanged.connect(self.on_font_changed)
 
-        self.setAttribute(Qt.WA_MacNoClickThrough, True)
         self.show()
         self.setFocus(Qt.MouseFocusReason)
 
