@@ -242,9 +242,9 @@ class CollectionItem(QTreeWidgetItem):
         self.items = dict()
 
         if self.mode == VocabularyTreeView.MODE_EDITING:
-            self.setFlags(Qt.ItemIsEditable| Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            self.setFlags(Qt.ItemFlag.ItemIsEditable| Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
         else:
-            self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            self.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
 
         self.recreate_vocabularies()
 
@@ -279,9 +279,9 @@ class VocabularyItem(QTreeWidgetItem):
         self.mode = mode
 
         if self.mode == VocabularyTreeView.MODE_EDITING:
-            self.setFlags(Qt.ItemIsEditable| Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            self.setFlags(Qt.ItemFlag.ItemIsEditable| Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
         else:
-            self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            self.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
 
         if show_words:
             self.recreate_words()
