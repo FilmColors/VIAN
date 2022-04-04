@@ -3,6 +3,7 @@ import h5py
 import os
 import gc
 import numpy as np
+import typing
 
 from vian.core.data.enums import DataSerialization
 from vian.core.data.log import log_info, log_warning
@@ -49,7 +50,7 @@ def print_registered_analyses():
 class HDF5Manager():
     def __init__(self):
         self.path = None
-        self.h5_file = None
+        self.h5_file: typing.Union[h5py.File, None] = None
         self._index = dict()
         self._uid_index = dict()
 
@@ -106,9 +107,11 @@ class HDF5Manager():
                 self._index[dataset_name] = 0
 
             pos = self._index[dataset_name]
+
             if pos >= self.h5_file[dataset_name].shape[0]:
                 new_dim = np.ceil((pos + 1) / DEFAULT_SIZE[0]) * DEFAULT_SIZE[0]
                 self.h5_file[dataset_name].resize((new_dim, ) + self.h5_file[dataset_name].shape[1:])
+
             self.h5_file[dataset_name][pos] = d
 
             self._uid_index[unique_id] = (dataset_name, pos)
@@ -156,6 +159,15 @@ class HDF5Manager():
 
         for k, v in dict(d['uidmapping']).items():
             self._uid_index[k] = v
+
+    def clear(self):
+        self.h5_file.clear()
+        self.h5_file.flush()
+
+        self._index = dict()
+        self._uid_index = dict()
+
+        self.initialize_all()
     #endregion
 
     #region Colorimetry

@@ -251,7 +251,6 @@ class VIANProject(QObject, IHasName, IClassifiable):
         shutil.rmtree(out_dir)
         return archive_name
 
-
     def get_all_containers(self, types = None):
         result = []
         if types is None:
@@ -1074,8 +1073,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for c in project.segmentation:
             segmentations.append(c.serialize())
 
-        for d in project.analysis:
-            analyses.append(d.serialize(bake=bake))
+        for idx, d in enumerate(project.analysis):
+            try:
+                analyses.append(d.serialize(bake=bake))
+            except Exception as e:
+                print(idx, d.analysis_job_class)
 
         for e in project.screenshot_groups:
             screenshot_groups.append(e.serialize())
@@ -1286,12 +1288,20 @@ class VIANProject(QObject, IHasName, IClassifiable):
             pass
         if has_file:
             self.hdf5_manager = HDF5Manager()
+
+            # If the file did not exist before, we should not set the hdf5_indices
+            file_existed = os.path.isfile(self.hdf5_path)
             self.hdf5_manager.set_path(self.hdf5_path)
-            try:
-                self.hdf5_manager.set_indices(my_dict['hdf_indices'])
-            except Exception as e:
-                print("Exception during hdf5_manager.set_indices(): ", e)
-                self.hdf5_manager.initialize_all()
+
+            if self.hdf5_indices_loaded != None:
+                self.hdf5_manager.set_indices(self.hdf5_indices_loaded)
+
+            # try:
+            #     if os.path.isfile(file_existed):
+            #         self.hdf5_manager.set_indices(my_dict['hdf_indices'])
+            # except Exception as e:
+            #     print("Exception during hdf5_manager.set_indices(): ", e)
+            #     self.hdf5_manager.initialize_all()
         else:
             print("No HDF5 File")
 
@@ -1304,7 +1314,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             try:
                 self.add_vocabulary(voc)
             except ValueError as e:
-                logging.info(e)
+                logging.exception(e)
                 continue
         # If the vocabularies are merged by name,
         # we have to update the unique ids in the keywords later
@@ -1330,7 +1340,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
                                                      f"Screenshot at {timestamp} is positioned outside given movie."
                                                      f"Continue loading and remove all Screenshots outside movie?")
                         delete_out_of_bounds_screenshots = state == QMessageBox.Yes
-
+                    else:
+                        delete_out_of_bounds_screenshots = True
 
                 if delete_out_of_bounds_screenshots:
                     continue
@@ -2138,6 +2149,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for c in clobjs:
             result += c.get_vocabularies()
         return result
+
+    def clear_analyses(self):
+        """Clears all analyses, and cleans up the complete project """
+        for a in self.analysis:
+            self.id_list.pop(a.unique_id)
+
+        for k, item in self.id_list.items():
+            if isinstance(item, BaseProjectEntity):
+                item.connected_analyses = []
+
+        self.hdf5_manager.clear()
+        self.analysis = []
 
     #endregion
 
