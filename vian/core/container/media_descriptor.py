@@ -96,6 +96,9 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
                 either as Tuple[x, y, width, height]
                 ort as Tuple[x1, y1, x2, y2] if as_coords is set to True
         """
+        if self.letterbox_rect is None:
+            return self.letterbox_rect
+
         x, y, w, h = self.letterbox_rect
         if as_coords:
             return x, y, x + w, y + h

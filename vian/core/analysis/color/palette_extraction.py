@@ -171,8 +171,8 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
         else:
             labels[np.where(mask != mask_index)] = 255
 
-        if np.where(labels == 255)[0].shape[0] == 0:
-            raise ValueError(f"The given mask does not contain any pixels with the label {mask_index}.")
+        #if np.where(labels == 255)[0].shape[0] == 0:
+        #    raise ValueError(f"The given mask does not contain any pixels with the label {mask_index}.")
 
         bins = np.unique(labels)
         bins = np.delete(bins, np.where(bins==255))
