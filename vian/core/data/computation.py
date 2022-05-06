@@ -288,7 +288,7 @@ def convertQImageToMat(qimage):
     height = qimage.height()
 
     ptr = qimage.bits()
-    ptr.setsize(qimage.byteCount())
+    ptr.setsize(qimage.sizeInBytes())
 
     if qimage.format() == QImage.Format.Format_ARGB32_Premultiplied:
         arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
@@ -520,7 +520,11 @@ def version_check(smaller_than, version):
 def open_web_browser(file_path):
     if sys.platform == "darwin":  # check if on OSX
         file_path = "file:///" + file_path
-    webbrowser.get().open(file_path)
+
+    if sys.platform == 'darwin':
+        os.system(f"open \"\" {file_path}")
+    else:
+        webbrowser.get().open(file_path)
 
 
 def find_closest(frame, segment):
