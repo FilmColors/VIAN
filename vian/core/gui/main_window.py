@@ -2128,11 +2128,7 @@ class MainWindow(QtWidgets.QMainWindow):
             path = self.project.path
             args = [self.project, self.project.path]
 
-        if sync:
-            self.project.store_project(path)
-        else:
-            worker = Worker(self.project.store_project, self, None, [path], msg_finished="Project Saved")
-            self.start_worker(worker, "Saving Project")
+        self.project.store_project(path)
 
         log_info("Saving to:", path)
         self.settings.add_to_recent_files(self.project)
