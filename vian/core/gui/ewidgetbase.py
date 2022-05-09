@@ -292,8 +292,8 @@ class EGraphicsView(QGraphicsView):
 
     def wheelEvent(self, event: QWheelEvent):
         if self.ctrl_is_pressed:
-            self.setTransformationAnchor(QGraphicsView.NoAnchor)
-            self.setResizeAnchor(QGraphicsView.NoAnchor)
+            self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
+            self.setResizeAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
 
             old_pos = self.mapToScene(event.pos())
 
@@ -426,8 +426,8 @@ class EMultiGraphicsView(QGraphicsView):
 
     def wheelEvent(self, event: QWheelEvent):
         if self.ctrl_is_pressed:
-            self.setTransformationAnchor(QGraphicsView.NoAnchor)
-            self.setResizeAnchor(QGraphicsView.NoAnchor)
+            self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
+            self.setResizeAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
 
             old_pos = self.mapToScene(event.pos())
 

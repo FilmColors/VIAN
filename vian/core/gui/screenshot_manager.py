@@ -662,8 +662,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def wheelEvent(self, event):
         if self.ctrl_is_pressed:
-            self.setTransformationAnchor(QtWidgets.QGraphicsView.NoAnchor)
-            self.setResizeAnchor(QtWidgets.QGraphicsView.NoAnchor)
+            self.setTransformationAnchor(QtWidgets.QGraphicsView.ViewportAnchor.NoAnchor)
+            self.setResizeAnchor(QtWidgets.QGraphicsView.ViewportAnchor.NoAnchor)
 
             old_pos = self.mapToScene(event.pos())
             if self.main_window.is_darwin:
