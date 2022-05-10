@@ -665,7 +665,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.setTransformationAnchor(QtWidgets.QGraphicsView.ViewportAnchor.NoAnchor)
             self.setResizeAnchor(QtWidgets.QGraphicsView.ViewportAnchor.NoAnchor)
 
-            old_pos = self.mapToScene(event.pos())
+            old_pos = self.mapToScene(event.position().toPoint())
             if self.main_window.is_darwin:
                 h_factor = 1.1
                 l_factor = 0.9
@@ -684,7 +684,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 self.curr_scale *= l_factor
                 self.scale(l_factor, l_factor)
 
-            cursor_pos = self.mapToScene(event.pos()) - old_pos
+            cursor_pos = self.mapToScene(event.position().toPoint()) - old_pos
 
             if self.scaling_mode == SCALING_MODE_WIDTH:
                 self.arrange_images()
