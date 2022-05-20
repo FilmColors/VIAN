@@ -19,3 +19,4 @@ matplotlib
 pymediainfo
 XlsxWriter
 openpyxl
+SoundFile
