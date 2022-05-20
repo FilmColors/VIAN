@@ -33,7 +33,7 @@ jobs:
         with:
           requirements: requirements.txt
       - run: unzip vian/install/three.zip -d vian/flask_server/static
-      - run: pip install pyinstaller
+      - run: pip install pyinstaller==4.9
       - run: pyinstaller main.spec
         working-directory: vian
       - run: |
