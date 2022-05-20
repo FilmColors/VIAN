@@ -5,7 +5,7 @@ sqlalchemy
 opencv-contrib-python-headless== 4.5.3.56
 requests
 PyQt6
-PyQtWebEngine
+PyQt6-WebEngine
 scikit-learn
 flask
 fastcluster
