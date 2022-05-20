@@ -4,6 +4,7 @@
 name: macOS - Build_and_upload_VIAN
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
     tags:
@@ -12,7 +13,7 @@ on:
     branches: [ master ]
     tags:
       - "v*.*.*"
-on: [workflow_dispatch]
+
 jobs:
   build_application:
 
