@@ -4,10 +4,16 @@
 name: macOS - Build_and_upload_VIAN
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ master, develop ]
+    branches: [ master ]
     tags:
       - "v*.*.*"
+  pull_request:
+    branches: [ master ]
+    tags:
+      - "v*.*.*"
+
 jobs:
   build_application:
 
@@ -45,20 +51,20 @@ jobs:
           security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
           security set-key-partition-list -S "apple-tool:,apple:,codesign:" -s -k keychain-password build.keychain
           security find-identity
-          /usr/bin/codesign --deep --force -s 98EW9FVDY4 ./vian/dist/VIAN.app -v
+          /usr/bin/codesign --deep --force -s MQ5V9J9888 ./vian/dist/VIAN.app -v
       - run: |
           mv vian/dist/VIAN.app VIAN.app
-          tar -a -c -f result.zip VIAN.app
+          tar -a -c -f vian-macos.zip VIAN.app
       - name: Artifact
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}_bundle
-          path: result.zip
+          path: vian-macos.zip
           if-no-files-found: error
       - name: Release
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/v')
         with:
-          artifacts: "result.zip"
+          artifacts: "vian-macos.zip"
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
