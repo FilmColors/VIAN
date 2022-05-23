@@ -27,7 +27,6 @@ dependencies:
       - tensorflow-macos
       - tensorflow-metal
       - pysrt
-      - python-vlc
       - XlsxWriter
       - openpyxl
       - ffmpeg

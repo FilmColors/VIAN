@@ -23,7 +23,6 @@ dependencies:
   - pymediainfo
   - pip:
       - pysrt
-      - python-vlc
       - pymediainfo
       - XlsxWriter
       - openpyxl

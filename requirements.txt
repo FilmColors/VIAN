@@ -10,7 +10,6 @@ scikit-learn
 flask
 fastcluster
 moviepy
-python-vlc
 pandas
 librosa
 pysrt

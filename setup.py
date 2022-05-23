@@ -13,7 +13,6 @@ requirements = [
     'flask',
     'fastcluster',
     'moviepy',
-    'python-vlc',
     'pandas',
     'librosa',
     'pysrt',

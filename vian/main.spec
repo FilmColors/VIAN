@@ -30,13 +30,6 @@ data_paths = [
 console = False
 if sys.platform == "win32":
     console = True
-    vlc_dlls = [
-        ('../bin/win64/libvlc.dll', '.'),
-        ('../bin/win64/axvlc.dll', '.'),
-        ('../bin/win64/libvlccore.dll', '.'),
-        ('../bin/win64/npvlc.dll', '.')
-    ]
-    data_paths += vlc_dlls
 
     binaries += [
         ('../bin/win64/plugins', 'plugins'),
