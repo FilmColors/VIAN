@@ -140,7 +140,7 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
         self.btn_FastForward.setChecked(False)
         self.fast_step_timer.stop()
 
-        isPaused = self.main_window.player.play_pause()
+        self.main_window.player.play_pause()
         self.main_window.player.set_subtitle(1)
 
     def on_fps_changed(self):

@@ -43,7 +43,7 @@ from vian.core.gui.inspector import Inspector
 from vian.core.gui.outliner import Outliner
 from vian.core.gui.perspectives import PerspectiveManager, Perspective
 from vian.core.gui.player_controls import PlayerControls
-from vian.core.gui.player_vlc import Player_VLC, PlayerDockWidget
+from vian.core.gui.player_qmediaplayer import Player_QMediaPlayer, PlayerDockWidget
 
 from vian.core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
 from vian.core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
@@ -219,7 +219,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.drawing_editor = None
         self.concurrent_task_viewer = None
 
-        self.player = Player_VLC(self)
+        self.player = Player_QMediaPlayer(self)
         self.player_dock_widget = None
 
         self.project = VIANProject(name="Default Project", path=None)
@@ -2212,10 +2212,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.time = self.player.get_media_time()
             self.time_counter = 0
 
+
         t = self.time
         if t > 0:
             if self.project is not None and t > self.project.movie_descriptor.duration - self.settings.EARLY_STOP:
-                self.player.pause()
+                pass #todo: to fix
+                #self.player.pause()
             self.dispatch_on_timestep_update(t)
 
     #endregion
