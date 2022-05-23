@@ -258,8 +258,6 @@ class Player_QMediaPlayer(VideoPlayer):
         #self.media_player.positionChanged.connect(self.clicked)
         self.media_player.mediaStatusChanged.connect(self.mediaChanged)
 
-        self.audio_output.setVolume(100)
-
         self.vboxlayout = QtWidgets.QVBoxLayout()
         self.setLayout(self.vboxlayout)
         self.vboxlayout.addWidget(self.video)
@@ -460,12 +458,12 @@ class Player_QMediaPlayer(VideoPlayer):
     def set_volume(self, volume):
         if self.audio_output is None:
             return
-        self.audio_output.setVolume(volume)
+        self.audio_output.setVolume(volume/100.0)
 
     def get_volume(self):
         if self.audio_output is None:
             return 0
-        return self.audio_output.getVolume()
+        return self.audio_output.getVolume()*100
 
     def set_sub_volume(self, volume):
         return
