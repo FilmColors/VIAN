@@ -287,31 +287,6 @@ class Player_QMediaPlayer(VideoPlayer):
 
         return frame
 
-    def init_ui(self):
-
-        # In this widget, the video will be drawn
-        # self.videoframe = QtWidgets.QFrame()
-
-        # the media player has to be 'connected' to the QFrame
-        # (otherwise a video would be displayed in it's own window)
-        # this is platform specific!
-        # you have to give the id of the QFrame (or similar object) to
-        # vlc, different platforms have different functions for this
-        if sys.platform.startswith('linux'):  # for Linux using the X Server
-            self.media_player.set_xwindow(int(self.videoframe.winId()))
-        elif sys.platform == "win32":  # for Windows
-            self.media_player.set_hwnd(int(self.videoframe.winId()))
-        elif sys.platform == "darwin":  # for MacOS
-            self.media_player.set_nsobject(int(self.videoframe.winId()))
-            # self.videoframe.setCocoaView(self.media_player.get_nsobject())
-
-            self.videoframe.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-            # self.videoframe.setAttribute(Qt.WA_NativeWindow, True)
-            # self.setAttribute(Qt.WA_DontCreateNativeAncestors, True)
-
-
-            # self.setWindowFlags(Qt.ForeignWindow)
-
     def get_size(self):
         if self.media_player is not None:
             return self.media_player.video_get_size()

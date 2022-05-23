@@ -265,7 +265,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.update_visualizations()
         self.update_ui()
 
-        self.scrollArea.wheelEvent = self.func_tes
+        self.scrollArea.wheelEvent = self.wheelEvent
 
         self.main_window.onTimeStep.connect(self.on_timestep_update)
 
@@ -302,9 +302,6 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
         self.scroll_h_timer.setInterval(30)
         self.scroll_h_timer.timeout.connect(self.on_scroll_h_timeout)
         self.show()
-
-    def func_tes(self, WheelEvent):
-        dummy = None
 
     def project(self):
         return self.parent().parent().project()
@@ -913,7 +910,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
 
     def wheelEvent(self, QWheelEvent):
         if self.is_scaling:
-            self.zoom_timeline(QWheelEvent.pos(), QWheelEvent.angleDelta())
+            self.zoom_timeline(QWheelEvent.position(), QWheelEvent.angleDelta())
         else:
             x = -1 * QWheelEvent.angleDelta().x() + self.scrollArea.horizontalScrollBar().value()
             y = -1 * QWheelEvent.angleDelta().y() + self.scrollArea.verticalScrollBar().value()
