@@ -5,5 +5,4 @@ conda install -c anaconda tensorflow keras requests networkx scikit-learn sqlalc
 conda install -c conda-forge fastcluster librosa
 conda install -c defaults opencv
 
-pip install python-vlc
 pip install moviepy

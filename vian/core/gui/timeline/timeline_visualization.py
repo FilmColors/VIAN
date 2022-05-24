@@ -1,12 +1,11 @@
 from PyQt6 import QtGui
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
-from PyQt6.QtWidgets import QSlider, QLabel
+from PyQt6.QtWidgets import QSlider, QLabel, QHBoxLayout
+
 from vian.core.gui.timeline.timeline_base import TimelineControl, TimelineBar, QPushButton
-
-from vian.core.data.interfaces import TimelineDataset
 from vian.core.container.project import *
-
+from vian.core.data.interfaces import TimelineDataset
 
 class TimelineVisualizationControl(TimelineControl):
     onVisibilityChanged = pyqtSignal(bool)
@@ -17,12 +16,19 @@ class TimelineVisualizationControl(TimelineControl):
         self.sp_filter.setMinimum(1)
         self.sp_filter.setMaximum(20)
 
-        self.layout().addWidget(QLabel("Filter", self), 1, 0)
-        self.layout().addWidget(self.sp_filter, 1, 1)
+        self.filter_layout = QHBoxLayout()
+
+
+        self.filterlabel = QLabel("Filter")
+        self.filterlabel.setAutoFillBackground(False)
+        self.filter_layout.addWidget(self.filterlabel)
+        self.filter_layout.addWidget(self.sp_filter)
 
         self.btn_toggle_visible = QPushButton("Hide")
         self.btn_toggle_visible.clicked.connect(self.on_hide)
-        self.layout().addWidget(self.btn_toggle_visible, 2, 0)
+        self.filter_layout.addWidget(self.btn_toggle_visible)
+
+        self.mainLayout.addLayout(self.filter_layout)
 
     def on_hide(self):
         if self.btn_toggle_visible.text() == "Hide":

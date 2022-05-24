@@ -3,13 +3,12 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
-from vian.core.data.interfaces import TimelineDataset
 from vian.core.container.project import *
 from vian.core.container.container_interfaces import ILockable
 from vian.core.gui.context_menu import open_context_menu
 from vian.core.gui.annotation_editor import AnnotationEditorPopup
 from vian.core.gui.vocabulary_selector import VocabularySelectorDialog
-
+from vian.core.data.interfaces import TimelineDataset
 
 
 class TimelineControl(QtWidgets.QWidget):
@@ -40,20 +39,30 @@ class TimelineControl(QtWidgets.QWidget):
         self.resize_offset = 0
         self.show()
         self.group_height = self.timeline.group_height
+        self.mainLayout = QVBoxLayout(self)
+        self.mainLayout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
 
-        self.setLayout(QGridLayout(self))
-        self.layout().setSpacing(2)
-        self.lbl_title = QLabel(self)
-        self.lbl_title.setStyleSheet("QWidget{background:transparent; margin:0pt;}")
-        self.lbl_title.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        self.layout().addWidget(self.lbl_title,0, 1, 1, 3)
+
+        self.pin_and_title = QHBoxLayout()
 
         self.btn_pin = QPushButton(create_icon("qt_ui/icons/icon_pin.png"), "", self)
         self.btn_pin.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.btn_pin.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
-        self.layout().addWidget(self.btn_pin, 0, 0)
-
         self.btn_pin.clicked.connect(self.toggle_pin)
+        self.pin_and_title.addWidget(self.btn_pin)
+
+        self.lbl_title = QLabel(self)
+        self.lbl_title.setStyleSheet("QWidget{background:transparent; margin:0pt;}")
+        self.lbl_title.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.pin_and_title.addWidget(self.lbl_title)
+
+        self.mainLayout.addLayout(self.pin_and_title)
+
+        self.lock_classification_vocb = QHBoxLayout()
+        self.mainLayout.addLayout(self.lock_classification_vocb)
+
+
+        self.setLayout(self.mainLayout)
 
         self.expand = QSpacerItem(1,1, QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
 
@@ -65,13 +74,6 @@ class TimelineControl(QtWidgets.QWidget):
         self.set_name()
         self._add_spacer()
 
-        h = 4 * QtWidgets.QApplication.activeWindow().fontMetrics().height()
-
-        if self.item.strip_height == -1:
-            self.resize(self.width(), h )
-        else:
-            self.resize(self.width(),h)# self.item.strip_height)
-
         if not isinstance(self.item, TimelineDataset):
             self.item.onSelectedChanged.connect(self.on_selected_changed)
 
@@ -80,7 +82,7 @@ class TimelineControl(QtWidgets.QWidget):
             self.btn_lock = QPushButton(create_icon("qt_ui/icons/icon_locked2.png"), "", self)
             self.btn_lock.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
             self.btn_lock.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-            self.layout().addWidget(self.btn_lock,1,0,1,1)
+            self.lock_classification_vocb.addWidget(self.btn_lock)
 
             if self.item.is_locked():
                 self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_locked2.png"))
@@ -92,17 +94,17 @@ class TimelineControl(QtWidgets.QWidget):
         if isinstance(self.item, Segmentation):
             self.btn_classification = QPushButton(create_icon("qt_ui/icons/icon_classification"), "", self)
             self.btn_classification.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
-            self.btn_classification.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-            self.layout().addWidget(self.btn_classification,1,1,1,1)
+            self.btn_classification.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+            self.lock_classification_vocb.addWidget(self.btn_classification)
             self.btn_classification.clicked.connect(self.toggle_classification)
 
             self.btn_vocabulary = QPushButton(create_icon("qt_ui/icons/icon_vocabulary"), "", self)
             self.btn_vocabulary.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
             self.btn_vocabulary.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-            self.layout().addWidget(self.btn_vocabulary, 1, 3, 1, 1)
+            self.lock_classification_vocb.addWidget(self.btn_vocabulary)
             self.btn_vocabulary.clicked.connect(self.show_vocabulary_setup)
 
-        self.layout().addItem(self.expand,2,0)
+        self.mainLayout.addItem(self.expand)
 
     def toggle_pin(self):
         self.is_pinned = not self.is_pinned

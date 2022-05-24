@@ -909,7 +909,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             QKeyEvent.ignore()
 
     def wheelEvent(self, QWheelEvent):
-        if self.is_scaling:
+        if QtWidgets.QApplication.keyboardModifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
             self.zoom_timeline(QWheelEvent.position(), QWheelEvent.angleDelta())
         else:
             x = -1 * QWheelEvent.angleDelta().x() + self.scrollArea.horizontalScrollBar().value()
