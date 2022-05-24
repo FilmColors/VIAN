@@ -69,8 +69,8 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
     def on_timestep_update(self, time):
         if not self.is_clicked:
             d = np.clip(self.main_window.player.duration, 1, None)
-            vlc_position = float(time) / d
-            self.sl_position.setValue(vlc_position * 10000)
+            position = float(time) / d
+            self.sl_position.setValue(position * 10000)
 
         self.lbl_position_time.setText(ms_to_string(time))
         self.lbl_position_frame.setText(str(int(float(time) / 1000 * self.main_window.player.get_fps())))

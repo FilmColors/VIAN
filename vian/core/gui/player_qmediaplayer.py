@@ -255,8 +255,14 @@ class Player_QMediaPlayer(VideoPlayer):
         self.audio_output = QAudioOutput()
         self.media_player.setAudioOutput(self.audio_output)
 
-        #self.media_player.positionChanged.connect(self.clicked)
+        self.media_player.positionChanged.connect(self.positionChanged)
+        self.media_player.playbackStateChanged.connect(self.playbackStateChanged)
         self.media_player.mediaStatusChanged.connect(self.mediaChanged)
+
+        self.time_update_interval = 10
+        self.update_timer = QtCore.QTimer()
+        self.update_timer.setInterval(self.time_update_interval)
+        self.update_timer.timeout.connect(self.signal_timestep_update)
 
         self.vboxlayout = QtWidgets.QVBoxLayout()
         self.setLayout(self.vboxlayout)
@@ -268,10 +274,19 @@ class Player_QMediaPlayer(VideoPlayer):
         self.set_initial_values()
         self.play()
 
-    # *** EXTENSION METHODS *** #
-    def init_vlc(self):
-        pass
+    def positionChanged(self):
+        self.timeChanged.emit(self.media_player.position())
 
+    def signal_timestep_update(self):
+        self.timeChanged.emit(self.media_player.position())
+
+    def playbackStateChanged(self):
+        if self.media_player.playbackState() == QMediaPlayer.PlaybackState.PlayingState and not self.update_timer.isActive():
+            self.update_timer.start()
+        elif self.update_timer.isActive():
+            self.update_timer.stop()
+
+    # *** EXTENSION METHODS *** #
     def release_player(self):
         return
         if self.media_player is not None:

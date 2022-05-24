@@ -540,20 +540,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.autosave_timer.timeout.connect(self.on_save_project, no_receiver_check=False)
         self.update_autosave_timer(do_start=False)
 
-        self.time_update_interval = 50
-        self.update_timer = QtCore.QTimer()
-        self.update_timer.setTimerType(Qt.TimerType.PreciseTimer)
-        self.update_timer.setInterval(self.time_update_interval)
-        self.update_timer.timeout.connect(self.signal_timestep_update)
-
         self.time = 0
         self.time_counter = 0
         self.clock_synchronize_step = 100
         self.last_segment_index = 0
 
         self.player.movieOpened.connect(self.on_movie_opened, QtCore.Qt.ConnectionType.QueuedConnection)
-        self.player.started.connect(self.start_update_timer, QtCore.Qt.ConnectionType.QueuedConnection)
-        self.player.stopped.connect(self.update_timer.stop, QtCore.Qt.ConnectionType.QueuedConnection)
         self.player.timeChanged.connect(self.dispatch_on_timestep_update, QtCore.Qt.ConnectionType.AutoConnection)
         self.onMovieOpened.connect(self.audio_handler.project_changed)
 
@@ -2203,22 +2195,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 if issubclass(obj, IAnalysisJob):
                     if not obj.__name__ == IAnalysisJob.__name__:
                         self.analysis_list.append(obj)
-
-    def signal_timestep_update(self):
-        if self.time_counter < self.clock_synchronize_step:
-            self.time += self.time_update_interval * self.player.get_rate()
-            self.time_counter += 1
-        else:
-            self.time = self.player.get_media_time()
-            self.time_counter = 0
-
-
-        t = self.time
-        if t > 0:
-            if self.project is not None and t > self.project.movie_descriptor.duration - self.settings.EARLY_STOP:
-                pass #todo: to fix
-                #self.player.pause()
-            self.dispatch_on_timestep_update(t)
 
     #endregion
 
