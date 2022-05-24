@@ -408,10 +408,9 @@ class Player_QMediaPlayer(VideoPlayer):
         return self.media_player.position()
 
     def set_rate(self, rate):
-        return
         if self.media_player is None:
-            return 1.0
-        self.media_player.set_rate(float(rate))
+            return
+        self.media_player.setPlaybackRate(float(rate))
 
     def get_rate(self):
         if self.media_player is None:
