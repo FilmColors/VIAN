@@ -270,9 +270,11 @@ class Player_QMediaPlayer(VideoPlayer):
 
 
     def mediaChanged(self):
-        self.media_player.setPosition(0)
-        self.set_initial_values()
-        self.play()
+        if not self.media_player.mediaStatus() is QMediaPlayer.MediaStatus.NoMedia:
+            self.media_player.setPosition(0)
+            self.set_initial_values()
+            if not self.media_player.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+                self.play()
 
     def positionChanged(self):
         self.timeChanged.emit(self.media_player.position())

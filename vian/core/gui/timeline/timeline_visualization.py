@@ -15,17 +15,19 @@ class TimelineVisualizationControl(TimelineControl):
         self.sp_filter = QSlider(Qt.Orientation.Horizontal)
         self.sp_filter.setMinimum(1)
         self.sp_filter.setMaximum(20)
+        self.sp_filter.setStyleSheet("background-color: rgba(0, 0, 0, 0);")  # for transparent background
 
         self.filter_layout = QHBoxLayout()
 
 
         self.filterlabel = QLabel("Filter")
-        self.filterlabel.setAutoFillBackground(False)
+        self.filterlabel.setStyleSheet("background-color: rgba(0, 0, 0, 0);") #for transparent background
         self.filter_layout.addWidget(self.filterlabel)
         self.filter_layout.addWidget(self.sp_filter)
 
         self.btn_toggle_visible = QPushButton("Hide")
         self.btn_toggle_visible.clicked.connect(self.on_hide)
+        self.btn_toggle_visible.setStyleSheet("background-color: rgba(0, 0, 0, 0);")  # for transparent background
         self.filter_layout.addWidget(self.btn_toggle_visible)
 
         self.mainLayout.addLayout(self.filter_layout)
