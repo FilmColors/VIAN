@@ -124,7 +124,7 @@ class NewProjectDialog(EDialogWidget):
 
     def set_project_path(self):
         self.project.folder = self.project_dir
-        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + VIAN_PROJECT_EXTENSION
+        self.project.path = os.path.join(self.project_dir, self.project_name, self.project_name + VIAN_PROJECT_EXTENSION)
 
         if self.auto_naming:
             self.project_name = self.get_movie_id() + "_" + \
@@ -219,13 +219,13 @@ class NewProjectDialog(EDialogWidget):
             QMessageBox.warning(self, str(e),"The Root directory of your project could not be created because the " + str(e) +", please set it manually.")
             self.project_dir = QFileDialog.getExistingDirectory(caption="Select Root Directory of the Project")
             try:
-                os.mkdir(self.project_dir + "/" + self.project_name)
+                os.mkdir(os.path.join(self.project_dir, self.project_name))
             except:
                 self.main_window.print_message("Project Creating failed due to an error in the settings file")
                 return
 
-        self.project.path = self.project_dir + "/" + self.project_name + "/" + self.project_name + VIAN_PROJECT_EXTENSION
-        self.project.folder = self.project_dir + "/" + self.project_name + "/"
+        self.project.path = os.path.join(self.project_dir, self.project_name, self.project_name + VIAN_PROJECT_EXTENSION)
+        self.project.folder = os.path.join(self.project_dir, self.project_name)
 
         self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
 

@@ -104,7 +104,7 @@ class MainWindow(QtWidgets.QMainWindow):
     onStartFlaskServer = pyqtSignal()
     onStopFlaskServer = pyqtSignal()
 
-    def __init__(self, loading_screen:QSplashScreen, file = None):
+    def __init__(self, loading_screen:QSplashScreen, settings, file = None):
         super(MainWindow, self).__init__()
         path = os.path.abspath("qt_ui/MainWindow.ui")
         uic.loadUi(path, self)
@@ -144,8 +144,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dock_widgets = []
         self.open_dialogs = []
 
-        self.settings = UserSettings()
-        self.settings.load()
+        self.settings = settings
 
         self.hdf5_cache = HDF5Cache(self.settings.DIR_ROOT + "/scr_cache.hdf5")
 
@@ -592,7 +591,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.project.undo_manager.clear()
         self.close_project()
 
-        query_initial(WebAppCorpusInterface())
+        #query_initial(WebAppCorpusInterface()) #todo: fix this query. Where is it used?
         self.show()
         self.on_multi_experiment_changed(self.settings.MULTI_EXPERIMENTS)
         self.on_pipeline_settings_changed()
@@ -1071,7 +1070,7 @@ class MainWindow(QtWidgets.QMainWindow):
         exit = self.on_exit()
         if not exit:
             a0.ignore()
-            super(MainWindow, self).closeEvent(a0)
+            #super(MainWindow, self).closeEvent(a0)
 
     def resizeEvent(self, *args, **kwargs):
         QtWidgets.QMainWindow.resizeEvent(self, *args, **kwargs)
@@ -1235,12 +1234,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def on_exit(self):
         self.set_overlay_visibility(False)
         if self.project is not None and self.project.undo_manager.has_modifications():
-            answer = QMessageBox.question(self, "Save Project", "Do you want to save the current Project?")
-            if answer == QMessageBox.StandardButton.Yes:
+            answer = QMessageBox.warning(self, "Save Project", "Your Project has been modified.",
+                               QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard
+                               | QMessageBox.StandardButton.Cancel,
+                               QMessageBox.StandardButton.Save)
+            if answer == QMessageBox.StandardButton.Save:
                 self.on_save_project(sync=True)
-            elif answer == QMessageBox.StandardButton.No:
+            elif answer == QMessageBox.StandardButton.Discard:
                 pass
-            else:
+            elif answer == QMessageBox.StandardButton.Cancel:
                 self.set_overlay_visibility(True)
                 return False
 

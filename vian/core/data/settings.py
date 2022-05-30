@@ -114,33 +114,19 @@ class UserSettings():
         self.AUTOSAVE = True
         self.AUTOSAVE_TIME = 5
 
-        self.DIR_BASE = (os.path.abspath(".") + "/").replace("\\", "/")
-        self.DIR_USERHOME = os.path.expanduser("~") + "/"
-        self.DIR_APPDATA = "data/"
-        self.DIR_SCREENSHOTS = "shots/"
-
-        if sys.platform.startswith('linux'):
-            self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
-        elif sys.platform.startswith("darwin"):
-            if os.path.isdir(os.path.join(self.DIR_USERHOME, "documents/")):
-                self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
-            else:
-                self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
-        else:
-            self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
+        self.DIR_USERHOME = os.path.expanduser("~")
+        self.DIR_ROOT = os.path.join(self.DIR_USERHOME, "Documents", "VIAN")
 
         log_info("User Home:", self.DIR_USERHOME)
         log_info("VIAN Root:", self.DIR_ROOT)
 
-        self.DIR_PLUGINS = self.DIR_ROOT + "/plugins/"
-        self.store_path = self.DIR_ROOT + path
-        self.MASTERFILE_PATH = self.DIR_APPDATA + "master_file.ems"
-        self.DIR_TEMPLATES = self.DIR_ROOT + "/templates/"
-        self.DIR_BACKUPS = self.DIR_ROOT + "backups/"
-        self.DIR_CORPORA = self.DIR_ROOT + "/corpora/"
-        self.DIR_PROJECTS = self.DIR_ROOT + "/projects/"
-        self.DIR_VOCABULARIES = self.DIR_ROOT + "/vocabularies/"
-        self.DIR_SCRIPTS = self.DIR_ROOT + "/scripts/"
+        self.DIR_PLUGINS = os.path.join(self.DIR_ROOT, "plugins")
+        self.store_path = os.path.join(self.DIR_ROOT, path)
+        self.DIR_TEMPLATES = os.path.join(self.DIR_ROOT, "templates")
+        self.DIR_BACKUPS = os.path.join(self.DIR_ROOT, "backups")
+        self.DIR_CORPORA = os.path.join(self.DIR_ROOT, "corpora")
+        self.DIR_PROJECTS = os.path.join(self.DIR_ROOT, "projects")
+        self.DIR_VOCABULARIES = os.path.join(self.DIR_ROOT, "vocabularies")
 
         self.MULTI_EXPERIMENTS = False
         self.PROCESSING_WIDTH = 1920
@@ -221,42 +207,6 @@ class UserSettings():
         # css = "QWidget{ font-family: \""+family+"\"; font-size: "+str(size)+"pt; margin: 5pt;  padding: 1pt; color: #b1b1b1; background-color: #323232;}"
         QApplication.instance().setStyleSheet(css)
 
-    def generate_dir_paths(self):
-        """
-        Generates the default Directory Paths
-        :return: 
-        """
-        self.DIR_BASE = (os.path.abspath(".") + "/").replace("\\", "/")
-        self.DIR_USERHOME = os.path.expanduser("~") + "/"
-        self.DIR_APPDATA = "data/"
-        self.DIR_SCREENSHOTS = "shots/"
-
-        if sys.platform.startswith('linux'):
-            self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
-        elif sys.platform.startswith("darwin"):
-            if os.path.isdir(os.path.join(self.DIR_USERHOME, "documents/")):
-                self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
-            else:
-                self.DIR_ROOT = self.DIR_USERHOME + "Documents/VIAN/"
-        else:
-            self.DIR_ROOT = self.DIR_USERHOME + "documents/VIAN/"
-
-        self.DIR_PLUGINS = self.DIR_ROOT + "/plugins/"
-        self.DIR_BACKUPS = self.DIR_ROOT + "backups/"
-        self.store_path = self.DIR_ROOT + "settings.json"
-        self.MASTERFILE_PATH = self.DIR_APPDATA + "master_file.ems"
-        self.DIR_TEMPLATES = self.DIR_ROOT + "/templates/"
-        self.DIR_CORPORA = self.DIR_ROOT + "/corpora/"
-        self.DIR_PROJECTS = self.DIR_ROOT + "/projects/"
-        self.DIR_SCRIPTS = self.DIR_ROOT + "/scripts/"
-        self.DIR_VOCABULARIES = self.DIR_ROOT + "/vocabularies/"
-
-        for d in [self.DIR_ROOT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS,
-                  self.DIR_CORPORA, self.DIR_PROJECTS, self.DIR_SCRIPTS, self.DIR_VOCABULARIES]:
-            if not os.path.isdir(d):
-                os.mkdir(d)
-                log_info(d + "\t Directory created.")
-
     def integritiy_check(self):
         """
         Check if the settings are possible, 
@@ -264,14 +214,11 @@ class UserSettings():
         :return: 
         """
 
-        integer = True
-        for dir in [self.DIR_BASE, self.DIR_USERHOME, self.DIR_ROOT, self.DIR_TEMPLATES,
-                    self.DIR_PLUGINS, self.DIR_CORPORA, self.DIR_SCRIPTS, self.DIR_VOCABULARIES]:
-            if not os.path.isdir(dir):
-                self.generate_dir_paths()
-                integer = False
-                log_info("Recreated Missing Directories:", dir)
-                break
+        for d in [self.DIR_ROOT, self.DIR_TEMPLATES, self.DIR_BACKUPS, self.DIR_PLUGINS,
+                  self.DIR_CORPORA, self.DIR_PROJECTS, self.DIR_VOCABULARIES]:
+            if not os.path.isdir(d):
+                os.mkdir(d)
+                log_info(d + "\t Directory created.")
 
         t = dict()
         for name, path in self.recent_corpora_2.items():
@@ -279,11 +226,6 @@ class UserSettings():
             if os.path.isfile(path):
                 t[name] = path
         self.recent_corpora_2 = t
-
-        if not integer:
-            log_info("Settings regenerated")
-        else:
-            log_info("Successfully Loaded Settings from: ", self.store_path)
 
     def add_to_recent_files(self, project):
         """

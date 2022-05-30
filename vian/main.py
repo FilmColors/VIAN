@@ -130,7 +130,6 @@ if __name__ == '__main__':
     print("ApplicationDone")
 
     app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)
-    #app.setAttribute(Qt.AA_EnableHighDpiScaling) #seems not to be needed in Qt6 (https://doc.qt.io/qt-6/highdpi.html)
 
     print("Setting UI")
     print(os.getcwd())
@@ -148,7 +147,7 @@ if __name__ == '__main__':
     app.processEvents()
 
     print("Starting Up")
-    main = MainWindow(splash, file)
+    main = MainWindow(splash, settings, file)
     MAIN_WINDOW = main
     sys.exit(app.exec())
 

@@ -113,7 +113,6 @@ class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
         self.movie_size = (720,480)
         self.millis_per_sample = 0
         self.fps = 24
-        self.volume = 0
         self.mute = False
 
         self.use_user_fps = False
@@ -317,7 +316,6 @@ class Player_QMediaPlayer(VideoPlayer):
         self.stop_time = self.media_player.duration()
         self.duration = self.stop_time
         self.millis_per_sample = 40
-        self.volume = 50
 
         capture = cv2.VideoCapture(self.movie_path)
         self.fps = capture.get(cv2.CAP_PROP_FPS)

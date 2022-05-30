@@ -138,7 +138,7 @@
       <bool>false</bool>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Project Location:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>Project Location:</string>
      </property>
      <property name="scaledContents">
       <bool>false</bool>

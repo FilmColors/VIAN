@@ -20,7 +20,6 @@ class ExtensionList:
         self.load_plugins()
         self.load_analysis()
         self.load_pipelines("extensions/pipelines/")
-        # self.load_pipelines(main_window.settings.DIR_SCRIPTS)
 
         log_info("\n")
         log_info("#### --- Extensions --- #####")
