@@ -247,10 +247,8 @@ class Player_QMediaPlayer(VideoPlayer):
     def __init__(self, main_window):
         super(Player_QMediaPlayer, self).__init__(main_window)
 
-        self.video = QVideoWidget()
-        self.video.resize(300, 300)
-        self.video.move(0, 0)
         self.media_player = QMediaPlayer()
+        self.video = QVideoWidget()
         self.media_player.setVideoOutput(self.video)
         self.audio_output = QAudioOutput()
         self.media_player.setAudioOutput(self.audio_output)
@@ -259,7 +257,7 @@ class Player_QMediaPlayer(VideoPlayer):
         self.media_player.playbackStateChanged.connect(self.playbackStateChanged)
         self.media_player.mediaStatusChanged.connect(self.mediaChanged)
 
-        self.time_update_interval = 10
+        self.time_update_interval = 50
         self.update_timer = QtCore.QTimer()
         self.update_timer.setInterval(self.time_update_interval)
         self.update_timer.timeout.connect(self.signal_timestep_update)
@@ -270,11 +268,12 @@ class Player_QMediaPlayer(VideoPlayer):
 
 
     def mediaChanged(self):
-        if not self.media_player.mediaStatus() is QMediaPlayer.MediaStatus.NoMedia:
+        if self.media_player.mediaStatus() is QMediaPlayer.MediaStatus.EndOfMedia:
             self.media_player.setPosition(0)
+
+        if self.media_player.mediaStatus() is QMediaPlayer.MediaStatus.BufferedMedia or \
+                self.media_player.mediaStatus() is QMediaPlayer.MediaStatus.BufferingMedia:
             self.set_initial_values()
-            if not self.media_player.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
-                self.play()
 
     def positionChanged(self):
         self.timeChanged.emit(self.media_player.position())
@@ -287,11 +286,13 @@ class Player_QMediaPlayer(VideoPlayer):
             self.update_timer.start()
         elif self.update_timer.isActive():
             self.update_timer.stop()
+        if self.media_player.playbackState() == QMediaPlayer.PlaybackState.StoppedState:
+            self.stopped.emit()
 
     # *** EXTENSION METHODS *** #
     def release_player(self):
-        return
         if self.media_player is not None:
+            self.media_player.setSource(QUrl("none")) #remove moviefile
             self.stop()
             self.videoframe.hide()
 
@@ -321,7 +322,6 @@ class Player_QMediaPlayer(VideoPlayer):
         capture = cv2.VideoCapture(self.movie_path)
         self.fps = capture.get(cv2.CAP_PROP_FPS)
         self.movie_size = (capture.get(cv2.CAP_PROP_FRAME_WIDTH), capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.main_window.project.movie_descriptor.fps = self.fps
         self.media_descriptor.set_duration(self.duration)
         self.user_fps = self.fps
 
@@ -467,16 +467,14 @@ class Player_QMediaPlayer(VideoPlayer):
         return self.get_volume()
 
     def set_mute(self, mute):
-        return
-        if self.media_player is None:
+        if self.audio_output is None:
             return
-        self.media_player.audio_set_mute(bool(mute))
+        self.audio_output.setMuted(bool(mute))
 
     def get_mute(self):
-        return
-        if self.media_player is None:
+        if self.audio_output is None:
             return 0
-        return self.media_player.audio_get_mute()
+        return self.audio_output.isMuted()
 
     def get_source_width(self):
         return
