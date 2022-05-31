@@ -1,7 +1,7 @@
 import glob
 import os
-import cv2
-
+import hashlib
+import threading
 from PyQt6 import uic
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QCompleter, QFileDialog, QMessageBox, QTabWidget, QCheckBox, QLineEdit, QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy, QWidget, QScrollArea, QComboBox
@@ -23,6 +23,8 @@ class NewProjectDialog(EDialogWidget):
         self.templates = []
         self.project_name = "project_name"
         self.auto_naming = False
+        self.movie_checksum = None
+        self.checksum_thread = None
 
         self.elan_segmentation = elan_segmentation
         if movie_path == "":
@@ -45,7 +47,6 @@ class NewProjectDialog(EDialogWidget):
 
         self.find_templates()
 
-        self.tabWidget.removeTab(1)
         self.cB_AutomaticNaming.stateChanged.connect(self.on_automatic_naming_changed)
         self.lineEdit_ProjectName.textChanged.connect(self.on_proj_name_changed)
         self.lineEdit_ProjectPath.editingFinished.connect(self.on_proj_path_changed)
@@ -66,6 +67,8 @@ class NewProjectDialog(EDialogWidget):
         self.comboBoxCorpus.addItems(self.settings.recent_corpora_2.keys())
         self.comboBoxCorpus.currentTextChanged.connect(self.on_corpus_changed)
 
+        self.lineEdit_MoviePath.textChanged.connect(self.on_movie_path_changed)
+
         if add_to_current_corpus:
             if self.main_window.corpus_widget.corpus is not None:
                 try:
@@ -75,7 +78,6 @@ class NewProjectDialog(EDialogWidget):
 
         self.btn_Cancel.clicked.connect(self.on_cancel)
         self.btn_OK.clicked.connect(self.on_ok)
-        self.btn_Help.clicked.connect(self.on_help)
 
         self.lineEdit_MoviePath.setText(movie_path)
         self.project.movie_descriptor.set_movie_path(movie_path)
@@ -85,6 +87,8 @@ class NewProjectDialog(EDialogWidget):
         self.set_project_path()
 
         self.image_paths = []
+
+        self.setOkButtonFunc()
 
         self.show()
 
@@ -160,15 +164,11 @@ class NewProjectDialog(EDialogWidget):
         self.lineEdit_ProjectPath.setText(self.project_dir)
 
     def on_browse_movie_path(self):
-        # if self.checkBox_FromImages.isChecked() is False:
-            path = QFileDialog.getOpenFileName()[0]
-            # self.project.movie_descriptor.movie_path = path
-            self.lineEdit_MoviePath.setText(path)
-            self.path_set_from_dialog = True
-            name = os.path.splitext(os.path.split(path)[1])[0]
-            self.lineEdit_Name.setText(name)
-        # else:
-        #     self.image_paths = QFileDialog.getOpenFileNames()[0]
+        path = QFileDialog.getOpenFileName()[0]
+        self.lineEdit_MoviePath.setText(path)
+        self.path_set_from_dialog = True
+        name = os.path.splitext(os.path.split(path)[1])[0]
+        self.lineEdit_Name.setText(name)
 
     def on_desc_name_changed(self):
         self.project.movie_descriptor.movie_name = self.lineEdit_Name.text()
@@ -190,11 +190,30 @@ class NewProjectDialog(EDialogWidget):
         self.project.movie_descriptor.source = self.comboBox_Source.currentText()
         self.set_project_path()
 
-    def on_desc_movie_path_changed(self):
+    def calculate_checksum(self, path):
+        self.movie_checksum = hashlib.md5(open(path,'rb').read()).hexdigest()
+        self.setOkButtonFunc()
+
+    def on_movie_path_changed(self):
+        self.movie_checksum = None
+        if not self.checksum_thread is None:
+            self.checksum_thread.join()
+        if os.path.isfile(self.lineEdit_MoviePath.text()):
+            self.checksum_thread = threading.Thread(target=self.calculate_checksum, args=(self.lineEdit_MoviePath.text(),))
+            self.checksum_thread.start()
+        self.setOkButtonFunc()
+
+    def setOkButtonFunc(self):
         if not os.path.isfile(self.lineEdit_MoviePath.text()):
-            self.lineEdit_MoviePath.setText("Not a Path")
-            return
-        self.project.movie_descriptor.set_movie_path(self.lineEdit_MoviePath.text())
+            self.btn_OK.setEnabled(False)
+            self.label_status.setText("Movie path not found")
+        else:
+            if self.movie_checksum == None:
+                self.btn_OK.setEnabled(False)
+                self.label_status.setText("Movie checksum being calculated")
+            else:
+                self.btn_OK.setEnabled(True)
+                self.label_status.setText("")
 
     def on_cancel(self):
         self.close()
