@@ -203,13 +203,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
     def create_file_structure(self):
         self.reset_file_paths(self.folder, self.path)
         if not os.path.isdir(self.data_dir):
-            os.mkdir(self.data_dir)
+            os.makedirs(self.data_dir)
         if not os.path.isdir(self.results_dir):
-            os.mkdir(self.results_dir)
+            os.makedirs(self.results_dir)
         if not os.path.isdir(self.shots_dir):
-            os.mkdir(self.shots_dir)
+            os.makedirs(self.shots_dir)
         if not os.path.isdir(self.export_dir):
-            os.mkdir(self.export_dir)
+            os.makedirs(self.export_dir)
 
     def get_bake_path(self, entity, file_extension, filename_only = False):
         """
