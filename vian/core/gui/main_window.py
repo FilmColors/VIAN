@@ -45,7 +45,7 @@ from vian.core.gui.perspectives import PerspectiveManager, Perspective
 from vian.core.gui.player_controls import PlayerControls
 from vian.core.gui.player_qmediaplayer import Player_QMediaPlayer, PlayerDockWidget
 
-from vian.core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsToolbar, ScreenshotsManagerDockWidget
+from vian.core.gui.screenshot_manager import ScreenshotsManagerWidget, ScreenshotsManagerDockWidget
 from vian.core.gui.status_bar import StatusBar, OutputLine, StatusProgressBar, StatusVideoSource
 from vian.core.gui.timeline.timeline import TimelineContainer
 from vian.core.gui.vocabulary import VocabularyManager #VocabularyExportDialog
@@ -186,7 +186,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timeline = None
         self.output_line = None
         self.perspective_manager = None
-        self.screenshot_toolbar = None
         self.outliner = None
         self.progress_bar = None
         self.inspector = None
@@ -273,7 +272,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_screenshot_manager()
         self.create_node_editor_results()
         self.create_node_editor()
-        self.create_screenshots_toolbar()
         self.create_outliner()
         self.create_screenshot_manager_dock_widget()
         self.create_inspector()
@@ -397,7 +395,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionScreenshot_Manager.triggered.connect(self.create_screenshot_manager_dock_widget)
         self.actionPreferences.triggered.connect(self.open_preferences)
         self.actionAnnotation_Toolbox.triggered.connect(self.create_annotation_toolbar)
-        self.actionScreenshot_Toolbox.triggered.connect(self.create_screenshots_toolbar)
         self.actionPlayerControls.triggered.connect(self.create_widget_player_controls)
         self.actionPerspectivesToggle.triggered.connect(self.create_perspectives_manager)
         self.actionOutliner.triggered.connect(self.create_outliner)
@@ -835,14 +832,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.history_view.hide()
             else:
                 self.history_view.show()
-
-    def create_screenshots_toolbar(self):
-        if self.screenshot_toolbar is None:
-            self.screenshot_toolbar = ScreenshotsToolbar(self, self.screenshots_manager)
-            self.addToolBar(self.screenshot_toolbar)
-            #self.addDockWidget(QtCore.Qt.DockWidgetArea.TopDockWidgetArea, self.screenshot_toolbar)
-        else:
-            self.screenshot_toolbar.show()
 
     def create_perspectives_manager(self):
         if self.perspective_manager is None:
@@ -1492,7 +1481,6 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
-            # self.screenshot_toolbar.show()
             self.screenshots_manager_dock.raise_()
 
         elif perspective == Perspective.Annotation:
@@ -1514,8 +1502,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.screenshots_manager_dock.show()
             self.inspector.show()
             self.outliner.show()
-
-            self.screenshot_toolbar.show()
 
             self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.inspector, Qt.Orientation.Horizontal)
             self.splitDockWidget(self.inspector, self.outliner, Qt.Orientation.Vertical)
@@ -1585,7 +1571,6 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.facial_identification_dock is not None:
                 self.tabifyDockWidget(self.screenshots_manager_dock, self.facial_identification_dock)
 
-            self.screenshot_toolbar.show()
             self.screenshots_manager_dock.raise_()
 
         # elif perspective == Perspective.CorpusVisualizer:
@@ -1613,8 +1598,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def hide_all_widgets(self):
         if self.annotation_toolbar.isVisible():
             self.annotation_toolbar.hide()
-        if self.screenshot_toolbar.isVisible():
-            self.screenshot_toolbar.hide()
         if self.corpus_client_toolbar.isVisible():
             self.corpus_client_toolbar.hide()
 
@@ -2387,7 +2370,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImportELANSegmentation.setDisabled(not state)
         self.actionImportVocabulary.setDisabled(not state)
         self.actionImportCSVVocabulary.setDisabled(not state)
-        self.screenshot_toolbar.setDisabled(not state)
         self.annotation_toolbar.setDisabled(not state)
 
         for i in range(2, len(self.menus_list)): # The First two should also be active if no project is opened

@@ -127,8 +127,6 @@ class NewProjectDialog(EDialogWidget):
 
 
     def set_project_path(self):
-        #self.project.path = os.path.join(self.project_dir, self.project_name, self.project_name + VIAN_PROJECT_EXTENSION)
-
         if self.auto_naming:
             name = self.get_movie_id() + "_" + \
                                 self.lineEdit_Name.text().replace(" ", "_") + "_" + \

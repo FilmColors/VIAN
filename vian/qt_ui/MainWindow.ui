@@ -153,7 +153,6 @@
       <string>Toolboxes</string>
      </property>
      <addaction name="actionAnnotation_Toolbox"/>
-     <addaction name="actionScreenshot_Toolbox"/>
     </widget>
     <widget class="QMenu" name="menuPerspectives">
      <property name="title">
@@ -393,11 +392,6 @@
   <action name="actionAnnotation_Toolbox">
    <property name="text">
     <string>Annotation Toolbox</string>
-   </property>
-  </action>
-  <action name="actionScreenshot_Toolbox">
-   <property name="text">
-    <string>Screenshot Toolbox</string>
    </property>
   </action>
   <action name="actionOutliner">

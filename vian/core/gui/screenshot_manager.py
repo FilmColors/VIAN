@@ -22,31 +22,6 @@ SCALING_MODE_BOTH = 3
 
 from threading import Lock
 
-#TODO we should move the ProjectChanged Loaded and Closed Dispatcher into the ScreenshotManagerDockWidget
-class ScreenshotsToolbar(EToolBar):
-    def __init__(self, main_window, screenshot_manager):
-        super(ScreenshotsToolbar, self).__init__(main_window, "Screenshots Toolbar")
-        self.setWindowTitle("Screenshots")
-
-        self.manager = screenshot_manager
-        self.action_export = self.addAction(create_icon("qt_ui/icons/icon_export_screenshot.png"), "")
-        self.toggle_annotation = self.addAction(create_icon("qt_ui/icons/icon_toggle_annotations.png"), "")
-
-        self.toggle_annotation.setToolTip("Toggle Annotations on Screenshots")
-        self.action_export.setToolTip("Export Screenshots")
-
-        self.action_export.triggered.connect(self.on_export)
-        self.toggle_annotation.triggered.connect(self.on_toggle_annotations)
-
-        self.show()
-
-    def on_export(self):
-        self.main_window.on_export_screenshots()
-
-    def on_toggle_annotations(self):
-        self.manager.toggle_annotations()
-
-
 class SMSegment(object):
     def __init__(self, name, segm_id, segm_start):
         self.segm_name = name
@@ -78,7 +53,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
         self.lbl_n = None
         self.bar = None
-        self.lbl_slider = None
 
         self.curr_visualization = "Row-Column"
 
@@ -102,7 +76,6 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
         self.tab = None
         self.slider_image_size = None
-        self.lbl_slider_size = None
         self.screenshot_manager = None
 
         self.color_dt_mode = "Saturation"
@@ -138,34 +111,12 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def on_follow_time(self):
         self.screenshot_manager.follow_time = self.a_follow_time.isChecked()
 
-    def create_bottom_bar(self):
-        bar = QStatusBar(self)
-        l = QHBoxLayout(bar)
-
-        self.slider_n_per_row = QSlider(Qt.Orientation.Horizontal, self)
-        self.slider_n_per_row.setRange(1, 20)
-        self.slider_n_per_row.setValue(10)
-        self.slider_n_per_row.setStyleSheet("QSlider{padding: 2px; margin: 2px; background: transparent}")
-
-        self.slider_n_per_row.valueChanged.connect(self.on_n_per_row_changed)
-        self.lbl_slider = QLabel("N-Columns:")
-        self.lbl_slider.setStyleSheet("QLabel{padding: 2px; margin: 2px; background: transparent}")
-        bar.addPermanentWidget(self.lbl_slider)
-        bar.addPermanentWidget(self.slider_n_per_row)
-        self.lbl_n = QLabel("\t" + str(self.slider_n_per_row.value()))
-        bar.addPermanentWidget(self.lbl_n)
-        self.inner.setStatusBar(bar)
-        # self.slider_image_size = QSlider(Qt.Orientation.Horizontal, self)
-
-        # self.inner.addDockWidget(Qt.TopDockWidgetArea, self.manager_dock, Qt.Orientation.Horizontal)
-
     def set_manager(self, screenshot_manager):
         # self.inner.addDockWidget(Qt.TopDockWidgetArea, self.la_dock, Qt.Orientation.Horizontal)
         # self.inner.addDockWidget(Qt.TopDockWidgetArea, self.lc_dock, Qt.Orientation.Horizontal)
         # self.inner.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.dt_dock, Qt.Orientation.Horizontal)
         self.screenshot_manager = screenshot_manager
         self.inner.setCentralWidget(screenshot_manager)
-        self.create_bottom_bar()
 
         self.a_increase_size.triggered.connect(partial(self.screenshot_manager.modify_image_size, 1.0))
         self.a_decrease_size.triggered.connect(partial(self.screenshot_manager.modify_image_size, -1.0))
