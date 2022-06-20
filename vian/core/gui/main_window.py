@@ -2547,9 +2547,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if self.project.get_main_segmentation() is not None:
             current_segment = self.project.get_main_segmentation().get_segment_of_time(time)
-            if current_segment is not None and self.last_segment_index != current_segment.ID - 1:
-                self.last_segment_index = current_segment.ID - 1
+            if current_segment is not None:
+                if self.last_segment_index != current_segment.ID - 1:
+                    self.last_segment_index = current_segment.ID - 1
+                    self.onSegmentStep.emit(self.last_segment_index)
+            else: #enter a 'no segment' interval
+                self.last_segment_index = -1
                 self.onSegmentStep.emit(self.last_segment_index)
+
+
 
         if time == -1:
             for l in self.project.annotation_layers:

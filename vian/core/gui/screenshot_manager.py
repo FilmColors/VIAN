@@ -1,8 +1,8 @@
 from functools import partial
 
 from PyQt6 import QtGui, QtWidgets
-from PyQt6.QtCore import Qt, QPoint, QPointF, QRectF, pyqtSlot
-from PyQt6.QtGui import QFont, QColor
+from PyQt6.QtCore import Qt, QPoint, QRectF, pyqtSlot
+from PyQt6.QtGui import QFont, QColor, QPen, QBrush
 from PyQt6.QtWidgets import *
 from vian.core.data.enums import *
 
@@ -10,7 +10,7 @@ from vian.core.data.computation import *
 from vian.core.container.project import VIANProject
 from vian.core.container.screenshot import Screenshot
 from vian.core.data.interfaces import IProjectChangeNotify
-from vian.core.gui.ewidgetbase import EDockWidget, EToolBar, ImagePreviewPopup
+from vian.core.gui.ewidgetbase import EDockWidget, ImagePreviewPopup
 
 from threading import Lock
 
@@ -34,41 +34,17 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
 
         self.m_display = self.inner.menuBar().addMenu("Display")
 
-        self.lbl_n = None
-        self.bar = None
-
-        self.curr_visualization = "Row-Column"
-
-        self.m_display.addSeparator()
-        self.a_follow_time = self.m_display.addAction(" Follow Time")
-        self.a_follow_time.setCheckable(True)
-        self.a_follow_time.setChecked(True)
-        self.a_follow_time.triggered.connect(self.on_follow_time)
-        self.m_display.addSeparator()
-        self.a_toggle_name = self.m_display.addAction(" Show Segment Names")
-        self.a_toggle_name.setCheckable(True)
-        self.a_toggle_name.setChecked(False)
-        self.a_toggle_name.triggered.connect(self.on_toggle_name)
-
-        self.a_show_only_current = self.m_display.addAction(" Only Show Current Segment")
+        self.a_show_only_current = self.m_display.addAction("Only Show Current Segment")
         self.a_show_only_current.setCheckable(True)
         self.a_show_only_current.setChecked(False)
         self.a_show_only_current.triggered.connect(self.on_toggle_show_current)
 
-        self.tab = None
-        self.slider_image_size = None
+        self.a_show_unassinged_screenshots = self.m_display.addAction("Show Unassigned Screenshots")
+        self.a_show_unassinged_screenshots.setCheckable(True)
+        self.a_show_unassinged_screenshots.setChecked(True)
+        self.a_show_unassinged_screenshots.triggered.connect(self.on_toggle_show_unassigned_screenshots)
+
         self.screenshot_manager = None
-
-        self.color_dt_mode = "Saturation"
-        self.ab_view_mean_cache = dict()
-
-    def on_toggle_name(self):
-        state = self.a_toggle_name.isChecked()
-        self.screenshot_manager.show_segment_name = state
-        self.screenshot_manager.update_manager()
-
-    def on_follow_time(self):
-        self.screenshot_manager.follow_time = self.a_follow_time.isChecked()
 
     def set_manager(self, screenshot_manager):
         self.screenshot_manager = screenshot_manager
@@ -79,13 +55,12 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def on_toggle_show_current(self):
         state = self.a_show_only_current.isChecked()
         self.screenshot_manager.only_show_current_segment = state
-        self.screenshot_manager.frame_segment(self.screenshot_manager.current_segment_index)
-
-    def on_n_per_row_changed(self, value):
-        self.screenshot_manager.n_per_row = value + 1
-        self.lbl_n.setText("\t" + str(value))
         self.screenshot_manager.arrange_images()
-        self.screenshot_manager.frame_segment(self.screenshot_manager.current_segment_index)
+
+    def on_toggle_show_unassigned_screenshots(self):
+        state = self.a_show_unassinged_screenshots.isChecked()
+        self.screenshot_manager.show_unassigned_screenshots = state
+        self.screenshot_manager.arrange_images()
 
     def remove_screenshot(self, scr):
         pass
@@ -128,11 +103,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.setRenderHints(QtGui.QPainter.RenderHint.Antialiasing|QtGui.QPainter.RenderHint.SmoothPixmapTransform)
 
         self.is_hovered = False
-        self.ctrl_is_pressed = False
-        self.shift_is_pressed = False
-        self.follow_time = True
-        self.show_segment_name = False
         self.only_show_current_segment = False
+        self.show_unassigned_screenshots = True
 
         self.color = QColor(225,225,225)
 
@@ -286,6 +258,15 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.clear_captions()
 
         for segm in self.images_segmentation:
+
+            if (self.only_show_current_segment and (segm.segm_id == 0 or segm.segm_id != self.current_segment_index + 1)) \
+                    or (segm.segm_id == 0 and not self.show_unassigned_screenshots):
+                for img in segm.segm_images:
+                    img.setVisible(False)
+                continue
+
+            segment_start_y = y
+
             cap = self.add_line(margin, y, self.current_available_size.width() - margin, y)
             y += cap.boundingRect().height()
 
@@ -300,8 +281,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
             highest_img_per_line = []
             current_line_index = 0
-            for i, img in enumerate(segm.segm_images):
-
+            for img in segm.segm_images:
+                img.setVisible(True)
                 img.setScale(self.curr_image_scale)
                 scaled_width = img.boundingRect().width()*self.curr_image_scale
                 scaled_height = img.boundingRect().height()*self.curr_image_scale
@@ -325,6 +306,12 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             if len(highest_img_per_line) > 0:
                 y += highest_img_per_line[-1]
             y += 2 * margin # add a big margin at the end
+
+            # mark as current segment
+            if segm.segm_id != 0 and self.current_segment_index + 1 == segm.segm_id:
+                cap = self.scene.addRect(QRectF(0, segment_start_y, margin, y-segment_start_y), QPen(QColor(150, 150, 150)),
+                                         QBrush(QColor(150, 150, 150)))
+                self.captions.append(cap)
 
         self.setSceneRect(0,0,self.current_available_size.width(), y)
         # Drawing the New Selection Frames
@@ -393,73 +380,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 break
 
     def frame_segment(self, segment_index, center = True):
-        return
         self.current_segment_index = segment_index
         self.arrange_images()
-
-        if self.follow_time:
-            x = self.scene.sceneRect().width()
-            y = self.scene.sceneRect().height()
-            width = 0
-            height = 0
-
-            if self.only_show_current_segment:
-                for i, img_segm in enumerate(self.images_segmentation):
-                    if img_segm.segm_id - 1 != self.current_segment_index:
-                        for img in img_segm.segm_images:
-                            img.hide()
-                        for cap in img_segm.scr_captions:
-                            cap.hide()
-                    else:
-                        for img in img_segm.segm_images:
-                            img.show()
-                        for cap in img_segm.scr_captions:
-                            cap.show()
-
-            # # Segments that are empty are not represented in self.images_segmentation
-            # if segment_index >= len(self.images_segmentation):
-            #     return
-
-            index = -1
-            for i, s in enumerate(self.images_segmentation):
-                try:
-                    if s.segm_id == segment_index + 1:
-                        index = i
-                except:
-                    return
-
-            if index == -1:
-                return
-
-            # Determining the Bounding Box
-            for img in self.images_segmentation[index].segm_images:
-                if img.scenePos().x() < x:
-                    x = img.scenePos().x()
-                if img.scenePos().y() < y:
-                    y = img.scenePos().y()
-                if img.scenePos().y() + img.pixmap().width() > width:
-                    width = img.scenePos().x() + img.pixmap().width()
-                if img.scenePos().y() + img.pixmap().height() > height:
-                    height = img.scenePos().y() + img.pixmap().height()
-
-
-            if self.current_segment_frame is not None:
-                self.scene.removeItem(self.current_segment_frame)
-
-
-
-            pen = QtGui.QPen()
-            pen.setColor(QtGui.QColor(251, 95, 2, 60))
-            pen.setWidth(20)
-            self.current_segment_frame = self.scene.addRect(0, y-int(self.img_height/5) - 10, self.sceneRect().width() + 100, height - y + int(self.img_height / 7) + self.img_height - 100, pen)
-
-            if center:
-                self.current_segment_frame.boundingRect()
-
-        else:
-            if self.current_segment_frame is not None:
-                self.scene.removeItem(self.current_segment_frame)
-                self.current_segment_frame = None
+        return
 
     def on_loaded(self, project):
         self.clear_manager()
@@ -475,11 +398,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         self.update_manager()
         self.on_selected(None, project.get_selected())
-
-        # if self.follow_time:
-        #     self.frame_segment(self.current_segment_index)
-        # else:
-        #     self.center_images()
 
     @QtCore.pyqtSlot(object)
     def on_classification_object_changed(self):
