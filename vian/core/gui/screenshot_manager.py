@@ -149,7 +149,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.main_window.onSegmentStep.connect(self.frame_segment)
 
         self.scene = ScreenshotsManagerScene(self)
-        self.scene.sceneRectChanged.connect(self.sceneRectChanged)
         self.setScene(self.scene)
 
         self.project = None
@@ -179,10 +178,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         self.qimage_cache = dict()
 
-    def sceneRectChanged(self, rect):
-
-        print("sceneRectChanged", rect.width(), rect.height())
-
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         self.current_available_size = event.size()
         self.arrange_images()
@@ -204,7 +199,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.loading_text.setPos(512 - self.loading_text.boundingRect().width() / 2, 786)
             self.scene.removeItem(self.current_segment_frame)
 
-            self.scene.setSceneRect(self.scene.itemsBoundingRect())
+            self.setSceneRect(self.scene.itemsBoundingRect())
         else:
             if self.loading_icon is not None:
                 self.scene.removeItem(self.loading_icon)
@@ -277,13 +272,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.clear_selection_frames()
         self.arrange_images()
 
-        if self.project.get_main_segmentation() is None \
-                or len(self.project.get_main_segmentation().segments) == 0:
-
-            self.center_images()
-        else:
-            self.verticalScrollBar().setValue(self.current_y)
-
     def clear_manager(self):
         self.current_y = self.verticalScrollBar().value()
         self.clear_scr_captions()
@@ -354,7 +342,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 y += highest_img_per_line[-1]
             y += 2 * margin # add a big margin at the end
 
-        self.scene.setSceneRect(0,0,self.current_available_size.width(), y)
+        self.setSceneRect(0,0,self.current_available_size.width(), y)
         # Drawing the New Selection Frames
         self.draw_selection_frames()
 
@@ -524,44 +512,18 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.rubberband_rect = self.mapToScene(QRect).boundingRect()
 
     def wheelEvent(self, event):
-        if self.ctrl_is_pressed:
-            self.curr_image_scale += event.angleDelta().y()/1000
-            self.curr_image_scale = max(0.1, self.curr_image_scale)
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
+        if modifiers == QtCore.Qt.KeyboardModifier.ControlModifier:
+            self.curr_image_scale = max(0.1, self.curr_image_scale + event.angleDelta().y()/1000)
             self.arrange_images()
 
         else:
             super(ScreenshotsManagerWidget, self).wheelEvent(event)
 
+
     def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key.Key_Control:
-            self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.UpArrowCursor))
-            self.ctrl_is_pressed = True
-
-        elif event.key() == QtCore.Qt.Key.Key_A and self.ctrl_is_pressed:
+        if event.key() == QtCore.Qt.Key.Key_A:
             self.select_image(self.images_plain)
-
-        elif event.key() == QtCore.Qt.Key.Key_Shift:
-            self.shift_is_pressed = True
-        elif event.key() == QtCore.Qt.Key.Key_Plus:
-            print("Plus",  self.curr_image_scale)
-            self.modify_image_size(1.0)
-        elif event.key() == QtCore.Qt.Key.Key_Minus:
-            print("Minus",  self.curr_image_scale)
-            self.modify_image_size(-1.0)
-        else:
-            event.ignore()
-
-    @pyqtSlot(float)
-    def modify_image_size(self, val):
-        self.curr_image_scale += val
-        #self.arrange_images()
-
-    def keyReleaseEvent(self, event):
-        if event.key() == QtCore.Qt.Key.Key_Control:
-            self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor))
-            self.ctrl_is_pressed = False
-        elif event.key() == QtCore.Qt.Key.Key_Shift:
-            self.shift_is_pressed = False
         else:
             event.ignore()
 
@@ -587,7 +549,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
 
 class ScreenshotsManagerScene(QGraphicsScene):
-    def     __init__(self, graphicsViewer):
+    def __init__(self, graphicsViewer):
         super(ScreenshotsManagerScene, self).__init__()
         self.graphicsViewer = graphicsViewer
 
