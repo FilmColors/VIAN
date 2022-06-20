@@ -282,6 +282,8 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         segment = segmentation.get_segment_of_time(self.movie_timestamp)
         if segment is not None:
             self.scene_id = segment.ID
+        else:
+            self.scene_id = 0 #0 is default if screenshot is not member of any segement
         return segment
 
     def serialize(self, bake=False):

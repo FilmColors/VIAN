@@ -231,9 +231,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         if self.project is None:
             return
-        last_items = dict()
-        for img in self.images_plain:
-            last_items[img.screenshot_obj.unique_id] = img
+
         self.clear_manager()
 
         current_segment_id = -1
@@ -252,12 +250,9 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     if segment is not None:
                         current_sm_object = SMSegment(segment.get_name(), segment.ID, segment.get_start())
                 else:
-                    current_sm_object = SMSegment("Unassigned Screenshots", 0, -1)
+                    current_sm_object = SMSegment("Unassigned Screenshots", 0, -1) # id=0 represents a container for screenshots which are not assigned to a segment
 
-            if s.unique_id in last_items:
-                item_image = last_items[s.unique_id]
-            else:
-                item_image = ScreenshotManagerPixmapItems(None, self, s)
+            item_image = ScreenshotManagerPixmapItems(None, self, s)
             item_image.set_pixmap()
             self.scene.addItem(item_image)
 
@@ -274,36 +269,25 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
     def clear_manager(self):
         self.current_y = self.verticalScrollBar().value()
-        self.clear_scr_captions()
 
-        for img in self.images_plain:
-            self.scene.removeItem(img)
-
+        self.scene.clear()
         self.images_plain = []
-        self.clear_captions()
-
-        self.clear_selection_frames()
-        if self.current_segment_frame is not None:
-            self.scene.removeItem(self.current_segment_frame)
-            self.current_segment_frame = None
-
-        if self.loading_icon is not None:
-            self.scene.removeItem(self.loading_icon)
-        if self.loading_text is not None:
-            self.scene.removeItem(self.loading_text)
+        self.captions = []
+        self.current_segment_frame = None
         self.images_segmentation = []
 
     def arrange_images(self):
         if self.current_available_size is None:
             return
 
-        self.clear_captions()
-
         margin = 10 * self.curr_image_scale
         y = margin
 
+        self.clear_captions()
+
         for segm in self.images_segmentation:
-            self.add_line(margin, y, self.current_available_size.width() - margin, y)
+            cap = self.add_line(margin, y, self.current_available_size.width() - margin, y)
+            y += cap.boundingRect().height()
 
             x = margin
             y += margin
