@@ -109,7 +109,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.color = QColor(225,225,225)
 
         self.loading_icon = None
-        self.loading_text= None
 
         self.setDragMode(self.DragMode.RubberBandDrag)
         self.setRubberBandSelectionMode(Qt.ItemSelectionMode.IntersectsItemShape)
@@ -118,7 +117,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.curr_image_scale = 1.0
 
         self.main_window = main_window
-        self.main_window.onSegmentStep.connect(self.frame_segment)
+        self.main_window.onSegmentStep.connect(self.mark_segment)
 
         self.scene = ScreenshotsManagerScene(self)
         self.setScene(self.scene)
@@ -139,7 +138,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.selected = []
 
         self.current_segment_index = 0
-        self.current_segment_frame = None
 
         self.border_height = 0
         self.img_height = 0
@@ -151,6 +149,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.qimage_cache = dict()
 
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+        if not self.loading_icon is None:
+            self.loading_icon.setPos(self.sceneRect().width()/2 - 256, self.sceneRect().height()/2 - 256)
         self.current_available_size = event.size()
         self.arrange_images()
 
@@ -163,19 +163,11 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             lbl.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
             movie.start()
 
-            font = QFont("Bahnschrift", 36)
             self.loading_icon = self.scene.addWidget(lbl)
-            self.loading_text = self.scene.addText("Loading Screenshots... please wait.", font)
-            self.loading_text.setDefaultTextColor(QColor(255,255,255))
-            self.loading_icon.setPos(256, 256)
-            self.loading_text.setPos(512 - self.loading_text.boundingRect().width() / 2, 786)
-            self.scene.removeItem(self.current_segment_frame)
-
-            self.setSceneRect(self.scene.itemsBoundingRect())
+            self.loading_icon.setPos(self.sceneRect().width()/2 - 256, self.sceneRect().height()/2 - 256)
         else:
             if self.loading_icon is not None:
                 self.scene.removeItem(self.loading_icon)
-                self.scene.removeItem(self.loading_text)
             self.update_manager()
 
     def toggle_annotations(self):
@@ -200,7 +192,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         Recreating the Data Structures
         :return: 
         """
-
         if self.project is None:
             return
 
@@ -245,7 +236,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.scene.clear()
         self.images_plain = []
         self.captions = []
-        self.current_segment_frame = None
         self.images_segmentation = []
 
     def arrange_images(self):
@@ -309,8 +299,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
             # mark as current segment
             if segm.segm_id != 0 and self.current_segment_index + 1 == segm.segm_id:
-                cap = self.scene.addRect(QRectF(0, segment_start_y, margin, y-segment_start_y), QPen(QColor(150, 150, 150)),
-                                         QBrush(QColor(150, 150, 150)))
+                cap = self.scene.addRect(QRectF(0, segment_start_y, margin, y-segment_start_y), QPen(self.color),
+                                         QBrush(self.color))
                 self.captions.append(cap)
 
         self.setSceneRect(0,0,self.current_available_size.width(), y)
@@ -322,7 +312,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         p2 = QtCore.QPointF(x2, y2)
 
         pen = QtGui.QPen()
-        pen.setColor(QtGui.QColor(200, 200, 200))
+        pen.setColor(self.color)
         pen.setWidth(1)
         line = self.scene.addLine(QtCore.QLineF(p1, p2), pen)
         self.captions.append(line)
@@ -379,7 +369,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 self.curr_scale = self.sceneRect().width() / rect.width()
                 break
 
-    def frame_segment(self, segment_index, center = True):
+    def mark_segment(self, segment_index):
         self.current_segment_index = segment_index
         self.arrange_images()
         return
@@ -394,7 +384,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def on_changed(self, project, item):
         if item is not None and item.get_type() not in [SEGMENT, SEGMENTATION, SCREENSHOT, SCREENSHOT_GROUP]:
             return
-        # self.project = project
 
         self.update_manager()
         self.on_selected(None, project.get_selected())
