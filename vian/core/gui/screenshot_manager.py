@@ -134,10 +134,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.show_segment_name = False
         self.only_show_current_segment = False
 
-        self.font_captions = QFont()
-        self.font_size = self.font().pointSize() * 2
-        self.font_size_segments = 120
-        self.font_captions.setPointSize(self.font_size)
         self.color = QColor(225,225,225)
 
         self.loading_icon = None
@@ -190,7 +186,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         self.current_available_size = event.size()
         self.arrange_images()
-        print("resizeEvent", event.size().width(), event.size().height())
 
     def set_loading(self, state):
         if state:
@@ -246,7 +241,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             last_items[img.screenshot_obj.unique_id] = img
         self.clear_manager()
 
-        current_segment_id = 0
+        current_segment_id = -1
         current_sm_object = None
         new_qimage_cache = dict()
         for s in self.project.screenshots:
@@ -257,9 +252,12 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                     self.images_segmentation.append(current_sm_object)
 
                 current_segment_id = s.scene_id
-                segment = self.project.get_segment_of_main_segmentation(current_segment_id - 1)
-                if segment is not None:
-                    current_sm_object = SMSegment(segment.get_name(), segment.ID, segment.get_start())
+                if current_segment_id > 0:
+                    segment = self.project.get_segment_of_main_segmentation(current_segment_id - 1)
+                    if segment is not None:
+                        current_sm_object = SMSegment(segment.get_name(), segment.ID, segment.get_start())
+                else:
+                    current_sm_object = SMSegment("Unassigned Screenshots", 0, -1)
 
             if s.unique_id in last_items:
                 item_image = last_items[s.unique_id]
@@ -272,20 +270,12 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             if current_sm_object is not None:
                 current_sm_object.segm_images.append(item_image)
 
-                scr_lbl = self.scene.addText(str(s.shot_id_segm), self.font_captions)
-                scr_lbl.setPos(item_image.pos() + QPointF(10, item_image.get_qpixmap().height()))
-                scr_lbl.setDefaultTextColor(self.color)
-                # scr_lbl.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations)
-                current_sm_object.scr_captions.append(scr_lbl)
-                current_sm_object.scr_caption_offset = QPoint(10, item_image.get_qpixmap().height())
-                self.scr_captions.append(scr_lbl)
-
         if current_sm_object is not None:
             self.images_segmentation.append(current_sm_object)
 
         self.qimage_cache = new_qimage_cache
         self.clear_selection_frames()
-        #self.arrange_images()
+        self.arrange_images()
 
         if self.project.get_main_segmentation() is None \
                 or len(self.project.get_main_segmentation().segments) == 0:
@@ -321,44 +311,48 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         self.clear_captions()
 
-        margin = 20
+        margin = 10 * self.curr_image_scale
         y = margin
 
-        if len(self.images_segmentation) > 0:
-            for segm in self.images_segmentation:
-                self.add_line(margin, y, self.current_available_size.width() - margin, y)
+        for segm in self.images_segmentation:
+            self.add_line(margin, y, self.current_available_size.width() - margin, y)
 
-                x = margin
-                y += margin
-                highest_img_per_line = []
-                current_line_index = 0
-                for i, img in enumerate(segm.segm_images):
+            x = margin
+            y += margin
 
-                    img.setScale(self.curr_image_scale)
-                    scaled_width = img.boundingRect().width()*self.curr_image_scale
-                    scaled_height = img.boundingRect().height()*self.curr_image_scale
+            if segm.segm_id == 0: # unassigned screenshots
+                cap = self.add_caption(x, y, segm.segm_name)
+            else:
+                cap = self.add_caption(x, y, f'{segm.segm_name} (ID: {segm.segm_id})')
+            y += cap.boundingRect().height()
 
-                    if x + scaled_width > self.current_available_size.width() - margin: #i.e. new line
-                        x = margin
-                        if len(highest_img_per_line) > current_line_index:
-                            y += highest_img_per_line[current_line_index]
-                        current_line_index += 1
+            highest_img_per_line = []
+            current_line_index = 0
+            for i, img in enumerate(segm.segm_images):
 
-                    #find highest image in line
-                    if len(highest_img_per_line) < current_line_index + 1:
-                        highest_img_per_line.append(scaled_height)
-                    elif highest_img_per_line[current_line_index] < scaled_height:
-                        highest_img_per_line[current_line_index] = scaled_height
+                img.setScale(self.curr_image_scale)
+                scaled_width = img.boundingRect().width()*self.curr_image_scale
+                scaled_height = img.boundingRect().height()*self.curr_image_scale
 
-                    img.setPos(x, y)
+                if x + scaled_width > self.current_available_size.width() - margin: #i.e. new line
+                    x = margin
+                    if len(highest_img_per_line) > current_line_index:
+                        y += highest_img_per_line[current_line_index]
+                    current_line_index += 1
 
-                    x += scaled_width
+                #find highest image in line
+                if len(highest_img_per_line) < current_line_index + 1:
+                    highest_img_per_line.append(scaled_height)
+                elif highest_img_per_line[current_line_index] < scaled_height:
+                    highest_img_per_line[current_line_index] = scaled_height
 
-                if len(highest_img_per_line) > 0:
-                    y += highest_img_per_line[-1]
-                y += margin
-        else:
-            x_counter = 0
+                img.setPos(x, y)
+
+                x += scaled_width
+
+            if len(highest_img_per_line) > 0:
+                y += highest_img_per_line[-1]
+            y += 2 * margin # add a big margin at the end
 
         self.scene.setSceneRect(0,0,self.current_available_size.width(), y)
         # Drawing the New Selection Frames
@@ -376,7 +370,7 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         return line
 
     def add_caption(self, x, y, text):
-        caption = self.scene.addText(str(text), self.font_captions)
+        caption = self.scene.addText(str(text))
         caption.setDefaultTextColor(self.color)
         caption.setPos(QtCore.QPointF(x, y))
         self.captions.append(caption)
@@ -537,7 +531,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         else:
             super(ScreenshotsManagerWidget, self).wheelEvent(event)
-            # self.verticalScrollBar().setValue(self.verticalScrollBar().value() - (500 * (float(event.angleDelta().y()) / 360)))
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key.Key_Control:
