@@ -455,7 +455,7 @@ class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def get_name(self):
-        return str(self.ID)
+        return str(self.name)
 
     def set_name(self, name):
         self.project.undo_manager.to_undo((self.set_name, [name]), (self.set_name, [self.name]))
