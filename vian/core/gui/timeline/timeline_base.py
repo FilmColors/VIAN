@@ -935,18 +935,10 @@ class TimelineScrubber(QtWidgets.QWidget):
             self.timeline.set_time_indicator_visibility(True)
             self.was_playing = self.player.is_playing()
             self.player.pause()
-            self.timeline.main_window.update_timer.stop()
             self.offset = self.mapToParent(QMouseEvent.pos())
             self.curr_pos = self.pos()
-
         else:
-            # QMouseEvent.ignore()
             self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
-        #     # self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
-        #
-        #
-        # # if QMouseEvent.buttons() & Qt.MouseButton.RightButton:
-        # #     self.timeline.mousePressEvent(QMouseEvent)
 
     def mouseReleaseEvent(self, QMouseEvent):
         self.timeline.set_time_indicator_visibility(False)
