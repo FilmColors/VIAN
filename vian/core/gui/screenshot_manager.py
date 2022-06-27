@@ -2,7 +2,7 @@ from functools import partial
 
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt, QPoint, QRectF, pyqtSlot
-from PyQt6.QtGui import QFont, QColor, QPen, QBrush
+from PyQt6.QtGui import QColor, QPen, QBrush
 from PyQt6.QtWidgets import *
 from vian.core.data.enums import *
 
@@ -483,7 +483,7 @@ class ScreenshotManagerPixmapItems(QGraphicsPixmapItem):
         if self.is_selected:
             pen = QtGui.QPen()
             pen.setColor(QtGui.QColor(255, 160, 74, 150))
-            pen.setWidth(10)
+            pen.setWidth(1)
             painter.setPen(pen)
             painter.drawRect(self.get_qpixmap().rect())
 
