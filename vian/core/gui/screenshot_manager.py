@@ -1,8 +1,8 @@
 from functools import partial
 
 from PyQt6 import QtGui, QtWidgets
-from PyQt6.QtCore import Qt, QPoint, QRectF, pyqtSlot
-from PyQt6.QtGui import QColor, QPen, QBrush
+from PyQt6.QtCore import Qt, QPoint, QRectF, pyqtSlot, pyqtSignal
+from PyQt6.QtGui import QColor, QPen, QBrush, QPalette
 from PyQt6.QtWidgets import *
 from vian.core.data.enums import *
 
@@ -23,7 +23,6 @@ class SMSegment(object):
         self.scr_captions = []
         self.scr_caption_offset = QPoint(0,0)
 
-
 class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def __init__(self, main_window):
         super(ScreenshotsManagerDockWidget, self).__init__(main_window, limit_size=False)
@@ -32,35 +31,13 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
         if is_vian_light():
             self.inner.menuBar().hide()
 
-        self.m_display = self.inner.menuBar().addMenu("Display")
-
-        self.a_show_only_current = self.m_display.addAction("Only Show Current Segment")
-        self.a_show_only_current.setCheckable(True)
-        self.a_show_only_current.setChecked(False)
-        self.a_show_only_current.triggered.connect(self.on_toggle_show_current)
-
-        self.a_show_unassinged_screenshots = self.m_display.addAction("Show Unassigned Screenshots")
-        self.a_show_unassinged_screenshots.setCheckable(True)
-        self.a_show_unassinged_screenshots.setChecked(True)
-        self.a_show_unassinged_screenshots.triggered.connect(self.on_toggle_show_unassigned_screenshots)
-
         self.screenshot_manager = None
+
 
     def set_manager(self, screenshot_manager):
         self.screenshot_manager = screenshot_manager
-        self.inner.setCentralWidget(screenshot_manager)
-
+        self.setWidget(screenshot_manager)
         self.main_window.currentClassificationObjectChanged.connect(self.screenshot_manager.on_classification_object_changed)
-
-    def on_toggle_show_current(self):
-        state = self.a_show_only_current.isChecked()
-        self.screenshot_manager.only_show_current_segment = state
-        self.screenshot_manager.arrange_images()
-
-    def on_toggle_show_unassigned_screenshots(self):
-        state = self.a_show_unassinged_screenshots.isChecked()
-        self.screenshot_manager.show_unassigned_screenshots = state
-        self.screenshot_manager.arrange_images()
 
     def remove_screenshot(self, scr):
         pass
@@ -92,11 +69,99 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def update_screenshot(self, scr, ndarray=None, pixmap=None):
         return
 
+class SettingsLabel(QLabel):
+    onSizeChanged = pyqtSignal()
+    def __init__(self):
+        super(SettingsLabel, self).__init__()
+        self.setText("Settings")
+
+    def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
+        super(SettingsLabel, self).paintEvent(a0)
+        self.onSizeChanged.emit()
+
+class ScreenshotsSettingsWidget(QFrame):
+    onSizeChanged = pyqtSignal()
+    onShowOnlyCurrentChanged = pyqtSignal(bool)
+    onShowUnassignedChanged = pyqtSignal(bool)
+    onSelectedSegmentationChanged = pyqtSignal(object)
+
+    def __init__(self, parent=None, show_only_current=True, show_unassigned=True):
+        super(ScreenshotsSettingsWidget, self).__init__(parent=parent)
+
+        self.main_layout = QVBoxLayout()
+
+        self.setFrameShape(QFrame.Shape.Box)
+        self.setLineWidth(2)
+        self.title = SettingsLabel()
+        self.title.onSizeChanged.connect(self.titleSizeChanged)
+        self.main_layout.addWidget(self.title)
+
+        self.settings_layout = QVBoxLayout()
+
+        self.comboBox = QComboBox()
+        self.comboBox.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.comboBox.currentIndexChanged.connect(self.comboBoxIndexChanged)
+        self.settings_layout.addWidget(self.comboBox)
+
+        self.showOnlyCurrentCheckBox = QCheckBox("Show only current Segment")
+        self.showOnlyCurrentCheckBox.setChecked(show_only_current)
+        self.showOnlyCurrentCheckBox.stateChanged.connect(self.forwardOnlyCurrentEvent)
+        self.settings_layout.addWidget(self.showOnlyCurrentCheckBox)
+
+        self.showUnassignedCheckBox = QCheckBox("Show unassigned Screenshots")
+        self.showUnassignedCheckBox.setChecked(show_unassigned)
+        self.showUnassignedCheckBox.stateChanged.connect(self.forwardUnassignedEvent)
+        self.settings_layout.addWidget(self.showUnassignedCheckBox)
+
+        self.settings_widget = QWidget()
+        self.settings_widget.setLayout(self.settings_layout)
+
+        self.setLayout(self.main_layout)
+
+    def updateSegmentation(self, project):
+
+        self.comboBox.blockSignals(True)
+
+        self.comboBox.clear()
+        for s in project.get_segmentations():
+            self.comboBox.addItem(s.name, s)
+
+        index = self.comboBox.findData(project.get_main_segmentation())
+        if index != -1:
+            self.comboBox.setCurrentIndex(index)
+
+        self.comboBox.blockSignals(False)
+
+    def enterEvent(self, event: QtGui.QEnterEvent) -> None:
+        self.main_layout.addWidget(self.settings_widget)
+        self.adjustSize()
+        self.onSizeChanged.emit()
+
+    def leaveEvent(self, a0: QtCore.QEvent) -> None:
+        if self.comboBox.view().isVisible():
+            return
+        self.main_layout.removeWidget(self.settings_widget)
+        self.adjustSize()
+        self.onSizeChanged.emit()
+
+    def forwardUnassignedEvent(self):
+        self.onShowUnassignedChanged.emit(self.showUnassignedCheckBox.isChecked())
+
+    def forwardOnlyCurrentEvent(self):
+        self.onShowOnlyCurrentChanged.emit(self.showOnlyCurrentCheckBox.isChecked())
+
+    def titleSizeChanged(self):
+        self.adjustSize()
+        self.onSizeChanged.emit()
+
+    def comboBoxIndexChanged(self, index):
+        self.onSelectedSegmentationChanged.emit(self.comboBox.currentData())
+
 class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
     """
     Implements IProjectChangeNotify
     """
-    def __init__(self,main_window, parent = None, ab_view = None, color_dt_view = None):
+    def __init__(self,main_window, parent = None):
         super(ScreenshotsManagerWidget, self).__init__(parent)
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
@@ -148,11 +213,34 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
 
         self.qimage_cache = dict()
 
+        self.settings = ScreenshotsSettingsWidget(parent=self, show_only_current=self.only_show_current_segment, show_unassigned=self.show_unassigned_screenshots)
+        self.settings.onSizeChanged.connect(self.repositionSettings)
+        self.settings.onShowUnassignedChanged.connect(self.onShowUnassignedChanged)
+        self.settings.onShowOnlyCurrentChanged.connect(self.onShowOnlyCurrentChanged)
+        self.settings.onSelectedSegmentationChanged.connect(self.onSelectedSegmentationChanged)
+
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         if not self.loading_icon is None:
             self.loading_icon.setPos(self.sceneRect().width()/2 - 256, self.sceneRect().height()/2 - 256)
         self.current_available_size = event.size()
         self.arrange_images()
+        self.repositionSettings()
+
+    def repositionSettings(self):
+        self.settings.raise_()
+        self.settings.move(self.current_available_size.width() - self.settings.geometry().width(), 0)
+
+    def onShowOnlyCurrentChanged(self, bool):
+        self.only_show_current_segment = bool
+        self.arrange_images()
+
+    def onShowUnassignedChanged(self, bool):
+        self.show_unassigned_screenshots = bool
+        self.arrange_images()
+
+    def onSelectedSegmentationChanged(self, segmentation):
+        if not self.project is None and not segmentation is None:
+            self.project.set_main_segmentation(segmentation)
 
     def set_loading(self, state):
         if state:
@@ -196,6 +284,8 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             return
 
         self.clear_manager()
+
+        self.settings.updateSegmentation(self.project)
 
         current_segment_id = -1
         current_sm_object = None

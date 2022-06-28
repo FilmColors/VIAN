@@ -91,7 +91,6 @@ class SegmentationContextMenu(ContextMenu):
         self.segmentation = segmentation
 
         self.action_delete = self.addAction("Remove Segmentation")
-        self.action_set_as_main = self.addAction("Set as main segmentation")
 
         if self.segmentation[0].timeline_visibility is True:
             self.action_set_timeline_visibility = self.addAction("Hide in Timeline")
@@ -112,9 +111,6 @@ class SegmentationContextMenu(ContextMenu):
         self.action_copy_segmentation.triggered.connect(self.copy_segmentation)
 
         self.action_delete.triggered.connect(self.on_delete)
-        self.action_set_as_main.triggered.connect(self.on_set_main)
-
-
 
         self.popup(pos)
 
@@ -157,15 +153,6 @@ class SegmentationContextMenu(ContextMenu):
                 log_error("ContextMenu Error", e)
                 continue
         self.close()
-
-    def on_set_main(self):
-        self.hide()
-        try:
-            self.segmentation[0].project.set_main_segmentation(self.segmentation[0])
-        except Exception as e:
-                log_error("ContextMenu Error", e)
-        self.close()
-
 
 class LayerContextMenu(ContextMenu):
     def __init__(self, parent, pos, layer):
