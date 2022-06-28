@@ -115,6 +115,8 @@ class ScreenshotsSettingsWidget(QFrame):
 
         self.settings_widget = QWidget()
         self.settings_widget.setLayout(self.settings_layout)
+        self.main_layout.addWidget(self.settings_widget)
+        self.settings_widget.setVisible(False)
 
         self.setLayout(self.main_layout)
 
@@ -133,14 +135,14 @@ class ScreenshotsSettingsWidget(QFrame):
         self.comboBox.blockSignals(False)
 
     def enterEvent(self, event: QtGui.QEnterEvent) -> None:
-        self.main_layout.addWidget(self.settings_widget)
+        self.settings_widget.setVisible(True)
         self.adjustSize()
         self.onSizeChanged.emit()
 
     def leaveEvent(self, a0: QtCore.QEvent) -> None:
         if self.comboBox.view().isVisible():
             return
-        self.main_layout.removeWidget(self.settings_widget)
+        self.settings_widget.setVisible(False)
         self.adjustSize()
         self.onSizeChanged.emit()
 

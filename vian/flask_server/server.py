@@ -321,7 +321,7 @@ class WebPage(QWebEnginePage):
 
 class FlaskWebWidget(EDockWidget):
     def __init__(self, main_window):
-        super(FlaskWebWidget, self).__init__(main_window, False)
+        super(FlaskWebWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Bokeh Visualizations")
 
 
