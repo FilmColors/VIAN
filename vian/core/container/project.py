@@ -595,6 +595,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.screenshots.remove(screenshot)
             self.remove_from_id_list(screenshot)
             self.sort_screenshots()
+            self.dispatch_changed()
             self.undo_manager.to_undo((self.remove_screenshot, [screenshot]),(self.add_screenshot, [screenshot]))
 
     def get_screenshots(self) -> List[Screenshot]:
