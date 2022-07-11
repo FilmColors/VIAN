@@ -53,6 +53,13 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def on_closed(self):
         pass
 
+    def get_settings(self):
+        return dict(screenshots_scale = self.screenshot_manager.curr_image_scale)
+
+    def apply_settings(self, settings):
+        self.screenshot_manager.curr_image_scale = settings['screenshots_scale']
+
+
     @pyqtSlot(object)
     def on_screenshots_highlighted(self, screenshots):
         pass
