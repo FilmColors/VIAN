@@ -21,8 +21,6 @@ class TimelineControl(QtWidgets.QWidget):
         self.timeline =  timeline
         self.item = item
 
-        self.h_exp = 300
-        self.h_col = 100
         self.name = name
         self.groups = []
 
@@ -39,8 +37,9 @@ class TimelineControl(QtWidgets.QWidget):
         self.resize_offset = 0
         self.show()
         self.group_height = self.timeline.group_height
+        self.resize(parent.width(), self.group_height)
         self.mainLayout = QVBoxLayout(self)
-        self.mainLayout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
+        self.mainLayout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
 
 
         self.pin_and_title = QHBoxLayout()
