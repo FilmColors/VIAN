@@ -43,10 +43,6 @@ elif sys.platform.startswith("linux"):
     hiddenimports += ['pkg_resources.py2_warn']
 
 else:
-    binaries += [
-        ('/System/Library/Frameworks/Tk.framework/Tk', 'tk'),
-        ('/System/Library/Frameworks/Tcl.framework/Tcl','tcl')
-        ]
     icon='qt_ui/images/main_round.icns'
 
 
