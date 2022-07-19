@@ -256,7 +256,7 @@ class Player_QMediaPlayer(VideoPlayer):
         self.media_player.playbackStateChanged.connect(self.playbackStateChanged)
         self.media_player.mediaStatusChanged.connect(self.mediaChanged)
 
-        self.time_update_interval = 50
+        self.time_update_interval = 100
         self.update_timer = QtCore.QTimer()
         self.update_timer.setInterval(self.time_update_interval)
         self.update_timer.timeout.connect(self.signal_timestep_update)

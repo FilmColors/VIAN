@@ -880,7 +880,7 @@ class Timeline(QtWidgets.QWidget, IProjectChangeNotify, ITimeStepDepending):
             elif self.time_scrubber.pos().x() < self.scrollArea.horizontalScrollBar().value():
                 self.scrollArea.horizontalScrollBar().setValue(self.time_scrubber.pos().x() - self.controls_width)
 
-        self.update_time_bar()
+        #self.update_time_bar()
         self.update_visualizations()
         # self.update()
 
