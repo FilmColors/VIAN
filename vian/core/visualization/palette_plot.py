@@ -19,6 +19,7 @@ from vian.core.data.log import log_error, log_info
 from random import randint
 import numpy as np
 import time
+import multiprocessing
 
 
 class PaletteWidget(QWidget):
@@ -325,9 +326,11 @@ class PaletteLABWidget(QWidget):
         self.view.update()
 
     def set_palette(self, tree):
+        self.view.lock.acquire()
         self.palette_tree = tree
         self.slider.setRange(0, np.unique(self.palette_tree[0]).shape[0] - 1)
         self.view.palette_layer = self.palette_tree
+        self.view.lock.release()
 
     def draw_palette(self):
         if self.palette_tree is None:
@@ -358,9 +361,12 @@ class PaletteLABView(QWidget, IVIANVisualization):
         self.background = "Light-Gray"
         self.jitter = 10
         self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent)
+        self.lock = multiprocessing.Lock()
 
     def draw_palette(self, target = None):
+        self.lock.acquire()
         if self.palette_layer is None:
+            self.lock.release()
             return
 
         self.image = QImage(self.size(), QImage.Format.Format_RGBA8888)
@@ -440,6 +446,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
                                 radius, radius)
         qp.end()
 
+        self.lock.release()
 
 
     def paintEvent(self, a0: QPaintEvent):
