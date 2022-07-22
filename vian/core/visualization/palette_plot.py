@@ -428,17 +428,19 @@ class PaletteLABView(QWidget, IVIANVisualization):
 
             color_rgb  = QColor(int(color[2]), int(color[1]), int(color[0]))
 
-            path = QPainterPath()
-
             heights = ([self.scale * (1.0 * lab[1]) - radius] * bins_to_draw[q]) + np.random.normal(0, self.jitter, bins_to_draw[q])
             widths =  ([self.scale * (1.0 * lab[2]) - radius] * bins_to_draw[q]) + np.random.normal(0, self.jitter, bins_to_draw[q])
 
+            qp.setPen(Qt.PenStyle.NoPen)
+            qp.setBrush(color_rgb)
+
             for i in range(len(heights)):
-                path.addEllipse((t_width / 2) + heights[i],
+                qp.drawEllipse((t_width / 2) + heights[i],
                                 (t_height / 2) + widths[i],
                                 radius, radius)
-                qp.fillPath(path, color_rgb)
         qp.end()
+
+
 
     def paintEvent(self, a0: QPaintEvent):
         if self.image is None:
