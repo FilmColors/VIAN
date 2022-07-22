@@ -267,23 +267,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
                 self.scene.removeItem(self.loading_icon)
             self.update_manager()
 
-    def toggle_annotations(self):
-        return
-        if len(self.selected) == 0:
-            return
-
-        state = not self.selected[0].screenshot_obj.annotation_is_visible
-        for s in self.selected:
-            # Only change those which aren't already
-            if s.screenshot_obj.annotation_is_visible != state:
-                if state and s.screenshot_obj.img_blend is not None:
-                    s.setPixmap(numpy_to_pixmap(s.screenshot_obj.img_blend))
-                    s.screenshot_obj.annotation_is_visible = state
-                else:
-                    s.setPixmap(numpy_to_pixmap(s.screenshot_obj.get_img_movie()))
-                    s.screenshot_obj.annotation_is_visible = False
-        pass
-
     def update_manager(self):
         """
         Recreating the Data Structures
