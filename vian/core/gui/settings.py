@@ -1,7 +1,7 @@
 from PyQt6 import QtCore
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QResizeEvent
-from PyQt6.QtWidgets import QLabel, QFrame, QVBoxLayout, QWidget, QComboBox
+from PyQt6.QtWidgets import QLabel, QFrame, QVBoxLayout, QWidget, QComboBox, QGraphicsView
 
 
 class SettingsLabel(QLabel):
@@ -17,7 +17,7 @@ class SettingsLabel(QLabel):
 
 class SettingsWidgetBase(QFrame):
     onSizeChanged = pyqtSignal()
-    def __init__(self, settingsWidget, parent=None):
+    def __init__(self, settingsWidget=None, parent=None):
         super(SettingsWidgetBase, self).__init__(parent=parent)
 
         self.main_layout = QVBoxLayout()
@@ -28,10 +28,7 @@ class SettingsWidgetBase(QFrame):
         self.title.onSizeChanged.connect(self.titleSizeChanged)
         self.main_layout.addWidget(self.title)
 
-        self.settings_widget = settingsWidget
-
-        self.main_layout.addWidget(self.settings_widget)
-        self.settings_widget.setVisible(False)
+        self.setSettingsWidget(settingsWidget)
 
         self.setLayout(self.main_layout)
 
@@ -41,6 +38,13 @@ class SettingsWidgetBase(QFrame):
         if isinstance(a1, QResizeEvent):
             self.repositionSettings()
         return False  # pass all the event further to the parent. We don't stop any event here.
+
+    def setSettingsWidget(self, settingsWidget):
+        if settingsWidget is None:
+            return
+        self.settings_widget = settingsWidget
+        self.main_layout.addWidget(self.settings_widget)
+        self.settings_widget.setVisible(False)
 
     def enterEvent(self, event) -> None:
         self.settings_widget.setVisible(True)
@@ -62,4 +66,7 @@ class SettingsWidgetBase(QFrame):
 
     def repositionSettings(self):
         self.raise_()
-        self.move(self.parent().size().width() - self.geometry().width(), 0)
+        size = self.parent().size()
+        if isinstance(self.parent(), QGraphicsView):
+            size = self.parent().sceneRect().size()
+        self.move(size.width() - self.geometry().width(), 0)

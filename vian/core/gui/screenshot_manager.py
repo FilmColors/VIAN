@@ -4,6 +4,8 @@ from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt, QPoint, QRectF, pyqtSlot, pyqtSignal
 from PyQt6.QtGui import QColor, QPen, QBrush, QPalette
 from PyQt6.QtWidgets import *
+
+from core.gui.settings import SettingsWidgetBase
 from vian.core.data.enums import *
 
 from vian.core.data.computation import *
@@ -76,17 +78,7 @@ class ScreenshotsManagerDockWidget(EDockWidget, IProjectChangeNotify):
     def update_screenshot(self, scr, ndarray=None, pixmap=None):
         return
 
-class SettingsLabel(QLabel):
-    onSizeChanged = pyqtSignal()
-    def __init__(self):
-        super(SettingsLabel, self).__init__()
-        self.setText("Settings")
-
-    def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
-        super(SettingsLabel, self).paintEvent(a0)
-        self.onSizeChanged.emit()
-
-class ScreenshotsSettingsWidget(QFrame):
+class ScreenshotsSettingsWidget(SettingsWidgetBase):
     onSizeChanged = pyqtSignal()
     onShowOnlyCurrentChanged = pyqtSignal(bool)
     onShowUnassignedChanged = pyqtSignal(bool)
@@ -94,14 +86,6 @@ class ScreenshotsSettingsWidget(QFrame):
 
     def __init__(self, parent=None, show_only_current=True, show_unassigned=True):
         super(ScreenshotsSettingsWidget, self).__init__(parent=parent)
-
-        self.main_layout = QVBoxLayout()
-
-        self.setFrameShape(QFrame.Shape.Box)
-        self.setLineWidth(2)
-        self.title = SettingsLabel()
-        self.title.onSizeChanged.connect(self.titleSizeChanged)
-        self.main_layout.addWidget(self.title)
 
         self.settings_layout = QVBoxLayout()
 
@@ -122,10 +106,8 @@ class ScreenshotsSettingsWidget(QFrame):
 
         self.settings_widget = QWidget()
         self.settings_widget.setLayout(self.settings_layout)
-        self.main_layout.addWidget(self.settings_widget)
-        self.settings_widget.setVisible(False)
 
-        self.setLayout(self.main_layout)
+        self.setSettingsWidget(self.settings_widget)
 
     def updateSegmentation(self, project):
 
@@ -141,27 +123,11 @@ class ScreenshotsSettingsWidget(QFrame):
 
         self.comboBox.blockSignals(False)
 
-    def enterEvent(self, event: QtGui.QEnterEvent) -> None:
-        self.settings_widget.setVisible(True)
-        self.adjustSize()
-        self.onSizeChanged.emit()
-
-    def leaveEvent(self, a0: QtCore.QEvent) -> None:
-        if self.comboBox.view().isVisible():
-            return
-        self.settings_widget.setVisible(False)
-        self.adjustSize()
-        self.onSizeChanged.emit()
-
     def forwardUnassignedEvent(self):
         self.onShowUnassignedChanged.emit(self.showUnassignedCheckBox.isChecked())
 
     def forwardOnlyCurrentEvent(self):
         self.onShowOnlyCurrentChanged.emit(self.showOnlyCurrentCheckBox.isChecked())
-
-    def titleSizeChanged(self):
-        self.adjustSize()
-        self.onSizeChanged.emit()
 
     def comboBoxIndexChanged(self, index):
         self.onSelectedSegmentationChanged.emit(self.comboBox.currentData())
@@ -223,7 +189,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         self.qimage_cache = dict()
 
         self.settings = ScreenshotsSettingsWidget(parent=self, show_only_current=self.only_show_current_segment, show_unassigned=self.show_unassigned_screenshots)
-        self.settings.onSizeChanged.connect(self.repositionSettings)
         self.settings.onShowUnassignedChanged.connect(self.onShowUnassignedChanged)
         self.settings.onShowOnlyCurrentChanged.connect(self.onShowOnlyCurrentChanged)
         self.settings.onSelectedSegmentationChanged.connect(self.onSelectedSegmentationChanged)
@@ -233,11 +198,6 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
             self.loading_icon.setPos(self.sceneRect().width()/2 - 256, self.sceneRect().height()/2 - 256)
         self.current_available_size = event.size()
         self.arrange_images()
-        self.repositionSettings()
-
-    def repositionSettings(self):
-        self.settings.raise_()
-        self.settings.move(self.current_available_size.width() - self.settings.geometry().width(), 0)
 
     def onShowOnlyCurrentChanged(self, bool):
         self.only_show_current_segment = bool
