@@ -6,7 +6,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 
-from core.gui.settings import SettingsWidgetBase
+from vian.core.gui.settings import SettingsWidgetBase
 from vian.core.analysis.colorimetry.hilbert import *
 from vian.core.visualization.basic_vis import IVIANVisualization
 from vian.core.data.computation import *
