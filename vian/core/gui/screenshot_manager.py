@@ -5,7 +5,7 @@ from PyQt6.QtCore import Qt, QPoint, QRectF, pyqtSlot, pyqtSignal
 from PyQt6.QtGui import QColor, QPen, QBrush, QPalette
 from PyQt6.QtWidgets import *
 
-from core.gui.settings import SettingsWidgetBase
+from vian.core.gui.settings import SettingsWidgetBase
 from vian.core.data.enums import *
 
 from vian.core.data.computation import *
