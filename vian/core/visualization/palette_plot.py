@@ -22,49 +22,40 @@ class PaletteWidget(QWidget):
         super(PaletteWidget, self).__init__(parent)
         self.palette_tree = None
 
-        self.all_ctrls = QWidget(self)
-        self.all_ctrls.setLayout(QVBoxLayout(self.all_ctrls))
-
         self.setLayout(QVBoxLayout(self))
         self.view = PaletteView(self)
-        self.slider = QSlider(Qt.Orientation.Horizontal, self.all_ctrls)
-        self.cb_mode = QComboBox(self.all_ctrls)
-        self.cb_mode.addItems(['Layer', 'Full Tree'])
-        self.lbl_mode_hint = QLabel("Layer Index:", self.all_ctrls)
-        self.lbl_depth = QLabel("0", self.all_ctrls)
-        self.lbl_depth.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.layout().addWidget(self.view)
-        self.cb_show_grid = QCheckBox("Show Grid", self.all_ctrls)
 
-        self.cb_sorting = QComboBox(self.all_ctrls)
+        self.all_ctrls = QWidget(self)
+        self.controls_layout = QFormLayout(self.all_ctrls)
+        self.all_ctrls.setLayout(self.controls_layout)
+
+        self.cb_mode = QComboBox()
+        self.cb_mode.addItems(['Layer', 'Full Tree'])
+        self.controls_layout.addRow("Mode", self.cb_mode)
+
+        self.cb_sorting = QComboBox()
         self.cb_sorting.addItems(['Cluster', 'Frequency', "Hilbert"])
+        self.controls_layout.addRow("Sorting", self.cb_sorting)
+
+        self.slider_layout = QHBoxLayout()
+        self.lbl_depth = QLabel()
+        self.slider = QSlider(Qt.Orientation.Horizontal)
+        self.slider.setValue(10)
+        self.slider_layout.addWidget(self.slider)
+        self.slider_layout.addWidget(self.lbl_depth)
+        self.controls_layout.addRow("Layer Index", self.slider_layout)
+
+        self.cb_show_grid = QCheckBox()
+        self.controls_layout.addRow("ShowGrid", self.cb_show_grid)
+
+        self.exportButton = QPushButton("Browse...")
+        self.exportButton.clicked.connect(self.exportButtonMethod)
+        self.controls_layout.addRow("Export Plot as Image", self.exportButton)
 
         self.settings = SettingsWidgetBase(self.all_ctrls, parent=self)
 
-        self.hbox_slider = QVBoxLayout(self.all_ctrls)
-        self.hbox_ctrl = QVBoxLayout(self.all_ctrls)
-        self.all_ctrls.layout().addItem(self.hbox_ctrl)
-        self.all_ctrls.layout().addItem(self.hbox_slider)
-
-        self.hbox_ctrl.addWidget(QLabel("Mode: ", self.all_ctrls))
-        self.hbox_ctrl.addWidget(self.cb_mode)
-        self.hbox_ctrl.addItem(QSpacerItem(0,0,QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
-        self.hbox_ctrl.addWidget(self.cb_show_grid)
-        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
-        self.hbox_ctrl.addWidget(QLabel("Sorting: ", self.all_ctrls))
-        self.hbox_ctrl.addWidget(self.cb_sorting)
-
-        self.exportButton = QPushButton("Export")
-        self.exportButton.clicked.connect(self.exportButtonMethod)
-        self.all_ctrls.layout().addWidget(self.exportButton)
-
-        self.slider.setValue(10)
-
-        self.hbox_slider.addWidget(self.lbl_mode_hint)
-        self.hbox_slider.addWidget(self.slider)
-        self.hbox_slider.addWidget(self.lbl_depth)
-
-        self.slider.valueChanged.connect(self.draw_palette)
+        self.slider.valueChanged.connect(self.on_settings_changed)
         self.cb_mode.currentTextChanged.connect(self.on_settings_changed)
         self.cb_show_grid.stateChanged.connect(self.on_settings_changed)
         self.cb_sorting.currentTextChanged.connect(self.on_settings_changed)
@@ -79,11 +70,13 @@ class PaletteWidget(QWidget):
         self.view.sorting = self.cb_sorting.currentText()
         self.view.mode = self.cb_mode.currentText()
         self.view.show_grid = self.cb_show_grid.isChecked()
+        self.view.depth = self.slider.value()
         if self.cb_mode.currentText() == "Layer":
-            self.lbl_mode_hint.setText("Layer Index:")
+            self.controls_layout.itemAt(4).widget().setText("Layer Index")
         else:
-            self.lbl_mode_hint.setText("Layer Depth:")
+            self.controls_layout.itemAt(4).widget().setText("Layer Depth")
         self.draw_palette()
+        self.lbl_depth.setText(str(self.slider.value()))
 
     def set_palette(self, tree):
         self.palette_tree = tree
@@ -91,9 +84,6 @@ class PaletteWidget(QWidget):
         self.view.palette_layer = self.palette_tree
 
     def draw_palette(self):
-        self.lbl_depth.setText(str(self.slider.value()))
-        self.view.mode = self.cb_mode.currentText()
-        self.view.depth = self.slider.value()
         self.view.draw_palette()
         self.view.update()
 
