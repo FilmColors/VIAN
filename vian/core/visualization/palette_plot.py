@@ -33,10 +33,12 @@ class PaletteWidget(QWidget):
         self.cb_mode = QComboBox()
         self.cb_mode.addItems(['Layer', 'Full Tree'])
         self.controls_layout.addRow("Mode", self.cb_mode)
+        self.cb_mode.view().setMinimumWidth(self.cb_mode.minimumSizeHint().width())
 
         self.cb_sorting = QComboBox()
         self.cb_sorting.addItems(['Cluster', 'Frequency', "Hilbert"])
         self.controls_layout.addRow("Sorting", self.cb_sorting)
+        self.cb_sorting.view().setMinimumWidth(self.cb_sorting.minimumSizeHint().width())
 
         self.slider_layout = QHBoxLayout()
         self.lbl_depth = QLabel()
@@ -227,6 +229,7 @@ class PaletteLABWidget(QWidget):
         self.cb_mode = QComboBox()
         self.cb_mode.addItems(['Layer', 'Full Tree'])
         self.controls_layout.addRow("Mode", self.cb_mode)
+        self.cb_mode.view().setMinimumWidth(self.cb_mode.minimumSizeHint().width())
 
         self.slider_layout = QHBoxLayout()
         self.lbl_depth = QLabel()
@@ -252,6 +255,7 @@ class PaletteLABWidget(QWidget):
         self.cb_background.addItems(['White', "Light-Gray", 'Dark-Gray', 'Black'])
         self.cb_background.setCurrentText("Dark-Gray")
         self.controls_layout.addRow("Background", self.cb_background)
+        self.cb_background.view().setMinimumWidth(self.cb_background.minimumSizeHint().width())
 
         self.cb_show_grid = QCheckBox()
         self.controls_layout.addRow("ShowGrid", self.cb_show_grid)
