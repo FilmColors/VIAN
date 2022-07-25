@@ -40,6 +40,8 @@ class PaletteWidget(QWidget):
 
         self.slider_layout = QHBoxLayout()
         self.lbl_depth = QLabel()
+        self.lbl_depth.setFixedWidth(20)
+        self.lbl_depth.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setValue(10)
         self.slider_layout.addWidget(self.slider)
@@ -79,9 +81,11 @@ class PaletteWidget(QWidget):
         self.lbl_depth.setText(str(self.slider.value()))
 
     def set_palette(self, tree):
+        self.view.lock.acquire()
         self.palette_tree = tree
         self.slider.setRange(0, np.unique(self.palette_tree[0]).shape[0] - 1)
         self.view.palette_layer = self.palette_tree
+        self.view.lock.release()
 
     def draw_palette(self):
         self.view.draw_palette()
@@ -106,9 +110,12 @@ class PaletteView(QWidget, IVIANVisualization):
         self.show_grid = False
         self.sorting = "Cluster"
         self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent)
+        self.lock = multiprocessing.Lock()
 
     def draw_palette(self, target = None):
+        self.lock.acquire()
         if self.palette_layer is None:
+            self.lock.release()
             return
         all_layers = self.palette_layer[0]
         all_cols = self.palette_layer[1]
@@ -178,6 +185,8 @@ class PaletteView(QWidget, IVIANVisualization):
                     pass
             y += height
         qp.end()
+
+        self.lock.release()
 
     def paintEvent(self, a0: QPaintEvent):
         if self.image is None:
