@@ -8,8 +8,8 @@ from typing import List
 from vian.core.data.computation import ms_to_frames, numpy_to_pixmap
 from vian.core.container.project import *
 from vian.core.gui.ewidgetbase import EGraphicsView
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 from vian.core.visualization.basic_vis import HistogramVis
 from vian.core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 from vian.core.container.hdf5_manager import vian_analysis
@@ -53,7 +53,7 @@ class ZProjectionAnalysis(IAnalysisJob):
                          end=ms_to_frames(tgt.get_end(), fps),
                          movie_path=project.movie_descriptor.movie_path,
                          target=tgt.get_id(),
-                         margins=project.movie_descriptor.get_letterbox_rect(),
+                         margins=project.movie_descriptor.get_letterbox_rect(as_coords=True),
                          semseg=semseg))
         return args
 

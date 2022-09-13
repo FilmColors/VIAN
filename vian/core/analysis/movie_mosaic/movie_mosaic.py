@@ -1,7 +1,7 @@
 from vian.core.container.project import *
 import cv2
 import numpy as np
-from PyQt5 import uic
+from PyQt6 import uic
 import pickle
 
 from vian.core.analysis.colorimetry.computation import *

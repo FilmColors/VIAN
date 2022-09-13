@@ -4,15 +4,19 @@ import cv2
 from functools import partial
 import json
 import platform
+import requests
+import webbrowser
 
 import numpy as np
 
-from PyQt5.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
-from PyQt5.QtWidgets import QLabel
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEngineProfile, QWebEnginePage
-from PyQt5 import QtGui
+from PyQt6.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
+from PyQt6.QtWidgets import QLabel
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWebEngineCore import QWebEngineSettings, QWebEngineProfile, QWebEnginePage
+from PyQt6 import QtGui
 from flask import Flask, render_template, send_file, url_for, jsonify, request, make_response
 
+from vian.core.data.interfaces import IAnalysisJob
 from vian.core.data.log import log_error, log_info
 from vian.core.gui.ewidgetbase import EDockWidget
 from vian.core.container.project import VIANProject, Screenshot, Segment
@@ -59,6 +63,11 @@ class ScreenshotData:
 
         self.palettes = []
 
+        self.selected_but_not_analyzed_uuids_ColorFeatureAnalysis = []
+        self.selected_but_not_analyzed_uuids_ColorPaletteAnalysis = []
+        self.segment_starts = []
+        self.segment_ends = []
+
 
 class ServerData:
     def __init__(self):
@@ -69,6 +78,7 @@ class ServerData:
 
         self._project_closed = False
         self.selected_uuids = None
+        self.settings = None
 
     def get_screenshot_data(self, revision = 0):
         if self._recompute_screenshot_cache:
@@ -97,6 +107,15 @@ class ServerData:
         palettes = []
 
         uuids = []
+
+        segment_starts = []
+        segment_ends = []
+        segment_ids = []
+
+        selected_but_not_analyzed_uuids_ColorFeatureAnalysis = []
+        selected_but_not_analyzed_uuids_ColorPaletteAnalysis = []
+        #print("selected screenshots", self.selected_uuids)
+
         for i, s in enumerate(self.project.screenshots):
             if self.selected_uuids is not None and s.unique_id not in self.selected_uuids:
                 continue
@@ -118,6 +137,8 @@ class ServerData:
                 chroma.append(float(lch[1]))
                 hue.append(float(lch[2]))
                 saturation.append(float(lab_to_sat(arr)))
+            else:
+                selected_but_not_analyzed_uuids_ColorFeatureAnalysis.append(s.unique_id)
 
             t2 = s.get_connected_analysis(ColorPaletteAnalysis)
             if len(t2) > 0:
@@ -129,6 +150,14 @@ class ServerData:
                 pal = get_palette_at_merge_depth(arr, depth=15)
                 if pal is not None:
                     palettes.extend(pal)
+            else:
+                selected_but_not_analyzed_uuids_ColorPaletteAnalysis.append(s.unique_id)
+
+        if self.project.get_main_segmentation() is not None:
+            for s in self.project.get_main_segmentation().segments:
+                segment_starts.append(int(s.get_start()))
+                segment_ends.append(int(s.get_end()))
+                segment_ids.append(s.ID)
 
         data = ScreenshotData()
         data.a = np.nan_to_num(a).tolist()
@@ -142,18 +171,28 @@ class ServerData:
         data.uuids = uuids
         data.palettes = palettes
 
+        data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis = selected_but_not_analyzed_uuids_ColorFeatureAnalysis
+        data.selected_but_not_analyzed_uuids_ColorPaletteAnalysis = selected_but_not_analyzed_uuids_ColorPaletteAnalysis
+
+        data.segment_starts = segment_starts
+        data.segment_ends = segment_ends
+        data.segment_ids = segment_ids
+
         self._screenshot_cache['has_changed'] = True
         self._screenshot_cache['data'] = data
         self.export_screenshots()
 
-    def set_project(self, project:VIANProject):
+    def set_project(self, project:VIANProject, onAnalyseColorFeatureSignal, onAnalyseColorPaletteSignal):
         self.project = project
+        self.onAnalyseColorFeatureSignal = onAnalyseColorFeatureSignal
+        self.onAnalyseColorPaletteSignal = onAnalyseColorPaletteSignal
 
         self._screenshot_cache = dict(revision = 0, data=ScreenshotData())
 
         self.project.onScreenshotAdded.connect(self.on_screenshot_added)
         self.project.onAnalysisAdded.connect(partial(self.queue_update))
-        self.project.onAnalysisAdded.connect(partial(self.queue_update))
+        self.project.onSelectionChanged.connect(partial(self.queue_update))
+        self.project.onProjectChanged.connect(partial(self.queue_update))
 
         for s in self.project.screenshots:
             s.onScreenshotChanged.connect(partial(self.queue_update))
@@ -208,6 +247,12 @@ class ServerData:
                 ps.append(p)
         return ps
 
+    def set_settings(self, settings):
+        self.settings = settings
+
+    def get_settings(self):
+        return self.settings
+
     def clear(self):
         self._project_closed = True
 
@@ -220,17 +265,18 @@ _server_data = ServerData()
 
 
 class FlaskServer(QObject):
+    onAnalyseColorFeature = pyqtSignal(list)
+    onAnalyseColorPalette = pyqtSignal(list)
     def __init__(self, parent):
         super(FlaskServer, self).__init__(parent)
-        self.app = app
 
     @pyqtSlot()
     def run_server(self):
-        self.app.run(port=VIAN_PORT)
+        app.run(host='127.0.0.1', port=VIAN_PORT)
 
     def on_loaded(self, project):
         global _server_data
-        _server_data.set_project(project)
+        _server_data.set_project(project, self.onAnalyseColorFeature, self.onAnalyseColorPalette)
 
     def on_closed(self):
         global _server_data
@@ -275,56 +321,62 @@ class WebPage(QWebEnginePage):
 
 class FlaskWebWidget(EDockWidget):
     def __init__(self, main_window):
-        super(FlaskWebWidget, self).__init__(main_window, False)
+        super(FlaskWebWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Bokeh Visualizations")
 
-        # On High Sierra and earlier QWebEngine crashes on load,
-        # it's a miracle, apple sucks, for f**** sake
-        # maybe I'm wrong and coded this shitty, no idea really,
-        # there is a resolved issue on QT tracker
-        # In a year or two, High sierra is gone anyway...
-        self.mac_disable_web = False
-        try:
-            if int(platform.mac_ver()[0].split(".")[1])<=13:
-                self.mac_disable_web = True
-        except Exception as e:
-            print(e)
-        if not self.mac_disable_web:
-            self.view = QWebEngineView(self)
-            self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, False)
-            self.view.setPage(WebPage())
-            self.view.reload()
-            self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
-            self.setWidget(self.view)
-        else:
-            self.setWidget(QLabel("Sorry, VIAN on OSX High Sierra and below does not support the visualization. \n "
-                                  "Please watch them in your browser by clicking 'Open in Browser' on top"))
+
+        self.view = QWebEngineView(self)
+        self.view.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, False)
+        self.view.setPage(WebPage())
+        self.view.reload()
+        self.view.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
+        self.setWidget(self.view)
+
         self.a_open_browser = self.inner.menuBar().addAction("Open in Browser")
         self.a_open_browser.triggered.connect(self.on_browser)
 
         self.url = None
+        self.getSettingsURL = None
+        self.setSettingsURL = None
 
 
     def on_browser(self):
-        import webbrowser
-
-        webbrowser.open(self.url)
+        if sys.platform == 'darwin':
+            os.system(f"open \"\" {self.url}")
+        else:
+            webbrowser.open(self.url)
 
     def set_url(self, url):
         self.url = url
-        if not self.mac_disable_web:
-            QWebEngineProfile.defaultProfile().clearAllVisitedLinks()
-            QWebEngineProfile.defaultProfile().clearHttpCache()
-            self.view.setUrl(QUrl(url))
-            self.view.reload()
+
+        QWebEngineProfile.defaultProfile().clearAllVisitedLinks()
+        QWebEngineProfile.defaultProfile().clearHttpCache()
+        self.view.setUrl(QUrl(url))
+        self.view.reload()
+
+    def set_settingsURL(self, getSettingsURL, setSettingsURL):
+        self.getSettingsURL = getSettingsURL
+        self.setSettingsURL = setSettingsURL
 
     def showEvent(self, a0: QtGui.QShowEvent) -> None:
         self.reload()
         super(FlaskWebWidget, self).showEvent(a0)
 
     def reload(self):
-        if not self.mac_disable_web:
-            self.view.reload()
+        self.view.reload()
+
+    def get_settings(self):
+        if self.getSettingsURL == None:
+            return None
+        response = requests.get(self.getSettingsURL)
+        if response.status_code == 204:
+            return None
+        return response.json()
+
+    def apply_settings(self, settings):
+        r = requests.post(self.setSettingsURL, json=settings)
+        print(r)
+
 
 
 @app.route("/")
@@ -373,6 +425,49 @@ def set_selection():
     _server_data.project.set_selected(_server_data, selected)
     return make_response("OK")
 
+@app.route("/run-ColorFeatureAnalysis/", methods=['POST'])
+def run_colorFeatureAnalysis():
+    if _server_data.project is None:
+        return make_response("Project is not set.")
+    d = request.json
+    uuid_submitted = d['uuids']
+    if len(uuid_submitted) == 0: # means: analyse all
+        for s in _server_data.project.screenshots:
+            analyses = s.get_connected_analysis(ColorFeatureAnalysis)
+            if len(analyses) == 0:
+                uuid_submitted.append(s.unique_id)
+    _server_data.onAnalyseColorFeatureSignal.emit(uuid_submitted)
+    return make_response("OK")
+
+@app.route("/run-ColorPaletteAnalysis/", methods=['POST'])
+def run_colorPaletteAnalysis():
+    if _server_data.project is None:
+        return make_response("Project is not set.")
+    d = request.json
+    uuid_submitted = d['uuids']
+    if len(uuid_submitted) == 0: # means: analyse all
+        for s in _server_data.project.screenshots:
+            analyses = s.get_connected_analysis(ColorPaletteAnalysis)
+            if len(analyses) == 0:
+                uuid_submitted.append(s.unique_id)
+    _server_data.onAnalyseColorPaletteSignal.emit(uuid_submitted)
+    return make_response("OK")
+
+@app.route("/post-settings/", methods=['POST'])
+def post_settings():
+    d = request.json
+    if d == None:
+        return make_response("nothing set, submitted settings are None")
+    _server_data.set_settings(d)
+    return make_response("OK")
+
+@app.route("/get-settings/")
+def get_settings():
+    if _server_data.project is None or _server_data.get_settings() is None:
+        return '', 204
+    return json.dumps(_server_data.get_settings())
+
+
 
 @app.route("/summary/")
 def summary():
@@ -384,4 +479,4 @@ def summary():
 
 if __name__ == '__main__':
     app.debug = True
-    app.run()
+    app.run(host='0.0.0.0', port=VIAN_PORT)

@@ -69,7 +69,10 @@ def log_warning(*args):
 def log_error(*args):
     msg = ""
     for a in args:
+        if isinstance(a, Exception):
+            log.exception(a)
         msg += str(a) + " "
+
     log.error(msg)
     log.error(traceback.format_exc())
 

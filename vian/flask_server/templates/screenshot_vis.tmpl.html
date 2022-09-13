@@ -1,137 +1,445 @@
 {% extends 'base.tmpl.html' %}
 {% block header %}
-<!--  <h1>{% block title %}Register{% endblock %}</h1>-->
 <style>
   html,
   body {
     height: 100%;
-    overflow: hidden !important;
+    margin: 0px;
   }
+.menu-item .popup-menu {
+  height: 0px;
+  overflow: hidden;
+  position: absolute;
+  z-index: 999;
+  left: 0;
+  top: 100%;
+  width: 300px;
+  transition: height 5s ease;
+}
+
+.menu-item:hover .popup-menu {
+	height: auto;
+}
+
+.btn.btn-outline-warning{
+  padding-top:0px;
+  padding-bottom:0px;
+}
+
+#inset {
+    width: 150px;
+    height: 150px;
+    background-color: transparent; /* or transparent; will show through only if renderer alpha: true */
+    border: none; /* or none; */
+    margin: 0;
+    padding: 0px;
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    z-index: 100;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<nav>
-  <div class="nav nav-tabs" id="nav-tab" role="tablist">
-    <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
-      aria-controls="nav-home" aria-selected="true">AB-Plane</a>
-    <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab"
-      aria-controls="nav-profile" aria-selected="false">Color-dT</a>
-    <a class="nav-item nav-link" id="nav-3d-palette-tab" data-toggle="tab" href="#nav-contact" role="tab"
-      aria-controls="nav-contact" aria-selected="false">Colorspace 3D</a>
-    <a class="nav-item nav-link" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab"
-      aria-controls="nav-settings" aria-selected="false">Settings</a>
+<div id="container" style="height: 100%; display: flex;flex-direction: column;">
+  <!-- Button trigger modal -->
+
+<!-- Alert pop up Color Feature-->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Alert: Visualization incomplete</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="display: flex;flex-direction: column">
+        <p id="info-text-body"></p>
+
+        <button type="button" class="btn btn-primary" id="run-selected-ColorFeature">Run analysis for all screenshots in your current selection</button>
+        <button type="button" class="btn btn-primary" id="run-all-ColorFeature">Run analysis for all screenshots in your project</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Alert pop up Color Palette-->
+<div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Alert: Visualization incomplete</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="display: flex;flex-direction: column">
+        <p id="info-text-body2"></p>
+
+        <button type="button" class="btn btn-primary" id="run-selected-ColorPalette">Run analysis for all screenshots in your current selection</button>
+        <button type="button" class="btn btn-primary" id="run-all-ColorPalette">Run analysis for all screenshots in your project</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<nav id="nav-part" style="display:flex;">
+    <ul class="nav nav-tabs">
+      <li><a class="nav-item nav-link active" id="nav-ab-plane-tab" data-toggle="tab" href="#nav-ab-plane" role="tab">AB-Plane
+        <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#exampleModalCenter" id="ab-plane-alert-button">Alert</button>
+      </a>
+      </li>
+      <li><a class="nav-item nav-link" id="nav-color-dt-tab" data-toggle="tab" href="#nav-color-dt" role="tab">Color-dT
+        <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#exampleModalCenter" id="color-dt-alert-button">Alert</button>
+      </a>
+      </li>
+      <li><a class="nav-item nav-link" id="nav-3d-palette-tab" data-toggle="tab" href="#nav-colorspace" role="tab">Colorspace 3D
+        <button type="button" class="btn btn-outline-warning" data-toggle="modal" data-target="#exampleModalCenter" id="colorspace-alert-button">Alert</button>
+      </a>
+      </li>
+    </ul>
+  <div class="menu-item" style="position: relative">
+    <button class="btn btn-primary nav-item nav-link" type="button"  aria-expanded="false" aria-controls="collapseExample" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+  </svg></button>
+    <div class="popup-menu">
+          <div class="card card-body" style="display: flex;flex-direction: column;">
+            <div id="screenshotsDiv" style="margin-bottom: 40px; display: flex;flex-direction: column;">
+              <div style="margin-bottom:10px; display: flex;flex-direction: row;justify-content: space-between"><label style="margin: 0px">Screenshot Size</label><input style="max-width: 100px" type="number" class="screenshot_size" min="10" max="100"></div>
+              <input style="width: 100%" type="range" class="form-range screenshot_size" id="imageSize" min="10" max="100" value="40">
+            </div>
+            <div id="circleDiv" style="margin-bottom: 40px; display: flex;flex-direction: column;">
+              <div style="margin-bottom:10px; display: flex;flex-direction: row;justify-content: space-between"><label style="margin: 0px">Circle Interval</label><input style="max-width: 100px" type="number" class="circle_interval" min="5" max="20"></div>
+              <input style="width: 100%" type="range" class="form-range circle_interval" id="circleInterval" min="5" max="20" value="10">
+            </div>
+            <div id="xAxisSelection" style="margin-bottom: 40px;display: none;flex-direction: row;justify-content: space-between;">
+              <label>X-Axis Labeling</label>
+              <select id="dropdown-xAxis">
+                <option value="time" selected="selected">Time</option>
+                <option value="segments">Segments</option>
+              </select>
+            </div>
+            <div id="channelSelection" style="margin-bottom: 40px;display: none;flex-direction: row;justify-content: space-between;">
+              <label>Y-Axis</label>
+              <select id="dropdown-channel">
+                <option value="saturation" selected="selected">Saturation</option>
+                <option value="chroma" >Chroma</option>
+                <option value="hue">Hue</option>
+                <option value="luminance">Luminance</option>
+                <option value="a-channel">A-Channel</option>
+                <option value="b-channel">B-Channel</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 40px;display: flex;flex-direction: row;justify-content: space-between;">
+              <label>Background</label>
+              <select id="dropdown-bgcolor-menu">
+                <option value="white">White</option>
+                <option value="gray" selected="selected">Dark Gray</option>
+              </select>
+            </div>
+            <div id="screenshot-borders" style="margin-bottom: 40px;display: flex;flex-direction: row;justify-content: space-between;">
+              <label>Screenshot Border Visibility</label>
+              <input id="checkbox-screenshot-borders" type="checkbox"></input>
+            </div>
+            <div id="connecting-line" style="margin-bottom: 40px;display: none;flex-direction: row;justify-content: space-between;">
+              <label>Connecting Line Visibility</label>
+              <input id="checkbox-connecting-line" type="checkbox"></input>
+            </div>
+          </div>
+        </div>
   </div>
 </nav>
-<div class="tab-content" id="nav-tabContent" style="position:absolute; top:4rem; bottom: 1rem; width:100%;">
-  <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" style="width:100%; height:100%">
-    <div style="padding: 20px; width:100%; height:100%">
-      <div id="ab-color" style="width:100%; height:100%">
-      </div>
+<div class="tab-content" id="nav-tabContent" style="width:100%; height:100%">
+  <div class="tab-pane fade fade show active" id="nav-ab-plane" role="tabpanel" style="width: 100%; height: 100%;" >
+    <div id="ab-color" style="width: 100%; height: 100%;"></div>
+  </div>
+  <div class="tab-pane fade" id="nav-color-dt" role="tabpanel" style="width: 100%; height: 100%;" >
+      <div id="dt-color" style="width:100%; height:100%"></div>
+  </div>
+  <div class="tab-pane fade" id="nav-colorspace" role="tabpanel" style="width: 100%; height: 100%;" >
+    <div id="renderframe" style="width:100%; height:100%">
+      <div id="inset"></div>
+      <canvas id="palette-3d" style="width:100%; height:100%;display: block"></canvas>
     </div>
   </div>
-  <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-    <div style="padding: 5px;">
-      <div id="dt-color" style="width:100%; height:100%">
-      </div>
-    </div>
-  </div>
-  <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-3d-palette-tab">
-    <div style="padding: 5px;">
-      <div id="renderframe" style="width:100%; height:100%">
-        <canvas id="palette-3d" style="width:100%; height:100%"></canvas>
-        </div>
-        {% include "color_3d.tmpl.html" %}
-      </div>
-    </div>
-    <div class="tab-pane fade" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
-      <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-          aria-haspopup="true" aria-expanded="false">
-          Background Color
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a id="setting-bg-white" class="dropdown-item" href="#">White</a>
-          <a id="setting-bg-black" class="dropdown-item" href="#">Dark Gray</a>
-        </div>
-      </div>
-    </div>
-    <div id="signals">
-    </div>
-  </div>
-  {% endblock %}
+  <div id="signals"></div>
+</div>
+</div>
+{% endblock %}
 
   {% block script %}
   <script src="/static/color_ab.js"></script>
   <script src="/static/color_dt.js"></script>
 
-  <script>
+  <script type="module">
+    import * as RENDERER from '/static/threeJsPlot2.js';
     var color_ab_plot = null;
     var color_dt_plot = null;
+    var colorspace_plot = null;
+    var current_data = null;
 
     var screenshot_revision = 0;
+
+    var settings_init_running = true;
 
     $(document).ready(function () {
       color_ab_plot = new ColorAB("ab-color");
       color_ab_plot.selectionCallback = setSelected;
       color_dt_plot = new ColorDT("dt-color");
+      colorspace_plot = new RENDERER.Palette3D("renderframe", "palette-3d");
 
       $(document).on("screenshotPollUpdate", function (event, data) {
+
+        checkForAlerts(data);
+        current_data = data;
+
         color_ab_plot.setData(data.a, data.b, data.urls, data.uuids);
         color_dt_plot.setData(
-          data.time,
-          data.luminance,
-          data.saturation,
-          data.chroma,
-          data.hue,
-          data.a,
-          data.b,
-          data.urls,
-          data.uuids);
+                data.time,
+                data.luminance,
+                data.saturation,
+                data.chroma,
+                data.hue,
+                data.a,
+                data.b,
+                data.urls,
+                data.uuids,
+                data.segment_starts,
+                data.segment_ends,
+                data.segment_ids
+        );
+
+
+        colorspace_plot.clear();
+
+        var ls = []
+        var as = []
+        var bs = []
+        var cols = []
+        var sizes = []
+
+        data.palettes.forEach((elem) => {
+          let rgb = [elem.bgr[2] / 255, elem.bgr[1] / 255, elem.bgr[0] / 255];
+          ls.push(elem.lab[0]);
+          as.push(elem.lab[1]);
+          bs.push(elem.lab[2]);
+          sizes.push(10);
+          cols.push(rgb);
+        });
+        colorspace_plot.addPoints(ls, as, bs, cols, sizes);
       });
 
-      $("#setting-bg-white").on("click", function () {
-        color_ab_plot.setBackgroundColor(255, 255, 255);
-        color_ab_plot.setBackgroundColor(255, 255, 255);
-      })
+      $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        if(this.id == "nav-ab-plane-tab"){
+          document.getElementById("circleDiv").style.display = "flex";
+          document.getElementById("screenshotsDiv").style.display = "flex";
+          document.getElementById("channelSelection").style.display = "none";
+          document.getElementById("screenshot-borders").style.display = "flex";
+          document.getElementById("connecting-line").style.display = "none";
+          document.getElementById("xAxisSelection").style.display = "none";
+        }
+        else if(this.id == "nav-color-dt-tab"){
+          document.getElementById("circleDiv").style.display = "none";
+          document.getElementById("screenshotsDiv").style.display = "flex";
+          document.getElementById("channelSelection").style.display = "flex";
+          document.getElementById("screenshot-borders").style.display = "flex";
+          document.getElementById("connecting-line").style.display = "flex";
+          document.getElementById("xAxisSelection").style.display = "flex";
+        }
+        else if(this.id == "nav-3d-palette-tab") {
+          document.getElementById("channelSelection").style.display = "none";
+          document.getElementById("circleDiv").style.display = "none";
+          document.getElementById("screenshotsDiv").style.display = "none";
+          document.getElementById("screenshot-borders").style.display = "none";
+          document.getElementById("connecting-line").style.display = "none";
+          document.getElementById("xAxisSelection").style.display = "none";
+        }
+        checkForAlerts(current_data);
+      });
 
-      $("#setting-bg-black").on("click", function () {
-        color_ab_plot.setBackgroundColor(17, 17, 17);
-        color_ab_plot.setBackgroundColor(17, 17, 17);
-      })
-
-      updateScreenshotVis(1000);
-    });
-
-
-    function checkUpdate(pollTime) {
-      $.ajax({
-        url: "/check-updates/",
+      $("#run-selected-ColorFeature").on('click', function(e){
+        $.ajax({
+        url: "/run-ColorFeatureAnalysis/",
         data: JSON.stringify({
-          screenshot_uuids: screenshot_uuids,
-          h: "Hello World",
+          uuids: current_data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis,
         }),
         dataType: 'json',
         contentType: 'application/json;charset=UTF-8',
         type: 'POST',
         success: function (e) {
-          screenshot_uuids = e.uuids;
-          console.log(e);
-          if (e.screenshots_changed) {
-            updateScreenshotVis();
-          }
+          console.log("Color Feature selected Screenshots")
         },
         error: function (jqXHR, textStatus, errorThrown) {
           console.log("Error", jqXHR, textStatus, errorThrown);
         },
-        complete: function () {
-          setTimeout(function () { checkUpdate(pollTime); }, pollTime);
-        }
       });
+      });
+      $("#run-all-ColorFeature").on('click', function(e){
+        $.ajax({
+        url: "/run-ColorFeatureAnalysis/",
+        data: JSON.stringify({
+          uuids: [],
+        }),
+        dataType: 'json',
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function (e) {
+          console.log("Color Feature all Screenshots")
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+      });
+      });
+
+      $("#run-selected-ColorPalette").on('click', function(e){
+        $.ajax({
+        url: "/run-ColorPaletteAnalysis/",
+        data: JSON.stringify({
+          uuids: current_data.selected_but_not_analyzed_uuids_ColorPaletteAnalysis,
+        }),
+        dataType: 'json',
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function (e) {
+          console.log("Color Palette selected Screenshots")
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+      });
+      });
+      $("#run-all-ColorPalette").on('click', function(e){
+        $.ajax({
+        url: "/run-ColorPaletteAnalysis/",
+        data: JSON.stringify({
+          uuids: [],
+        }),
+        dataType: 'json',
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function (e) {
+          console.log("Color Palette all Screenshots")
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+      });
+      });
+
+      const screenshot_inputs=[...document.getElementsByClassName("screenshot_size")];
+      screenshot_inputs.forEach((inp,i)=>inp.addEventListener("input",function(){
+        screenshot_inputs[1-i].value=screenshot_inputs[i].value;
+        color_ab_plot.setImageSize(screenshot_inputs[i].value);
+        color_dt_plot.setImageSize(screenshot_inputs[i].value);
+        sendSettings();
+      },false));
+      screenshot_inputs[1].dispatchEvent(new Event("input"))
+
+      const circle_intervals=[...document.getElementsByClassName("circle_interval")];
+      circle_intervals.forEach((inp,i)=>inp.addEventListener("input",function(){
+        circle_intervals[1-i].value=circle_intervals[i].value;
+        color_ab_plot.setCircleInterval(circle_intervals[i].value);
+        sendSettings();
+      },false));
+      circle_intervals[1].dispatchEvent(new Event("input"))
+
+      var e2 = document.getElementById("dropdown-bgcolor-menu");
+      e2.addEventListener("change", function(){
+        if(e2.value == "white"){
+          color_ab_plot.setBackgroundColor("255", "17");
+          color_dt_plot.setBackgroundColor("255", "17");
+          colorspace_plot.setBackgroundColor("255", "17");
+        }else if (e2.value == "gray"){
+          color_ab_plot.setBackgroundColor("17", "255");
+          color_dt_plot.setBackgroundColor("17", "255");
+          colorspace_plot.setBackgroundColor("17", "255");
+        }
+        sendSettings();
+      }, false);
+      e2.dispatchEvent(new Event("change"));
+
+      var e3 = document.getElementById("dropdown-channel");
+      e3.addEventListener("change", function(){
+        color_dt_plot.parameterChanged(e3.value);
+        sendSettings();
+      }, false);
+      e3.dispatchEvent(new Event("change"));
+
+      var e4 = document.getElementById("checkbox-screenshot-borders");
+      e4.addEventListener("change", function (){
+        color_ab_plot.showScreenshotBorders(this.checked);
+        color_dt_plot.showScreenshotBorders(this.checked);
+        sendSettings();
+      }, false);
+      e4.dispatchEvent(new Event("change"));
+
+      var e5 = document.getElementById("checkbox-connecting-line");
+      e5.addEventListener("change", function (){
+        color_dt_plot.showConnectingLine(this.checked);
+        sendSettings();
+      }, false);
+      e5.dispatchEvent(new Event("change"));
+
+      var e6 = document.getElementById("dropdown-xAxis");
+      e6.addEventListener("change", function (){
+        color_dt_plot.xAxisOptionChanged(e6.value);
+        sendSettings();
+      }, false);
+      e6.dispatchEvent(new Event("change"));
+
+      updateScreenshotVis(1000);
+      getAndApplySettings();
+    });
+
+    function checkForAlerts(data){
+      if (data == null){
+        return;
+      }
+      if(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length > 0){
+        if(["nav-ab-plane-tab", "nav-color-dt-tab"].includes($("#nav-part a.active").attr('id'))){
+          $("#exampleModalCenter").modal('show');
+          let html_string = data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length +
+                  " screenshots in your selection have not yet been analyzed and are not available for this plot.";
+          if(data.selected_but_not_analyzed_uuids_ColorFeatureAnalysis.length == 1){
+            html_string = "1 screenshot in your selection has not yet been analyzed and is not available for this plot."
+          }
+          $("p#info-text-body").html(html_string);
+        }
+        $("#ab-plane-alert-button").show();
+        $("#color-dt-alert-button").show();
+      }else{
+        $("#exampleModalCenter").modal('hide');
+        $("#ab-plane-alert-button").hide();
+        $("#color-dt-alert-button").hide();
+      }
+
+      if(data.selected_but_not_analyzed_uuids_ColorPaletteAnalysis.length > 0){
+        if(["nav-3d-palette-tab"].includes($("#nav-part a.active").attr('id'))) {
+          $("#exampleModalCenter2").modal('show');
+          let html_string = data.selected_but_not_analyzed_uuids_ColorPaletteAnalysis.length +
+                  " screenshots in your selection have not yet been analyzed and are not available for this plot.";
+          if (data.selected_but_not_analyzed_uuids_ColorPaletteAnalysis.length == 1) {
+            html_string = "1 screenshot in your selection has not yet been analyzed and is not available for this plot."
+          }
+          $("p#info-text-body2").html(html_string);
+        }
+        $("#colorspace-alert-button").show();
+        }else{
+        $("#exampleModalCenter2").modal('hide');
+        $("#colorspace-alert-button").hide();
+      }
     }
 
     function updateScreenshotVis(pollTime) {
-      console.log("Pulling Screenshots ")
+      //console.log("Pulling Screenshots ")
       $.ajax({
         type: 'GET',
         dataType: 'json',
@@ -150,6 +458,83 @@
         }
       });
     }
+    function getAndApplySettings(){
+      $.ajax({
+        type: 'GET',
+        dataType: 'json',
+        url: "/get-settings/",
+        success: function(e, textStatus, xhr) {
+          if(xhr.status == 204){
+            console.log("/get-settings/ returned 204");
+            return;
+          }
+          if('background' in e){
+            document.getElementById("dropdown-bgcolor-menu").value = e['background'];
+            document.getElementById("dropdown-bgcolor-menu").dispatchEvent(new Event("change"));
+          }
+          if('screenshot_size' in e){
+            const screenshot_inputs=[...document.getElementsByClassName("screenshot_size")];
+            screenshot_inputs[1].value = e['screenshot_size'];
+            screenshot_inputs[1].dispatchEvent(new Event("input"))
+          }
+          if('circle_interval' in e){
+            const circle_inputs=[...document.getElementsByClassName("circle_interval")];
+            circle_inputs[1].value = e['circle_interval'];
+            circle_inputs[1].dispatchEvent(new Event("input"))
+          }
+          if('dt_selected_channel' in e){
+            document.getElementById("dropdown-channel").value = e['dt_selected_channel'];
+            document.getElementById("dropdown-channel").dispatchEvent(new Event("change"));
+          }
+          if('screenshot_borders' in e){
+            document.getElementById("checkbox-screenshot-borders").checked = e['screenshot_borders'];
+            document.getElementById("checkbox-screenshot-borders").dispatchEvent(new Event("change"));
+          }
+          if('connecting_line' in e){
+            document.getElementById("checkbox-connecting-line").checked = e['connecting_line'];
+            document.getElementById("checkbox-connecting-line").dispatchEvent(new Event("change"));
+          }
+          if('xaxis_option' in e){
+            document.getElementById("dropdown-xAxis").value = e['xaxis_option'];
+            document.getElementById("dropdown-xAxis").dispatchEvent(new Event("change"));
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error in get-settings", jqXHR, textStatus, errorThrown);
+        },
+        complete: function () {
+          settings_init_running = false;
+        }
+      });
+    }
+
+  function sendSettings() {
+      if (settings_init_running){
+        return;
+      }
+      console.log("sendSettings entered")
+      $.ajax({
+        url: "/post-settings/",
+        data: JSON.stringify({
+          background: document.getElementById("dropdown-bgcolor-menu").value,
+          screenshot_size: document.getElementsByClassName("screenshot_size")[0].value,
+          circle_interval: document.getElementsByClassName("circle_interval")[0].value,
+          dt_selected_channel: document.getElementById("dropdown-channel").value,
+          screenshot_borders: document.getElementById("checkbox-screenshot-borders").checked,
+          connecting_line: document.getElementById("checkbox-connecting-line").checked,
+          xaxis_option: document.getElementById("dropdown-xAxis").value,
+        }),
+        dataType: 'html',
+        contentType: 'application/json;charset=UTF-8',
+        type: 'POST',
+        success: function (e) {
+            console.log("Settings set")
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log("Error", jqXHR, textStatus, errorThrown);
+        },
+      });
+    }
 
     function setSelected(selected_uuids) {
       console.log(selected_uuids);
@@ -157,7 +542,6 @@
         url: "/set-selection/",
         data: JSON.stringify({
           uuids: selected_uuids,
-          h: "Hello World",
         }),
         dataType: 'json',
         contentType: 'application/json;charset=UTF-8',
@@ -173,54 +557,5 @@
 
 
   </script>
-
-  <script type="module">
-    import * as RENDERER from '/static/threeJsPlot2.js';
-    console.log(RENDERER)
-    var plot = new RENDERER.Palette3D("renderframe", "palette-3d")
-    // RENDERER.initScene(env_lines, "palette-3d", "renderframe");
-
-    $("#nav-3d-palette-tab").on("click", function () {
-      setTimeout(function () { plot.onWindowResize(); console.log("Hello"); }, 500)
-
-    })
-
-    $(document).on("screenshotPollUpdate", function (event, data) {
-      plot.clear();
-
-      var ls = []
-      var as = []
-      var bs = []
-      var cols = []
-      var sizes = []
-
-      data.palettes.forEach((elem) => {
-        let rgb = [elem.bgr[2] / 255, elem.bgr[1] / 255, elem.bgr[0] / 255];
-        ls.push(elem.lab[0]);
-        as.push(elem.lab[1]);
-        bs.push(elem.lab[2]);
-        sizes.push(10);
-        cols.push(rgb);
-      });
-      plot.addPoints(ls, as, bs, cols, sizes);
-
-    });
-
-
-    let rgbs = []
-
-    for (var i = 0; i < 1000; i++) {
-      var r = Math.random();
-      var g = Math.random();
-      var b = Math.random();
-
-      plot.addPoint(
-        Math.floor(255 * r) - 128,
-        Math.floor(255 * g) - 128,
-        Math.floor(255 * b) - 128
-        , [r, b, g]);
-    }
-  </script>
-
 
   {% endblock %}

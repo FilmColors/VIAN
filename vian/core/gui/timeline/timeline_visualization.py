@@ -1,28 +1,36 @@
-from PyQt5 import QtGui
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import QSlider, QLabel
+from PyQt6 import QtGui
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import QSlider, QLabel, QHBoxLayout
+
 from vian.core.gui.timeline.timeline_base import TimelineControl, TimelineBar, QPushButton
-
-from vian.core.data.interfaces import TimelineDataset
 from vian.core.container.project import *
-
+from vian.core.data.interfaces import TimelineDataset
 
 class TimelineVisualizationControl(TimelineControl):
     onVisibilityChanged = pyqtSignal(bool)
 
     def __init__(self, parent, timeline, item = None, name = "No Name"):
         super(TimelineVisualizationControl, self).__init__(parent,timeline, item, name)
-        self.sp_filter = QSlider(Qt.Horizontal)
+        self.sp_filter = QSlider(Qt.Orientation.Horizontal)
         self.sp_filter.setMinimum(1)
         self.sp_filter.setMaximum(20)
+        self.sp_filter.setStyleSheet("background-color: rgba(0, 0, 0, 0);")  # for transparent background
 
-        self.layout().addWidget(QLabel("Filter", self), 1, 0)
-        self.layout().addWidget(self.sp_filter, 1, 1)
+        self.filter_layout = QHBoxLayout()
+
+
+        self.filterlabel = QLabel("Filter")
+        self.filterlabel.setStyleSheet("background-color: rgba(0, 0, 0, 0);") #for transparent background
+        self.filter_layout.addWidget(self.filterlabel)
+        self.filter_layout.addWidget(self.sp_filter)
 
         self.btn_toggle_visible = QPushButton("Hide")
         self.btn_toggle_visible.clicked.connect(self.on_hide)
-        self.layout().addWidget(self.btn_toggle_visible, 2, 0)
+        self.btn_toggle_visible.setStyleSheet("background-color: rgba(0, 0, 0, 0);")  # for transparent background
+        self.filter_layout.addWidget(self.btn_toggle_visible)
+
+        self.mainLayout.addLayout(self.filter_layout)
 
     def on_hide(self):
         if self.btn_toggle_visible.text() == "Hide":
@@ -62,16 +70,16 @@ class TimelineVisualization(TimelineBar):
 
         self.last_data = data, ms
 
-        qimage = QtGui.QImage(self.size(), QtGui.QImage.Format_ARGB32_Premultiplied)
-        qimage.fill(QtCore.Qt.transparent)
+        qimage = QtGui.QImage(self.size(), QtGui.QImage.Format.Format_ARGB32_Premultiplied)
+        qimage.fill(QtCore.Qt.GlobalColor.transparent)
         qp = QtGui.QPainter(qimage)
 
         pen = QtGui.QPen()
 
         qp.setPen(pen)
         qp.begin(qimage)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, True)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing, True)
 
         rect = QRect(self.rect().x(),
                      self.rect().y(),
@@ -203,7 +211,7 @@ class TimelineLinePlot(TimelineVisualization):
             d = self.hover_dot_size
             hd = self.hover_dot_size / 2
             qp.drawEllipse(QRectF(float(point.x() - hd), float(point.y() - hd), d, d))
-            p = QPoint(d,0) + point
+            p = QPointF(d,0.0) + point
             qp.drawText(p, self.dataset.name + ": {v}".format(v=round(val, 2)))
 
             c = QColor(self.dataset.vis_color.rgb())

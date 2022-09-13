@@ -49,7 +49,7 @@ class OpticalFlowAnalysis(IAnalysisJob):
         fps = project.movie_descriptor.fps
         targets, args = super(OpticalFlowAnalysis, self).prepare(project, targets, fps, class_objs)
         self.movie_path = project.movie_descriptor.movie_path
-        self.margins = project.movie_descriptor.get_letterbox_rect()
+        self.margins = project.movie_descriptor.get_letterbox_rect(as_coords=True)
         return args
 
     def process(self, argst, sign_progress):

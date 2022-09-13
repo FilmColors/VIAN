@@ -1,10 +1,10 @@
-from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QFontComboBox
-from PyQt5.QtGui import QFont
-from PyQt5.QtCore import pyqtSignal
+from PyQt6 import uic
+from PyQt6.QtWidgets import QApplication, QFontComboBox
+from PyQt6.QtGui import QFont
+from PyQt6.QtCore import pyqtSignal
 import os
 
-from PyQt5 import uic
+from PyQt6 import uic
 from vian.core.data.settings import COLORMAPS_SEQUENTIAL, UserSettings
 from vian.core.data.enums import ScreenshotNamingConventionOptions
 from vian.core.gui.ewidgetbase import EDialogWidget

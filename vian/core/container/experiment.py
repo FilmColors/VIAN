@@ -15,8 +15,8 @@ from .hdf5_manager import get_analysis_by_name
 
 from vian.core.analysis.deep_learning.labels import LIPLabels
 
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QMessageBox
 
 from functools import partial
 
@@ -449,7 +449,7 @@ class Vocabulary(BaseProjectEntity, IHasName):
                     break
         if has_been_used:
             answer = delete_even_if_connected_msgbox("voc")
-            if answer == QMessageBox.Yes:
+            if answer == QMessageBox.StandardButton.Yes:
                 self.delete()
             else:
                 return
@@ -549,7 +549,7 @@ class VocabularyWord(BaseProjectEntity, IHasName):
                 break
         if has_been_used:
             answer = delete_even_if_connected_msgbox("word")
-            if answer == QMessageBox.Yes:
+            if answer == QMessageBox.StandardButton.Yes:
                 self.delete()
             else:
                 return

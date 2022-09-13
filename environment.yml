@@ -1,0 +1,29 @@
+name: vian-conda
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip
+  - python=3.8
+  - moviepy
+  - bokeh==2.2.1
+  - librosa
+  - tensorflow
+  - requests
+  - flask
+  - keras
+  - ffmpeg
+  - pyqt
+  - opencv
+  - pandas
+  - sqlalchemy
+  - matplotlib
+  - scikit-learn
+  - fastcluster
+  - pymediainfo
+  - pip:
+      - pysrt
+      - pymediainfo
+      - XlsxWriter
+      - openpyxl
+

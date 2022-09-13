@@ -1,8 +1,8 @@
 import os
 
 import numpy as np
-from PyQt5 import QtCore, uic
-from PyQt5.QtWidgets import QComboBox, QSpinBox, QLayout
+from PyQt6 import QtCore, uic
+from PyQt6.QtWidgets import QComboBox, QSpinBox, QLayout
 
 from vian.core.data.log import log_error, log_info
 from vian.core.data.computation import ms_to_string
@@ -69,8 +69,8 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
     def on_timestep_update(self, time):
         if not self.is_clicked:
             d = np.clip(self.main_window.player.duration, 1, None)
-            vlc_position = float(time) / d
-            self.sl_position.setValue(vlc_position * 10000)
+            position = float(time) / d
+            self.sl_position.setValue(position * 10000)
 
         self.lbl_position_time.setText(ms_to_string(time))
         self.lbl_position_frame.setText(str(int(float(time) / 1000 * self.main_window.player.get_fps())))
@@ -140,7 +140,7 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
         self.btn_FastForward.setChecked(False)
         self.fast_step_timer.stop()
 
-        isPaused = self.main_window.player.play_pause()
+        self.main_window.player.play_pause()
         self.main_window.player.set_subtitle(1)
 
     def on_fps_changed(self):

@@ -4,9 +4,9 @@ These operations can be of arbitrary type and are not categorized.
 """
 from datetime import datetime
 
-from PyQt5.QtGui import QImage, QPixmap, QIcon
+from PyQt6.QtGui import QImage, QPixmap, QIcon
 from vian.core.data.log import *
-import PyQt5.QtCore as QtCore
+import PyQt6.QtCore as QtCore
 import subprocess
 import inspect
 import importlib
@@ -237,10 +237,10 @@ def numpy_to_qt_image(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_al
         arr = cv2.resize(arr, None, None, factor, factor, cv2.INTER_CUBIC)
 
     if not with_alpha:
-        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 3, QImage.Format_RGB888)
+        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 3, QImage.Format.Format_RGB888)
         qpixmap = QPixmap(qimage)
     else:
-        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 4, QImage.Format_RGBA8888)
+        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 4, QImage.Format.Format_RGBA8888)
         qpixmap = QPixmap(qimage)
     return qimage, qpixmap
 
@@ -263,10 +263,10 @@ def numpy_to_pixmap(arr, cvt = cv2.COLOR_BGR2RGB, target_width = None, with_alph
         arr = cv2.resize(arr, None, None, factor, factor, cv2.INTER_CUBIC)
 
     if not with_alpha or arr.shape[2] < 4:
-        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 3, QImage.Format_RGB888)
+        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 3, QImage.Format.Format_RGB888)
         qpixmap = QPixmap(qimage)
     else:
-        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 4, QImage.Format_RGBA8888)
+        qimage = QImage(arr, arr.shape[1], arr.shape[0], arr.shape[1] * 4, QImage.Format.Format_RGBA8888)
         qpixmap = QPixmap(qimage)
 
     return qpixmap
@@ -278,7 +278,7 @@ def pixmap_to_numpy(pixmap: QPixmap):
     :param pixmap: the Pixmap
     :return: a numpy array
     """
-    return convertQImageToMat(pixmap.toImage().convertToFormat(QImage.Format_ARGB32_Premultiplied))
+    return convertQImageToMat(pixmap.toImage().convertToFormat(QImage.Format.Format_ARGB32_Premultiplied))
 
 
 def convertQImageToMat(qimage):
@@ -288,9 +288,9 @@ def convertQImageToMat(qimage):
     height = qimage.height()
 
     ptr = qimage.bits()
-    ptr.setsize(qimage.byteCount())
+    ptr.setsize(qimage.sizeInBytes())
 
-    if qimage.format() == QImage.Format_ARGB32_Premultiplied:
+    if qimage.format() == QImage.Format.Format_ARGB32_Premultiplied:
         arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
     else:
         arr = np.array(ptr).reshape(height, width, 3)
@@ -520,7 +520,11 @@ def version_check(smaller_than, version):
 def open_web_browser(file_path):
     if sys.platform == "darwin":  # check if on OSX
         file_path = "file:///" + file_path
-    webbrowser.get().open(file_path)
+
+    if sys.platform == 'darwin':
+        os.system(f"open \"\" {file_path}")
+    else:
+        webbrowser.get().open(file_path)
 
 
 def find_closest(frame, segment):
@@ -742,3 +746,38 @@ def fir_lowpass_filter(sample_rate):
 
 def is_gui():
     return "VIAN_GUI" in os.environ
+
+
+def detect_letterbox(movie_path, n_samples=100) -> dict:
+    """
+    Attempts to detect the letterbox by thresholding the mean of multiple slices
+
+    :param movie_path:
+    :param n_samples:
+    :return:
+    """
+    cap = cv2.VideoCapture(movie_path)
+    cap.read()
+    samples = []
+    for i in range(n_samples):
+        f_idx = int(np.floor(cap.get(cv2.CAP_PROP_FRAME_COUNT) * (i / n_samples)))
+        cap.set(cv2.CAP_PROP_POS_FRAMES, f_idx)
+        ret, frame = cap.read()
+        if frame is None:
+            continue
+        samples.append(cv2.cvtColor(frame.astype(np.float32) / 255, cv2.COLOR_BGR2LAB))
+    frame = np.array(samples)[..., 0]
+    variance = np.mean(frame, axis=0)
+    variance -= np.amin(variance)
+    variance /= np.amax(variance)
+    ret, thresh = cv2.threshold(variance, 0.1, 1, cv2.THRESH_BINARY)
+    if np.mean(thresh) == 1.0:
+        return dict(left=0, right=0, top=0, bottom=0)
+    else:
+
+        # We search for the first pixel from each border which is > 0
+        left = thresh[thresh.shape[0] // 2].tolist().index(1.0)
+        right = thresh[thresh.shape[0] // 2][::-1].tolist().index(1.0)
+        top = thresh[:, thresh.shape[0] // 2].tolist().index(1.0)
+        bottom = thresh[:, thresh.shape[0] // 2][::-1].tolist().index(1.0)
+        return dict(left=left, right=right, top=top, bottom=bottom)

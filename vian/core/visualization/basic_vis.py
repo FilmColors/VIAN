@@ -1,7 +1,7 @@
 import os
-from PyQt5.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QCheckBox, QMenu, QHBoxLayout, QLabel, QSlider
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt6.QtWidgets import  QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QCheckBox, QMenu, QHBoxLayout, QLabel, QSlider
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
 import numpy as np
 from vian.core.data.computation import get_heatmap_value, ms_to_string
 from vian.core.gui.ewidgetbase import EGraphicsView
@@ -43,7 +43,7 @@ class IVIANVisualization():
         dialog.show()
 
     def render_to_image(self, background: QColor, size: QSize):
-        image = QImage(size, QImage.Format_RGBA8888)
+        image = QImage(size, QImage.Format.Format_RGBA8888)
         qp = QPainter()
         qp.begin(image)
         qp.fillRect(image.rect(), background)
@@ -53,7 +53,7 @@ class IVIANVisualization():
     def frame_plot(self):
         try:
             rect = self.scene().itemsBoundingRect()
-            self.fitInView(rect, Qt.KeepAspectRatio)
+            self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
         except Exception as e:
             print(e)
 
@@ -62,9 +62,9 @@ class IVIANVisualization():
 
 
 class VIANPlot(QGraphicsView, IVIANVisualization):
-    def __init__(self, parent, background=QColor(30, 30, 30), aspect = Qt.KeepAspectRatio, x_label_format = "value", y_label_format = "value"):
+    def __init__(self, parent, background=QColor(30, 30, 30), aspect = Qt.AspectRatioMode.KeepAspectRatio, x_label_format = "value", y_label_format = "value"):
         super(VIANPlot, self).__init__(parent)
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
         self.setBackgroundBrush(QColor(30, 30, 30))
@@ -188,22 +188,22 @@ class VIANPlot(QGraphicsView, IVIANVisualization):
         self.fitInView(rect,  self.aspect)
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = True
             event.ignore()
-        elif event.key() == Qt.Key_F:
+        elif event.key() == Qt.Key.Key_F:
             self.frame_default()
         else:
             event.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = False
         else:
             event.ignore()
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)
@@ -213,8 +213,8 @@ class VIANPlot(QGraphicsView, IVIANVisualization):
 
     def wheelEvent(self, event: QWheelEvent):
         if self.ctrl_is_pressed:
-            self.setTransformationAnchor(QGraphicsView.NoAnchor)
-            self.setResizeAnchor(QGraphicsView.NoAnchor)
+            self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
+            self.setResizeAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
 
             old_pos = self.mapToScene(event.pos())
 
@@ -255,12 +255,12 @@ class VIANPlot(QGraphicsView, IVIANVisualization):
 
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
-        image = QImage(size, QImage.Format_ARGB32)
+        image = QImage(size, QImage.Format.Format_ARGB32)
         image.fill(background)
 
         painter = QPainter()
         painter.begin(image)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.scene().render(painter)
         painter.end()
 
@@ -283,13 +283,13 @@ class VIANPlotControls(QWidget):
         hl3 = QHBoxLayout(self)
         hl3.addWidget(QLabel("X-Scale:", self))
 
-        self.slider_yscale = QSlider(Qt.Horizontal, self)
+        self.slider_yscale = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_yscale.setRange(1, 1000)
         self.slider_yscale.setValue(100)
 
         hl2.addWidget(self.slider_yscale)
 
-        self.slider_xscale = QSlider(Qt.Horizontal, self)
+        self.slider_xscale = QSlider(Qt.Orientation.Horizontal, self)
         self.slider_xscale.setRange(1, 1000)
         self.slider_xscale.setValue(100)
 
@@ -363,7 +363,7 @@ class MatrixPlot(EGraphicsView, IVIANVisualization):
                     self.items.append(itm)
         else:
             painter = QPainter()
-            img = QImage(QSize(1000,1000), QImage.Format_RGB888)
+            img = QImage(QSize(1000,1000), QImage.Format.Format_RGB888)
             img.fill(QColor(0,0,0))
             painter.begin(img)
             for x in range(matrix.shape[0]):
@@ -483,7 +483,7 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
             self.view.removeItem(i)
         self.items.clear()
         self.scene().clear()
-        img = QImage(QSize(4096,4096), QImage.Format_RGBA8888)
+        img = QImage(QSize(4096,4096), QImage.Format.Format_RGBA8888)
         img.fill(background)
 
         p = QPainter()
@@ -558,7 +558,7 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
         t_size = self.sceneRect().size().toSize()
-        image = QImage(size, QImage.Format_ARGB32)
+        image = QImage(size, QImage.Format.Format_ARGB32)
         image.fill(background)
         painter = QPainter()
         painter.begin(image)
@@ -570,7 +570,7 @@ class HistogramVis(EGraphicsView, IVIANVisualization):
         return image
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             self.export()
         else:
             super(EGraphicsView, self).mousePressEvent(event)

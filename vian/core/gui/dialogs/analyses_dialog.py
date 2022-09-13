@@ -1,10 +1,10 @@
 import os
 from random import randint
-from PyQt5 import QtCore, uic, QtGui
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QPushButton, QTreeWidgetItem, QLineEdit, QMainWindow, QListWidget, QListWidgetItem, QHBoxLayout, QFrame, QWidget, QSizePolicy, QVBoxLayout, QSpacerItem
-from PyQt5.QtGui import QFont
+from PyQt6 import QtCore, uic, QtGui
+from PyQt6.QtCore import pyqtSignal, pyqtSlot
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QPushButton, QTreeWidgetItem, QLineEdit, QMainWindow, QListWidget, QListWidgetItem, QHBoxLayout, QFrame, QWidget, QSizePolicy, QVBoxLayout, QSpacerItem
+from PyQt6.QtGui import QFont
 
 from vian.core.data.computation import ms_to_string
 from vian.core.container.project import MOVIE_DESCRIPTOR

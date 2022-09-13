@@ -13,6 +13,7 @@ flask_hidden_imports = collect_submodules('flask_server')
 sklearn_hidden_imports = collect_submodules('sklearn')
 
 binaries = collect_dynamic_libs("pymediainfo")
+binaries += collect_dynamic_libs("librosa")
 hiddenimports = mp_hidden_imports \
                 + flask_hidden_imports \
                 + sklearn_hidden_imports
@@ -29,13 +30,6 @@ data_paths = [
 console = False
 if sys.platform == "win32":
     console = True
-    vlc_dlls = [
-        ('../bin/win64/libvlc.dll', '.'),
-        ('../bin/win64/axvlc.dll', '.'),
-        ('../bin/win64/libvlccore.dll', '.'),
-        ('../bin/win64/npvlc.dll', '.')
-    ]
-    data_paths += vlc_dlls
 
     binaries += [
         ('../bin/win64/plugins', 'plugins'),
@@ -49,10 +43,6 @@ elif sys.platform.startswith("linux"):
     hiddenimports += ['pkg_resources.py2_warn']
 
 else:
-    binaries += [
-        ('/System/Library/Frameworks/Tk.framework/Tk', 'tk'),
-        ('/System/Library/Frameworks/Tcl.framework/Tcl','tcl')
-        ]
     icon='qt_ui/images/main_round.icns'
 
 

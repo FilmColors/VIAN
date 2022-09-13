@@ -1,12 +1,6 @@
 import * as THREE from '/static/three/build/three.module.js';
 import Stats from '/static/three/jsm/libs/stats.module.js';
-import { GUI } from '/static/three/jsm/libs/dat.gui.module.js';
-import { DragControls } from '/static/three/jsm/controls/DragControls.js';
 import { OrbitControls } from '/static/three/jsm/controls/OrbitControls.js';
-import { TransformControls } from '/static/three/jsm/controls/TransformControls.js';
-import { LineMaterial } from '/static/three/jsm/lines/LineMaterial.js';
-import { LineGeometry } from '/static/three/jsm/lines/LineGeometry.js';
-import { Line2 } from '/static/three/jsm/lines/Line2.js';
 
 import { VRButton } from '/static/three/jsm/webxr/VRButton.js';
 import { XRControllerModelFactory } from '/static/three/jsm/webxr/XRControllerModelFactory.js';
@@ -21,14 +15,15 @@ function floatRgb2ThreeColor(r, g, b) {
 }
 
 class ThreeJSView {
-    constructor(frame_name, canvas_name, background_color = [17 / 255, 17 / 255, 17 / 255], useVr = false) {
+    constructor(frame_name, canvas_name, useVr = false) {
         this.frame_name = frame_name;
         this.canvas_name = canvas_name;
+
+        new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(canvas_name));
 
         this.canvas = document.getElementById(canvas_name);
         this.frame = document.getElementById(frame_name);
 
-        this.background_color = background_color
         const VERTEX_SCALE = 10;
 
         if (useVr == true && navigator.xr != null){
@@ -38,20 +33,13 @@ class ThreeJSView {
         }
 
         this.scene = new THREE.Scene();
-        this.renderWidth = this.frame.clientWidth;
-        this.renderHeight = this.frame.clientHeight;
         if (this.fov == null) {
             this.fov = 75;
         }
-        this.camera = new THREE.PerspectiveCamera(this.fov, this.renderWidth / this.renderHeight, 0.1, 1000);
+        this.camera = new THREE.PerspectiveCamera(this.fov, 1, 0.1, 1000);
         this.camera.updateProjectionMatrix();
-        var currentCamera = this.camera;
-        var ratio = this.renderHeight / this.renderWidth
-        var orthoWidth = VERTEX_SCALE
 
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
-        this.scene.background = new THREE.Color("rgb(17,17,17)");
-        this.renderer.setSize(this.renderWidth, this.renderHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.gammaInput = true;
         this.renderer.gammaOutput = true;
@@ -74,22 +62,13 @@ class ThreeJSView {
         this.initialTarget = this.controls.target;
         // this.controls.target.set(VERTEX_SCALE / 2, 0, 0);
 
-        var targetObject = new THREE.Object3D();
-        this.scene.add(targetObject);
-
         this.stats = new Stats();
         this.stats.showPanel(1);
-
-        this.gridHelper = new THREE.GridHelper(10, 10);
-        this.scene.add(this.gridHelper);
 
         // gridLines(this);
         if (this.useVr){
             this.initVrController();
         }
-        var that = this;
-        window.addEventListener('resize', function () { that.onWindowResize() }, false);
-        this.frame.addEventListener('resize', function () { that.onWindowResize() }, false);
 
         this.frame.addEventListener("keydown", event => {
           if (event.keyCode === 70) {
@@ -97,6 +76,55 @@ class ThreeJSView {
             this.controls.target.set(0,0,0)
           }
         });
+
+        //set up second renderer (for axis helper)
+        const insetWidth = 150, insetHeight = 150;
+        this.container2 = document.getElementById( 'inset' );
+        this.container2.width = insetWidth;
+        this.container2.height = insetHeight;
+
+        // renderer
+        this.renderer2 = new THREE.WebGLRenderer( { alpha: true } );
+        this.renderer2.setClearColor( 0x000000, 0 );
+        this.renderer2.setSize( insetWidth, insetHeight );
+        this.container2.appendChild( this.renderer2.domElement );
+
+        // scene
+        this.scene2 = new THREE.Scene();
+
+        // camera
+        this.camera2 = new THREE.PerspectiveCamera( 50, insetWidth / insetHeight, 1, 1000 );
+        this.camera2.up = this.camera.up; // important!
+
+        // axes
+        const material = new THREE.LineBasicMaterial({linewidth:3, vertexColors: true});
+        const geometry = new THREE.BufferGeometry();
+
+        const vertices = new Float32Array( [
+            -100, 0,  0,
+            100, 0,  0,
+            0,  -100,  0,
+            0,  100,  0,
+            0,  0,  -100,
+            0, 0,  100
+        ] );
+        geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+
+        const colors = new Float32Array( [
+            0,  0.5,  0,
+            1,  0,  0,
+            0, 0,  0,
+            1, 1,  1,
+            0,  0,  1,
+            1, 1,  0
+        ] );
+
+        geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+
+        const line = new THREE.LineSegments( geometry, material );
+        this.scene2.add( line );
+
+
         // window.addEventListener('mousemove', function (event) { onMouseMove(event) }, false);
         this.animate();
         // this.renderer.render(this.scene, this.camera);
@@ -122,24 +150,37 @@ class ThreeJSView {
     }
 
     animate() {
-        var that = this;
-        that.renderer.setAnimationLoop( function(){that.render(that); });
+        this.renderer.setAnimationLoop( () => {this.render(); });
     }
-    render(that) {
+
+    render() {
+        this.onResize();
         if (this.useVr){
-            this.handleController( that.controller1 );
-            this.handleController( that.controller2 );
+            this.handleController( this.controller1 );
+            this.handleController( this.controller2 );
         }
 
         this.controls.update();
-        this.renderer.render( that.scene, that.camera );
+
+        //copy position of the camera into inset
+        this.camera2.position.copy( this.camera.position );
+        this.camera2.position.sub( this.controls.target );
+        this.camera2.position.setLength( 300 );
+        this.camera2.lookAt( this.scene2.position );
+
+
+        this.renderer.render( this.scene, this.camera );
+        this.renderer2.render(this.scene2, this.camera2);
+    }
+    setBackgroundColor(back, front){
+        let background = "rgb(" + back + "," + back + "," + back + ")";
+        this.scene.background = new THREE.Color(background);
     }
 
-    onWindowResize() {
-        var frame = this.frame;
-        var width = frame.clientWidth;
-        var height = width;
-
+    onResize() {
+        var width = this.frame.clientWidth;
+        //todo: this is not very clean, but the best solution I came up with..
+        var height = document.getElementById("container").clientHeight - document.getElementById("nav-part").clientHeight;
 
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
@@ -147,7 +188,7 @@ class ThreeJSView {
     }
 
     initVrController() {
-        var that = this;
+
         document.body.appendChild(VRButton.createButton(this.renderer));
 
         // controllers
@@ -233,20 +274,16 @@ class ThreeJSView {
         this.scene.add(particles);
     }
 
-    clear() {
-        this.scene.remove.apply(this.scene, this.scene.children);
-    }
-
+    clear() {}
 
 }
 
 class Palette3D extends ThreeJSView {
-    constructor(rame_name, canvas_name, background_color = "rgb(255,255,255)") {
-        super(rame_name, canvas_name, background_color)
+    constructor(rame_name, canvas_name) {
+        super(rame_name, canvas_name)
         this._palette = []
 
         this._sprite = new THREE.TextureLoader().load('/static/textures/disc.png');
-
     }
     addPoint(l, a, b, col, size = 10) {
         let p = {}
@@ -300,7 +337,7 @@ class Palette3D extends ThreeJSView {
 
     clear() {
         this.scene.remove.apply(this.scene, this.scene.children);
-        this._palette = []
+        this._palette = [];
     }
 }
 

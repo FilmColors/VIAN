@@ -1,25 +1,10 @@
-// create a data source to hold data
-const templ =`
-<div class="dropdown">
-  <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    Select Channel
-  </button>
-  <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item w-100" id="btn-dt-chroma">Chroma</a>
-    <a class="dropdown-item w-100" id="btn-dt-hue">Hue</a>
-    <a class="dropdown-item w-100" id="btn-dt-luminance">Luminance</a>
-    <a class="dropdown-item w-100" id="btn-dt-a">A-Channel</a>
-    <a class="dropdown-item w-100" id="btn-dt-b">B-Channel</a>
-  </div>
-</div>`
-
-
 class ColorDT {
     constructor(divName) {
-
         this.divName = divName;
-        this.grid_col = "rgb(255,255,255)"
-        this.background = "rgb(17,17,17)"
+        new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(divName));
+
+        this.boxannotations = [];
+        this.currentParameter = null;
 
         this.source = new Bokeh.ColumnDataSource({data:{
             url : [],
@@ -31,87 +16,112 @@ class ColorDT {
             hue : [],
             a: [], 
             b: [], 
-            uuids: []
+            uuids: [],
         }});
 
-        this.menu = [("Saturation", "Saturation"), ("Chroma", "Chroma"), ("Hue", "Hue"), ("Luminance", "Luminance"), ("A-Channel", "A-Channel"), ("B-Channel", "B-Channel")]
-        this.dropdown = new Bokeh.Widgets.Dropdown({label:"Select Feature", button_type:"warning", menu:this.menu}) 
 
-        var that = this;
-        // this.dropdown.js_event_callbacks['change'] = { execute: (event) => { console.log("Hello World") }}
-//        this.dropdown.menu_item_click function(){console.log("Hello World")}).connect(
-//        function(){console.log("Hello World")
-//        that.parameterChanged(that.source, that.dropdown)})
+        this.segment_starts = [];
+        this.segment_ends = [];
+        this.segment_ids = [];
+
         this.plot = Bokeh.Plotting.figure({
-            title:'Color dT',
             tools: "pan,wheel_zoom,box_zoom,reset,save",
-            height: 500,
-            width: 1200,
+            aspect_ratio: 2,
             x_axis_type: "datetime",
-            y_axis_label: "Saturation", 
         });
 
-        this.plot.background_fill_color = this.background
-        this.plot.background_fill_alpha = 0.0
-        this.plot.border_fill_alpha = 0.0
-        this.plot.center[0].grid_line_alpha = 0.3
-        this.plot.center[1].grid_line_alpha = 0.3
-
-        this.plot.sizing_mode = "scale_width"
-        this.aspect = 9.0 / 16
-        
-        this.plot.below[0].axis_label = "Time"
-        // seconds = ['%Ss']
-        
         let args = {
-            seconds: ['%Ss'],
-            minsec: [':%M:%S'],
-            minutes: [':%M', '%Mm'],
-            hourmin: ['%H:%M'],
-            hours: ['%Hh', '%H:%M']
-        }
-        args = {
-            seconds:['%Ss'], minutes:["%H:%M:%S"], hours:["%H"], hourmin:["%H:%M:%S"],
-                                                 months:["%H:%M:%S"], years:["%H:%M:%S"]
+            seconds:['%Ss'], minsec:["%M:%S"], hours:["%Hh"], hourmin:["%H:%M:%S"], months:["%H:%M:%S"], days:['%Ss'], years:["%H:%M:%S"]
         }
         let f = new Bokeh.DatetimeTickFormatter(args)
-        // console.log(f)
-
         this.plot.below[0].formatter = f;
-        // this.plot.left[0]
-       
-        this.plot.line({x: { field: "x" }, y: { field: "y" }, line_color : "rgb(255,255,255)", line_alpha:0.2, source: this.source});
+        this.plot.below[0].axis_label = "Time";
 
-        var r = this.plot.image_url({url: { field: "url" },x: { field: "x" },y: { field: "y" },
-            w: 40,
-            h: 40 * this.aspect,
+        this.plot.add_layout(new Bokeh.LinearAxis(), "below");
+        this.plot.below[1].axis_label = "Start of Segment [ID]";
+
+        this.plot.add_layout(new Bokeh.Grid(), "center");
+        
+        this.plot.center[0].grid_line_alpha = 0.3;
+        this.plot.center[1].grid_line_alpha = 0.3;
+        this.plot.center[2].grid_line_alpha = 0.3;
+
+        this.aspect = 9.0 / 16
+
+        this.lineRenderer = this.plot.line({x: { field: "x" }, y: { field: "y" }, line_alpha:0.7, line_width:2, source: this.source});
+
+        this.border_renderer = this.plot.rect({
+            x: { field: "x" },
+            y: { field: "y" },
+            fill_color: "transparent",
+            line_width: 2,
+            source:this.source,
+        });
+
+        this.glyph_renderer = this.plot.image_url({
+            url: { field: "url" },
+            x: { field: "x" },
+            y: { field: "y" },
             anchor: "center",
-            global_alpha: 0.8,
             source: this.source
             });
-        r.glyph.h.units = "screen"
-        r.glyph.w.units = "screen"
-        
-        console.log(this.plot);
+
+        this.plot.x_range.property('start').change.connect((_args, x_range) => this.plotRangesChangedCallback())
+        this.plot.x_range.property('end').change.connect((_args, x_range) => this.plotRangesChangedCallback())
+        this.plot.y_range.property('start').change.connect((_args, x_range) => this.plotRangesChangedCallback())
+        this.plot.y_range.property('end').change.connect((_args, x_range) => this.plotRangesChangedCallback())
+
         var doc = new Bokeh.Document();
-        doc.add_root(new Bokeh.Column({children: [this.plot], sizing_mode: "scale_width"}));
-
-        var that = this; 
-        var docd = document.getElementById(divName)
-        docd.innerHTML = templ
-        var plotElem = document.createElement("div");
-        docd.appendChild(plotElem)
-
-        $("#btn-dt-chroma").click(function(){that.parameterChanged(that.source, "Chroma")})
-        $("#btn-dt-hue").click(function(){that.parameterChanged(that.source, "Hue")})
-        $("#btn-dt-luminance").click(function(){that.parameterChanged(that.source, "Luminance")})
-        $("#btn-dt-a").click(function(){that.parameterChanged(that.source, "A-Channel")})
-        $("#btn-dt-b").click(function(){that.parameterChanged(that.source, "B-Channel")})
-
-
-        Bokeh.embed.add_document_standalone(doc, plotElem);
+        doc.add_root(this.plot);
+        Bokeh.embed.add_document_standalone(doc, document.getElementById(divName));
         this.source.change.emit()
     }
+
+    setImageSize(s){
+        this.glyph_renderer.glyph.h = s * this.aspect;
+        this.glyph_renderer.glyph.w = s;
+        this.glyph_renderer.glyph.h.units = "screen";
+        this.glyph_renderer.glyph.w.units = "screen";
+
+        this.border_renderer.glyph.height = s * this.aspect;
+        this.border_renderer.glyph.width = s;
+        this.border_renderer.glyph.height.units = "screen";
+        this.border_renderer.glyph.width.units = "screen";
+    }
+
+    setBackgroundColor(back, front) {
+        let background = "rgb(" + back + "," + back + "," + back + ")";
+        let foreground = "rgb(" + front + "," + front + "," + front + ")";
+
+        this.plot.background_fill_color = background;
+        this.plot.border_fill_color = background;
+
+        this.border_renderer.glyph.line_color = foreground;
+
+        this.plot.center[0].grid_line_color = foreground; //parallel to y-axis
+        this.plot.center[1].grid_line_color = foreground;
+        this.plot.center[2].grid_line_color = foreground;
+
+        this.lineRenderer.glyph.line_color = foreground;
+
+        this.plot.xaxis[0].axis_line_color = foreground;
+        this.plot.xaxis[0].major_tick_line_color = foreground;
+        this.plot.xaxis[0].minor_tick_line_color = foreground;
+        this.plot.xaxis[0].axis_label_text_color = foreground;
+        this.plot.xaxis[0].major_label_text_color = foreground;
+        this.plot.xaxis[1].axis_line_color = foreground;
+        this.plot.xaxis[1].major_tick_line_color = foreground;
+        this.plot.xaxis[1].minor_tick_line_color = foreground;
+        this.plot.xaxis[1].axis_label_text_color = foreground;
+        this.plot.xaxis[1].major_label_text_color = foreground;
+        this.plot.yaxis[0].axis_line_color = foreground;
+        this.plot.yaxis[0].major_tick_line_color = foreground;
+        this.plot.yaxis[0].minor_tick_line_color = foreground;
+        this.plot.yaxis[0].axis_label_text_color = foreground;
+        this.plot.yaxis[0].major_label_text_color = foreground;
+        this.plot.outline_line_color = foreground;
+    }
+
     poll(pollTime) {
         var that = this;
         this.source.change.emit();
@@ -138,7 +148,10 @@ class ColorDT {
                     that.source.data.a = e.data.a;
                     that.source.data.b = e.data.b;
 
-                    that.source.data.url = e.data.urls
+                    that.source.data.url = e.data.urls;
+
+                    that.segment_starts = e.data.segment_starts;
+                    that.segment_ends = e.data.segment_ends;
                 }
             },
             error: function (error, timeout) {
@@ -151,36 +164,45 @@ class ColorDT {
         });
     }
 
-    setBackgroundColor(r, g, b){
-        let col = "rgb(" + r + "," + g + "," + b + ")";
-
-        this.plot.background_fill_color = col;
-
-        if (r < 100){
-            this.plot.background_fill_alpha = 0.0;
-            this.plot.border_fill_alpha = 0.0;
-        }else{
-            this.plot.background_fill_alpha = 1.0;
-            this.plot.border_fill_alpha = 1.0;
+    plotRangesChangedCallback(){
+        //remove all boxes
+        for (var i =0; i < this.boxannotations.length; i++){
+            var index = this.plot.center.indexOf(this.boxannotations[i]);
+            if (index !== -1) {
+              this.plot.center.splice(index, 1);
+            }
         }
-        console.log(this.plot.background_fill_alpha, this.plot.background_fill_color)
+
+        if(isNaN(this.plot.y_range.start) || isNaN(this.plot.y_range.end)){
+            console.log("jumped out of plotRangesChangedCallback function due to NaN");
+            return;
+        }
+
+        //box annotation
+        var c1 = '#555555';
+        var c2 = '#888888';
+        for(var i = 0; i < this.segment_starts.length; i++){
+            var c = i%2==0 ? c1: c2;
+            let ba = new Bokeh.BoxAnnotation({
+                left:this.segment_starts[i],
+                right:this.segment_ends[i],
+                top:this.plot.y_range.start + (this.plot.y_range.end-this.plot.y_range.start)/20,
+                bottom:this.plot.y_range.start,
+                fill_color:c, fill_alpha:0.6});
+            this.boxannotations.push(ba);
+            this.plot.add_layout(ba);
+        }
+
+
+        this.source.change.emit();
     }
 
-    setData(times, luminance, saturation, chroma, hue, a, b, urls, uuids){
-        console.log(uuids);
-
-        let time = []
-        for (var i = 0; i < times.length; i++){
-            time.push(new Date(times[i]))
-        }
-        console.log(this.source)
-
-        this.source.data.x = time;
-        this.source.data.y = luminance;
+    setData(times, luminance, saturation, chroma, hue, a, b, urls, uuids, segment_starts, segment_ends, segment_ids){
+        this.source.data.x = times;
 
         this.source.data.sat = saturation;
         this.source.data.lum = luminance;
-        this.source.data.chroma =chroma;
+        this.source.data.chroma = chroma;
         this.source.data.hue = hue;
 
         this.source.data.a = a;
@@ -188,34 +210,115 @@ class ColorDT {
 
         this.source.data.uuids = uuids;
 
-        this.source.data.url = urls
+        this.source.data.url = urls;
+        this.segment_starts = segment_starts;
+        this.segment_ends = segment_ends;
+        this.segment_ids = segment_ids;
+        this.parameterChanged(this.currentParameter);
+        this.source.change.emit();
+
+
+        this.plot.xaxis[1].ticker = new Bokeh.FixedTicker({ticks:this.segment_starts});
+
+        let res_dict = {};
+        for (var i = 0; i < this.segment_ids.length; i++){
+            res_dict[this.segment_starts[i]] = this.segment_ids[i].toString();
+        }
+        this.plot.xaxis[1].major_label_overrides = res_dict;
+
+        this.plot.center[2].ticker = new Bokeh.FixedTicker({ticks:this.segment_starts});
+    }
+
+    parameterChanged(value){
+
+        var label = "";
+        var values = null;
+        this.currentParameter = value;
+        switch (value){
+            case "saturation":
+                values = this.source.data.sat;
+                label = "Saturation";
+                break;
+            case "chroma":
+                values = this.source.data.chroma;
+                label = "Chroma";
+                break;
+            case "hue":
+                values = this.source.data.hue;
+                label = "Hue";
+                break;
+            case "a-channel":
+                values = this.source.data.a;
+                label = "A-Channel";
+                break;
+            case "b-channel":
+                values = this.source.data.b;
+                label = "B-Channel";
+                break;
+            case "luminance":
+                values = this.source.data.lum;
+                label = "Luminance";
+                break;
+            default:
+                throw "Channel not used";
+                break;
+        }
+
+        this.plot.left[0].axis_label = label;
+        this.source.data.y = values;
         this.source.change.emit();
     }
 
-    parameterChanged(source, value){
-        console.log("HELLOO", value)
-        var t = value;
-        var values = null;
-        if (t == "Saturation"){
-            values = source.data.sat;
-        }else if (t == "Chroma"){
-            values = source.data.chroma
+    xAxisOptionChanged(value){
+        var label = "";
+        switch (value){
+            case "time":
+                label = "Time";
+
+                this.plot.below[0].visible = true;
+                this.plot.below[1].visible = false;
+
+                this.plot.center[0].visible = true;
+                this.plot.center[2].visible = false;
+
+                break;
+            case "segments":
+                label = "Start of Segment [ID]";
+
+                this.plot.below[0].visible = false;
+                this.plot.below[1].visible = true;
+
+                this.plot.center[0].visible = false;
+                this.plot.center[2].visible = true;
+                break;
+            default:
+                throw "Option not available";
+                break;
         }
-        else if (t == "Hue"){
-            values = source.data.hue
+    }
+
+    showScreenshotBorders(show){
+        if(show){
+            this.border_renderer.glyph.line_alpha=1.0;
+        }else{
+            this.border_renderer.glyph.line_alpha=0.0;
         }
-        else if (t == "A-Channel"){
-            values = source.data.a
+    }
+    showConnectingLine(show){
+        if(show){
+            this.lineRenderer.glyph.line_alpha = 1.0;
+        }else{
+            this.lineRenderer.glyph.line_alpha = 0.0;
         }
-        else if (t == "B-Channel"){
-            values = source.data.b
+    }
+
+    onResize() {
+        let elem = document.getElementById(this.divName)
+        if (elem.clientHeight*this.plot.aspect_ratio > elem.clientWidth) {
+            this.plot.sizing_mode = "scale_width"
+        } else {
+            this.plot.sizing_mode = "scale_height"
         }
-        else {
-            values = source.data.lum
-        }
-        this.plot.left[0].axis_label = t
-        source.data.y = values;
-        source.change.emit()
     }
 
 }

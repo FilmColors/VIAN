@@ -10,8 +10,7 @@ To make the change as easy as possible for you, **here** are the **most importan
 Perspectives
 ************
 Since VIAN is now also capable of segmenting a movie, a new perspective called **Segmentation** has been added.
-While Windows users can already customize their interface freely, this is not yet possible on OSX due to a bug in
-libVLC. Since most of the windows are only rarely used in a specific section of the Workflow,
+Since most of the windows are only rarely used in a specific section of the Workflow,
 many windows have been hidden, to increase the size of the player and the timeline.
 
 Remember that all Windows can be opened using the *Window/ Menu* on the very top.
@@ -82,10 +81,6 @@ The perspectives are now mapped as follows:
 
 Changing the Video-Source
 *************************
-Depending on the movie file you're currently using and on how fine-grained your work in the timeline has to be,
-VLC might not give a sufficient frame-update rate. (You may only see one or two frames of a given second when sliding
-thought the movie)
-
 To counter this problem, VIAN gives you the ability to ready every frame out of the movie.
 With 0.4.2, you now have the possibility to switch fast between those system by clicking on the **Video Source Field**,
 on the bottom-left corner of VIAN.

@@ -100,9 +100,6 @@
      <property name="title">
       <string>Recently Opened</string>
      </property>
-     <addaction name="actionClearRecent"/>
-     <addaction name="actionCleanUpRecent"/>
-     <addaction name="separator"/>
     </widget>
     <addaction name="actionNew"/>
     <addaction name="actionLoad"/>
@@ -156,7 +153,6 @@
       <string>Toolboxes</string>
      </property>
      <addaction name="actionAnnotation_Toolbox"/>
-     <addaction name="actionScreenshot_Toolbox"/>
     </widget>
     <widget class="QMenu" name="menuPerspectives">
      <property name="title">
@@ -227,6 +223,9 @@
      <addaction name="separator"/>
     </widget>
     <widget class="QMenu" name="menuAudio">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="title">
       <string>Audio</string>
      </property>
@@ -393,11 +392,6 @@
   <action name="actionAnnotation_Toolbox">
    <property name="text">
     <string>Annotation Toolbox</string>
-   </property>
-  </action>
-  <action name="actionScreenshot_Toolbox">
-   <property name="text">
-    <string>Screenshot Toolbox</string>
    </property>
   </action>
   <action name="actionOutliner">
@@ -614,11 +608,6 @@
   <action name="actionExportVocabulary">
    <property name="text">
     <string>VIAN Vocabulary</string>
-   </property>
-  </action>
-  <action name="actionClearRecent">
-   <property name="text">
-    <string>Clear List</string>
    </property>
   </action>
   <action name="actionZip_Project">
@@ -869,11 +858,6 @@
   <action name="actionAuto_Screenshots">
    <property name="text">
     <string>Auto Screenshots</string>
-   </property>
-  </action>
-  <action name="actionCleanUpRecent">
-   <property name="text">
-    <string>Clean Up</string>
    </property>
   </action>
   <action name="actionColorFeatures">

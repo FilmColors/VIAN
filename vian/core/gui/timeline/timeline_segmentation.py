@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot
 from vian.core.gui.timeline.timeline_base import TimelineControl, TimelineBar, TimebarSlice
 
 from vian.core.analysis.color.average_color import ColorFeatureAnalysis

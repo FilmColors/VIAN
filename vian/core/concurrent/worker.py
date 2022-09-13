@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QRunnable, QObject, Qt, QThread
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QRunnable, QObject, Qt, QThread
+from PyQt6.QtCore import pyqtSignal, pyqtSlot
 from random import randint
 import traceback, sys
 import cv2
@@ -35,11 +35,11 @@ class Worker(QRunnable):
         self.target_id = target_id
 
         self.signals = WorkerSignals()
-        self.signals.sign_progress.connect(main_window.worker_progress,Qt.AutoConnection)
-        self.signals.sign_error.connect(main_window.worker_error,Qt.AutoConnection)
-        self.signals.sign_finished.connect(main_window.worker_finished,Qt.AutoConnection)
+        self.signals.sign_progress.connect(main_window.worker_progress,Qt.ConnectionType.AutoConnection)
+        self.signals.sign_error.connect(main_window.worker_error,Qt.ConnectionType.AutoConnection)
+        self.signals.sign_finished.connect(main_window.worker_finished,Qt.ConnectionType.AutoConnection)
         if result_cb is not None:
-            self.signals.sign_result.connect(result_cb, Qt.AutoConnection)
+            self.signals.sign_result.connect(result_cb, Qt.ConnectionType.AutoConnection)
 
     @pyqtSlot()
     def run(self):
@@ -223,9 +223,9 @@ class AnalysisWorker(QObject):
         super(AnalysisWorker, self).__init__()
 
         self.signals = WorkerSignals()
-        self.signals.sign_progress.connect(worker_manager.on_signal_progress, Qt.AutoConnection)
-        self.signals.sign_error.connect(worker_manager.on_signal_error, Qt.AutoConnection)
-        self.signals.sign_result.connect(worker_manager.on_worker_finished, Qt.AutoConnection)
+        self.signals.sign_progress.connect(worker_manager.on_signal_progress, Qt.ConnectionType.AutoConnection)
+        self.signals.sign_error.connect(worker_manager.on_signal_error, Qt.ConnectionType.AutoConnection)
+        self.signals.sign_result.connect(worker_manager.on_worker_finished, Qt.ConnectionType.AutoConnection)
 
         self.scheduled_task = dict()
         self.finished_tasks = dict()

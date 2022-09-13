@@ -1,14 +1,14 @@
 import os
 
-from PyQt5 import uic
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt
-# from PyQt5.QtWebKitWidgets import QWebView
+from PyQt6 import uic
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import Qt
+# from PyQt6.QtWebKitWidgets import QWebView
 import sys
 # if sys.platform == "darwin":
-#     from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
+#     from PyQt6.QtWebEngineWidgets import QWebEngineView as QWebView
 # else:
-#     from PyQt5.QtWebKitWidgets import QWebView
+#     from PyQt6.QtWebKitWidgets import QWebView
 from vian.core.container.project import *
 from vian.core.gui.ewidgetbase import EDockWidget
 
@@ -74,7 +74,7 @@ class ImageResultWidget(ResultWidget):
             qpixmap = numpy_to_pixmap(numpy_img)
             self.pixm = self.scene.addPixmap(qpixmap)
             rect = self.pixm.sceneBoundingRect()
-            self.view.fitInView(rect, Qt.KeepAspectRatio)
+            self.view.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
         except:
             print("No Pixmap in Image Result Widget")
 
@@ -90,7 +90,7 @@ class ImageResultWidget(ResultWidget):
         super(ImageResultWidget, self).resizeEvent(QResizeEvent)
         if self.pixm is not None:
             rect = self.pixm.sceneBoundingRect()
-            self.view.fitInView(rect, Qt.KeepAspectRatio)
+            self.view.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
 
 class WebResultWidget(ResultWidget):
@@ -108,5 +108,5 @@ class WebResultWidget(ResultWidget):
     # def resizeEvent(self, QResizeEvent):
     #     super(WebResultWidget, self).resizeEvent(QResizeEvent)
     #     rect = self.pixm.sceneBoundingRect()
-    #     self.view.fitInView(rect, Qt.KeepAspectRatio)
+    #     self.view.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 

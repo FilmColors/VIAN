@@ -1,9 +1,9 @@
 import os
 
 import numpy as np
-from PyQt5 import QtWidgets, uic, QtCore, QtGui
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QPushButton
+from PyQt6 import QtWidgets, uic, QtCore, QtGui
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import QPushButton
 
 class ColorPaletteSelector(QtWidgets.QMainWindow):
     on_selection = pyqtSignal(list)
@@ -13,7 +13,7 @@ class ColorPaletteSelector(QtWidgets.QMainWindow):
         self.is_transparent = is_transparent
         self.color_selector = ColorSelector(self, settings)
         self.color_selector.on_selection.connect(self.on_color_selection)
-        self.setWindowFlags(Qt.Popup)
+        self.setWindowFlags(Qt.WindowType.Popup)
         self.setCentralWidget(self.color_selector)
         self.show()
 

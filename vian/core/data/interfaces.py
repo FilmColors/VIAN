@@ -6,9 +6,9 @@ from typing import List, Union, Dict, Tuple
 import numpy as np
 from random import randint
 from collections import namedtuple
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
-from PyQt5.QtGui import QColor
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal
+from PyQt6.QtGui import QColor
 from vian.core.data.enums import DataSerialization
 from scipy.signal import savgol_filter, resample
 from vian.core.data.log import log_debug, log_info, log_error
@@ -248,7 +248,7 @@ class IAnalysisJob(QObject):
                     end=ms_to_frames(t.get_end(), fps),
                     movie_path=project.movie_descriptor.movie_path,
                     target=t.get_id(),
-                    margins=project.movie_descriptor.get_letterbox_rect(),
+                    margins=project.movie_descriptor.get_letterbox_rect(as_coords=True),
                     semseg=semseg
                 ))
         return targets, args

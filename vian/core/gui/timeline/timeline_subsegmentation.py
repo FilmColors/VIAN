@@ -1,8 +1,8 @@
-from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal, QPoint, QPointF, QRect, QRectF, Qt
-from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QSpacerItem
-from PyQt5.QtGui import QLinearGradient, QColor, QGradient, QPixmap
+from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QPoint, QPointF, QRect, QRectF, Qt
+from PyQt6.QtWidgets import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QSpacerItem
+from PyQt6.QtGui import QLinearGradient, QColor, QGradient, QPixmap
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt6 import QtGui, QtWidgets, QtCore
 
 from .timeline_base import TimelineControl, TimebarSlice, TimelineBar
 from vian.core.container.project import Segmentation, UniqueKeyword, Segment, AnnotationBody
@@ -80,9 +80,9 @@ class TimelineControlParent(QWidget):
 
         self.lbl_title = QLabel(self.name, self)
         self.lbl_title.setStyleSheet("QWidget{background:transparent; }")
-        self.lbl_title.setAlignment(Qt.AlignLeft)
-        self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.expander = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+        self.lbl_title.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
+        self.expander = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
 
         self.vbox.addWidget(self.lbl_title)
         self.vbox.addItem(self.expander)
@@ -163,9 +163,9 @@ class TimelineSubSegmentationControl(QWidget):
         self.layout().addItem(self.vbox)
         self.lbl_title = QLabel(self.name, self)
         self.lbl_title.setStyleSheet("QWidget{background:transparent; }")
-        self.lbl_title.setAlignment(Qt.AlignLeft)
-        self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.expand = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+        self.lbl_title.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.lbl_title.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
+        self.expand = QSpacerItem(1, 1, QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
         self.vbox.addWidget(self.lbl_title)
         self.vbox.addItem(self.expand)
 
@@ -247,7 +247,7 @@ class TimelineSubSegmentationControl(QWidget):
         super(TimelineSubSegmentationControl, self).leaveEvent(a0)
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.button() == Qt.LeftButton:
+        if QMouseEvent.button() == Qt.MouseButton.LeftButton:
             if QMouseEvent.pos().y() > self.height() - 15 and self.is_expanded:
                 self.is_resizing = True
                 self.resize_offset = self.height() - QMouseEvent.pos().y()
@@ -261,7 +261,7 @@ class TimelineSubSegmentationControl(QWidget):
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255, 50))
         pen.setWidth(1)
         qp.setPen(pen)
@@ -273,7 +273,7 @@ class TimelineSubSegmentationControl(QWidget):
         gradient.setColorAt(0.0, QColor(50, 50, 50))
         gradient.setColorAt(0.5, QColor(65, 65, 65))
         gradient.setColorAt(1.0, QColor(50, 50, 50))
-        gradient.setSpread(QGradient.PadSpread)
+        gradient.setSpread(QGradient.Spread.PadSpread)
         qp.fillRect(QtCore.QRect(self.indent, 0, self.width(), self.height()), gradient)
 
         if self.is_expanded:
@@ -283,7 +283,7 @@ class TimelineSubSegmentationControl(QWidget):
                 if s.strip == self.highlighted_entry:
                     r = QtCore.QRect(self.indent, y, self.width(),  self.sub.strip_height)
                     qp.fillRect(r,  QColor(120,120,120,120))
-                qp.drawText(text_rect, Qt.AlignRight | Qt.AlignVCenter, s.name)
+                qp.drawText(text_rect, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, s.name)
                 y += self.sub.strip_height
 
         pen.setColor(QtGui.QColor(54, 146, 182, 200))
@@ -423,7 +423,7 @@ class TimelineSubSegmentationBar(QWidget):
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(20, 20, 20, 50))
         pen.setWidth(1)
         qp.setPen(pen)
@@ -501,7 +501,7 @@ class TimebarSubSegmentationSlice(QWidget):
 
     def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
         super(TimebarSubSegmentationSlice, self).mousePressEvent(a0)
-        if a0.button() == Qt.LeftButton:
+        if a0.button() == Qt.MouseButton.LeftButton:
             self.is_active = not self.is_active
             self.onClicked.emit(self.is_active, self)
             self.bar.set_selecting(self.is_active)
@@ -518,7 +518,7 @@ class TimebarSubSegmentationSlice(QWidget):
 
     def mouseMoveEvent(self, a0: QtGui.QMouseEvent) -> None:
         super(TimebarSubSegmentationSlice, self).mouseMoveEvent(a0)
-        if a0.button() == Qt.LeftButton and not self.already_changed:
+        if a0.button() == Qt.MouseButton.LeftButton and not self.already_changed:
             self.is_active = not self.is_active
             self.onClicked.emit(self.is_active, self)
             self.already_changed = True
@@ -543,7 +543,7 @@ class TimebarSubSegmentationSlice(QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255))
         pen.setWidth(2)
         qp.setPen(pen)
@@ -553,7 +553,7 @@ class TimebarSubSegmentationSlice(QWidget):
         gradient.setColorAt(0.0, QColor(col[0] - 20, col[1] - 20, col[2] - 20, col[3] - 20))
         gradient.setColorAt(0.5, QColor(col[0], col[1], col[2], col[3]))
         gradient.setColorAt(1.0, QColor(col[0] - 20, col[1] - 20, col[2] - 20, col[3]  - 20))
-        gradient.setSpread(QGradient.PadSpread)
+        gradient.setSpread(QGradient.Spread.PadSpread)
 
         pen.setColor(QColor(col[0], col[1], col[2], 150))
         qp.setPen(pen)

@@ -10,7 +10,7 @@ import numpy as np
 from vian.core.misc.ffmpeg_executor import ffmpeg_convert
 from moviepy.editor import *
 from typing import List, Tuple
-from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal
 from vian.core.data.interfaces import TimelineDataset
 from vian.core.data.log import log_error, log_info, log_warning, log_debug
 from vian.core.container.project import VIANProject
@@ -125,22 +125,24 @@ class AudioHandler(QObject):
             return
 
         with HDF5_FILE_LOCK:
-            bitrate = 3.0
-
-            self._read(self.project.movie_descriptor.get_movie_path())
-            for i, s in enumerate(segments):
-                clip = self._videoclip.subclip(s[0] / 1000, s[1] / 1000)
-                name = os.path.join(directory, s[2] + ".mp4")
-                if sys.platform == "darwin":
-                    clip.write_videofile(name,
-                                         codec='libx264',
-                                         audio_codec='aac',
-                                         bitrate=str(bitrate * 10 ** 6))
-                else:
-                    clip.write_videofile(name,
-                                         codec="libx264",
-                                         bitrate=str(bitrate * 10 ** 6))
-                clip.close()
-                if callback is not None:
-                    callback(i / len(segments))
+            try:
+                bitrate = 3.0
+                self._read(self.project.movie_descriptor.get_movie_path())
+                for i, s in enumerate(segments):
+                    clip = self._videoclip.subclip(s[0] / 1000, s[1] / 1000)
+                    name = os.path.join(directory, s[2] + ".mp4")
+                    if sys.platform == "darwin":
+                        clip.write_videofile(name,
+                                             codec='libx264',
+                                             audio_codec='aac',
+                                             bitrate=str(bitrate * 10 ** 6))
+                    else:
+                        clip.write_videofile(name,
+                                             codec="libx264",
+                                             bitrate=str(bitrate * 10 ** 6))
+                    clip.close()
+                    if callback is not None:
+                        callback(i / len(segments))
+            except Exception as e:
+                log_error(e)
             self._videoclip.close()

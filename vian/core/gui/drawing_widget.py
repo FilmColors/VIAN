@@ -2,10 +2,10 @@ import os
 
 import cv2
 import numpy as np
-from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QFileDialog, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFontDialog, QSizePolicy, QTabWidget, QSlider
-from PyQt5.QtGui import QFont
+from PyQt6 import QtCore, QtGui, uic, QtWidgets
+from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt6.QtWidgets import QFileDialog, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFontDialog, QSizePolicy, QTabWidget, QSlider
+from PyQt6.QtGui import QFont
 
 from vian.core.data.computation import create_icon, parse_file_path, tuple2point, get_mouse_handle_by_location
 from vian.core.container.svg_annotation import SVGAnnotation, AnnotationLayer, ANNOTATION, AnnotationType
@@ -94,7 +94,7 @@ class AnnotationOptionsDock(EDockWidget, IProjectChangeNotify):
         self.lwidget = QTabWidget()
         self.setWidget(self.lwidget)
         self.color_picker = HSVColorPicker(self)
-        self.color_picker.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.color_picker.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         self.font_picker = QFontDialog(self)
 
@@ -102,7 +102,7 @@ class AnnotationOptionsDock(EDockWidget, IProjectChangeNotify):
         self.width_widget.setLayout(QHBoxLayout())
         self.width_widget.layout().addWidget(QLabel("Width:"))
         self.lbl_width = QLabel("0")
-        self.width_slider = QSlider(Qt.Horizontal)
+        self.width_slider = QSlider(Qt.Orientation.Horizontal)
         self.width_slider.setRange(1, 100)
         self.width_widget.layout().addWidget(self.width_slider)
         self.width_widget.layout().addWidget(self.lbl_width)
@@ -462,8 +462,8 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         w = final_w
         h = final_h
 
-        qimage = QtGui.QImage(QtCore.QSize(final_w, final_h), QtGui.QImage.Format_ARGB32_Premultiplied)
-        qimage.fill(QtCore.Qt.transparent)
+        qimage = QtGui.QImage(QtCore.QSize(final_w, final_h), QtGui.QImage.Format.Format_ARGB32_Premultiplied)
+        qimage.fill(QtCore.Qt.GlobalColor.transparent)
         qp = QtGui.QPainter(qimage)
 
         for a in self.project.current_annotation_layer.annotations:
@@ -484,11 +484,11 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         return qimage, frame
 
     def initUI(self):
-        self.setWindowFlags(Qt.Tool|Qt.CustomizeWindowHint|Qt.FramelessWindowHint|Qt.NoDropShadowWindowHint)#|Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.WindowType.Tool|Qt.WindowType.CustomizeWindowHint|Qt.WindowType.FramelessWindowHint|Qt.WindowType.NoDropShadowWindowHint)#|Qt.WindowStaysOnTopHint)
         self.setStyleSheet("background: transparent;")
-        self.setAttribute(Qt.WA_NoSystemBackground, True)
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.setAttribute(Qt.WA_MacNoShadow)
+        self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+        #self.setAttribute(Qt.WidgetAttribute.WA_MacNoShadow)
 
     def update_annotation_widgets(self):
         if self.project.current_annotation_layer is None:
@@ -562,7 +562,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
             # self.synchronize_transforms()
 
     def set_input_transparent(self, transparent):
-        self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents,transparent)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents,transparent)
 
     def paintEvent(self, e):
         if not self.main_window.player.is_playing():
@@ -660,28 +660,28 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
                     m.widget.hide()
 
     def drawLines(self, qp):
-        pen = QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.SolidLine)
+        pen = QtGui.QPen(QtCore.Qt.GlobalColor.black, 2, QtCore.Qt.PenStyle.SolidLine)
 
         qp.setPen(pen)
         qp.drawLine(20, 40, 250, 40)
 
-        pen.setStyle(QtCore.Qt.DashLine)
+        pen.setStyle(QtCore.Qt.PenStyle.PenStyle.DashLine)
         qp.setPen(pen)
         qp.drawLine(20, 80, 250, 80)
 
-        pen.setStyle(QtCore.Qt.DashDotLine)
+        pen.setStyle(QtCore.Qt.PenStyle.DashDotLine)
         qp.setPen(pen)
         qp.drawLine(20, 120, 250, 120)
 
-        pen.setStyle(QtCore.Qt.DotLine)
+        pen.setStyle(QtCore.Qt.PenStyle.DotLine)
         qp.setPen(pen)
         qp.drawLine(20, 160, 250, 160)
 
-        pen.setStyle(QtCore.Qt.DashDotDotLine)
+        pen.setStyle(QtCore.Qt.PenStyle.DashDotDotLine)
         qp.setPen(pen)
         qp.drawLine(20, 200, 250, 200)
 
-        pen.setStyle(QtCore.Qt.CustomDashLine)
+        pen.setStyle(QtCore.Qt.PenStyle.CustomDashLine)
         pen.setDashPattern([1, 4, 5, 4])
         qp.setPen(pen)
         qp.drawLine(20, 240, 250, 240)
@@ -695,13 +695,13 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
         self.abort_freehand_drawing()
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Shift:
+        if event.key() == Qt.Key.Key_Shift:
             self.multi_selection = True
 
         self.main_window.keyPressEvent(event)
 
     def keyReleaseEvent(self, event):
-        if event.key() == Qt.Key_Shift:
+        if event.key() == Qt.Key.Key_Shift:
             self.multi_selection = False
 
     @pyqtSlot(int)
@@ -710,7 +710,7 @@ class DrawingOverlay(QtWidgets.QMainWindow, IProjectChangeNotify, ITimeStepDepen
 
     @pyqtSlot(object)
     def assign_opencv_image(self, qpixmap):
-        self.opencv_pixmap = qpixmap.scaled(self.size(), Qt.KeepAspectRatio)
+        self.opencv_pixmap = qpixmap.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio)
         self.update()
     
     def hideEvent(self, a0: QtGui.QHideEvent):
@@ -774,8 +774,8 @@ class DrawingBase(QtWidgets.QWidget):
 
         qp.begin(self)
 
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
         pen.setColor(self.curr_col)
         pen.setWidth(self.curr_line_thickness)
         qp.setPen(pen)
@@ -799,8 +799,8 @@ class DrawingBase(QtWidgets.QWidget):
     def renderDrawing(self,qp, offset, size, scale = 1.0):
 
         pen = QtGui.QPen()
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
         pen.setColor(self.curr_col)
         pen.setWidth(self.curr_line_thickness * scale)
         qp.setPen(pen)
@@ -822,10 +822,10 @@ class DrawingBase(QtWidgets.QWidget):
             pen = QtGui.QPen()
 
             qp.begin(self)
-            qp.setRenderHint(QtGui.QPainter.Antialiasing)
+            qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
             pen.setColor(QtGui.QColor(200,200,200))
             pen.setWidth(2)
-            pen.setStyle(QtCore.Qt.DashDotDotLine)
+            pen.setStyle(QtCore.Qt.PenStyle.DashDotDotLine)
             pen.setJoinStyle(Qt.BevelJoin)
             pen.setCapStyle(Qt.RoundCap)
             qp.setPen(pen)
@@ -910,10 +910,10 @@ class DrawingBase(QtWidgets.QWidget):
             pen = QtGui.QPen()
 
             qp.begin(self)
-            qp.setRenderHint(QtGui.QPainter.Antialiasing)
+            qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
             pen.setColor(QtGui.QColor(200, 200, 200))
             pen.setWidth(2)
-            pen.setStyle(QtCore.Qt.DashDotDotLine)
+            pen.setStyle(QtCore.Qt.PenStyle.DashDotDotLine)
             pen.setJoinStyle(Qt.BevelJoin)
             pen.setCapStyle(Qt.RoundCap)
             qp.setPen(pen)
@@ -973,7 +973,7 @@ class DrawingBase(QtWidgets.QWidget):
 
     def mousePressEvent(self, QMouseEvent):
         if self.is_active and not self.overlay.main_window.player.is_playing():
-            if QMouseEvent.button() == Qt.LeftButton:
+            if QMouseEvent.button() == Qt.MouseButton.LeftButton:
                 self.curr_loc = self.pos() / self.scale
                 self.offset = QMouseEvent.pos()
                 self.curr_size = self.size().width(), self.size().height()
@@ -982,7 +982,7 @@ class DrawingBase(QtWidgets.QWidget):
                 self.select()
                 self.executed_handle = self.current_handle
                 return
-            if QMouseEvent.button() == Qt.RightButton:
+            if QMouseEvent.button() == Qt.MouseButton.RightButton:
                 open_context_menu(self.overlay.main_window, self.mapToGlobal(QMouseEvent.pos()), [self.annotation_object], self.overlay.project)
 
     def select(self, dispatch = True):
@@ -1002,7 +1002,7 @@ class DrawingBase(QtWidgets.QWidget):
             return
 
         self.current_handle = get_mouse_handle_by_location(QMouseEvent.pos(), self.rect(),0.2,0.2)
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             if self.executed_handle == "Center":
                 pos = (QMouseEvent.pos() - self.offset)
                 target = self.mapToParent(pos) / self.scale
@@ -1128,7 +1128,7 @@ class DrawingBase(QtWidgets.QWidget):
                 self.scale_widget()
                 return
 
-        if QMouseEvent.buttons() & Qt.RightButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.RightButton:
             delta = self.mapToParent(QMouseEvent.pos() - self.offset) / self.scale
             x = delta.x() - self.pos().x() / self.scale + self.curr_size[0] / self.scale
             y = delta.y() - self.pos().y() / self.scale + self.curr_size[1] / self.scale
@@ -1259,7 +1259,7 @@ class DrawingFreeHand(DrawingBase):
         if not self.is_drawing:
             super(DrawingFreeHand, self).mousePressEvent(QMouseEvent)
         else:
-            if QMouseEvent.button() == Qt.LeftButton:
+            if QMouseEvent.button() == Qt.MouseButton.LeftButton:
                 self.current_line_width = self.overlay.current_line_thickness
                 self.current_color = self.overlay.current_color
                 self.pen_location = QMouseEvent.pos()
@@ -1352,9 +1352,9 @@ class DrawingEditorWidget(QtWidgets.QMainWindow):
         path = os.path.abspath("qt_ui/DrawingEditorWidget.ui")
         uic.loadUi(path, self)
         self.drawing = drawing
-        self.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.FramelessWindowHint|Qt.Popup)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint|Qt.WindowType.FramelessWindowHint|Qt.WindowType.Popup)
 
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         x = drawing.width()/2
         y = drawing.height()
         if drawing.pos().x() > drawing.parent().width()/2:
@@ -1386,9 +1386,8 @@ class DrawingEditorWidget(QtWidgets.QMainWindow):
         self.fontComboBox.setCurrentFont(QFont(self.drawing.annotation_object.font))
         self.fontComboBox.currentFontChanged.connect(self.on_font_changed)
 
-        self.setAttribute(Qt.WA_MacNoClickThrough, True)
         self.show()
-        self.setFocus(Qt.MouseFocusReason)
+        self.setFocus(Qt.FocusReason.MouseFocusReason)
 
     def on_text_change(self):
         text = self.textEdit.toPlainText()
@@ -1419,8 +1418,8 @@ class DrawingEditorWidget(QtWidgets.QMainWindow):
 
         qp.begin(self)
 
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
-        qp.setRenderHint(QtGui.QPainter.TextAntialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.TextAntialiasing)
         pen.setColor(QtGui.QColor(80,80,80,100))
         qp.setPen(pen)
 

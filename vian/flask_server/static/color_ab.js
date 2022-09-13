@@ -2,159 +2,167 @@
 class ColorAB {
     constructor(divName) {
         this.divName = divName;
-        this.grid_col = "rgb(255,255,255)"
-        this.background = "rgb(17,17,17)"
 
         this.selectionCallback = null;
-
-        this.grid_renderer = []
 
         this.source = new Bokeh.ColumnDataSource({
             data: { x: [], y: [], image: [], uuids: [] }
         });
 
         this.source_grid = new Bokeh.ColumnDataSource({
-            data: { x: [], y: [], radius: [] }
+            data: { x: [], y: [], radius: [], radius_label: [] }
         });
 
         var that = this;
         this.source.selected.change.connect(function (a, selection) {
             that.onSelectionChanged(that.source, selection);
         })
-        console.log(this.source)
+
+        new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(divName));
 
         this.plot = Bokeh.Plotting.figure({
-            title: 'Color CIE-Lab (AB - Plane)',
-            tools: "lasso_select, pan,wheel_zoom,box_zoom,reset,save",
-            height: 300,
-            width: 300,
+            tools: "pan,wheel_zoom,box_zoom,reset",
+            aspect_ratio: 1,
             x_axis_label: "A-Channel",
             y_axis_label: "B-Channel",
-            match_aspect:true, 
+            match_aspect: true,
+            x_range: new Bokeh.Range1d({ start: -50, end: 50 }),
+            y_range: new Bokeh.Range1d({ start: -50, end: 50 }),
+            outline_line_alpha: 0.0,
         });
 
         this.plot.center[0].grid_line_alpha = 0.0
         this.plot.center[1].grid_line_alpha = 0.0
 
-        this.plot.background_fill_color = this.background
-        this.plot.background_fill_alpha = 0.0
-        this.plot.border_fill_alpha = 0.0
-        this.plot.sizing_mode = "scale_both"
+        this.plot.xaxis[0].major_tick_line_alpha = 0.0;
+        this.plot.xaxis[0].minor_tick_line_alpha = 0.0;
+        this.plot.xaxis[0].major_label_text_alpha = 0.0;
+        this.plot.yaxis[0].major_tick_line_alpha = 0.0;
+        this.plot.yaxis[0].minor_tick_line_alpha = 0.0;
+        this.plot.yaxis[0].major_label_text_alpha = 0.0;
+
         this.aspect = 9.0 / 16
 
-        this.plot.circle({
-            x: { field: 'x' },
-            y: { field: 'y' },
-            fill_alpha: 0.0,
-            line_alpha: 0.0,
-            source: this.source
-        })
-
-        var r = this.plot.image_url({
-            url: { field: "image" }, x: { field: "x" }, y: { field: "y" },
-            w: 40,
-            h: 40 * this.aspect,
-            anchor: "center",
-            // global_alpha: 0.2,
-            source: this.source
-        });
-        r.glyph.h.units = "screen"
-        r.glyph.w.units = "screen"
-
-        // this.plot.add_tools(Bokeh.LassoSelectTool({callback:function(){console.log("Hello World")}}))
-
-        this.q = 20
-
-        for (var i = 0; i < 10; i++) {
-            this.source_grid.data.x.push(0);
-            this.source_grid.data.y.push(0);
-            this.source_grid.data.radius.push(i * this.q);
-        }
-
-        this.plot.circle({
+        this.grid_renderer = this.plot.circle({
             x: { field: "x" },
             y: { field: "y" },
             radius: { field: "radius" },
             fill_alpha: 0,
-            line_color: this.grid_col,
-            line_alpha: 0.1,
+            line_alpha: 0.6,
             line_width: 1.0,
-            source: this.source_grid
+            source: this.source_grid,
         })
+
+        this.grid_renderer.level = "image";
+        this.labels = new Bokeh.LabelSet({
+            x: { field: "radius" },
+            y: { field: "y" },
+            text:{ field: "radius_label" },
+            x_offset:0,
+            y_offset:-6,
+            text_align: "center",
+            text_font_size: "12px",
+            source: this.source_grid,
+            render_mode:'canvas',
+            background_fill_alpha: 1.0,
+        });
+        this.plot.add_layout(this.labels, "center");
+        this.plot.center[2].level = "underlay";
+
+
+        this.border_renderer = this.plot.rect({
+            x: { field: "x" },
+            y: { field: "y" },
+            fill_color: "transparent",
+            line_width: 2,
+            source:this.source,
+        });
+
+        this.glyph_renderer = this.plot.image_url({
+            url: { field: "image" },
+            x: { field: "x" },
+            y: { field: "y" },
+            anchor: "center",
+            source: this.source,
+        });
 
         var doc = new Bokeh.Document();
         doc.add_root(this.plot);
-        console.log(this.plot)
         Bokeh.embed.add_document_standalone(doc, document.getElementById(divName));
         this.source.change.emit()
     }
 
-    setBackgroundColor(r, g, b) {
-        let col = "rgb(" + r + "," + g + "," + b + ")";
-        let line = "rgb(255,255,255)";
-        if (r + g + b > 300) {
-            line = "rgb(0,0,0)"
-        }
-        this.grid_renderer.forEach(function (elem) {
-            elem.glyph.line_color = line;
-        });
+    setBackgroundColor(back, front) {
+        let col = "rgb(" + back + "," + back + "," + back + ")";
+        let line = "rgb(" + front + "," + front + "," + front + ")";
+
+        this.grid_renderer.glyph.line_color = line;
+        this.border_renderer.glyph.line_color = line;
         this.plot.background_fill_color = col;
-        this.plot.background_fill_color = col;
-        if (r < 100) {
-            this.plot.background_fill_alpha = 0.0;
-            this.plot.border_fill_alpha = 0.0;
-        } else {
-            this.plot.background_fill_alpha = 1.0;
-            this.plot.border_fill_alpha = 1.0;
-        }
-        console.log(this.plot.background_fill_alpha, this.plot.background_fill_color)
+        this.plot.border_fill_color = col;
+
+        this.plot.xaxis[0].axis_label_text_color = line;
+        this.plot.xaxis[0].axis_line_color = col;
+
+        this.plot.yaxis[0].axis_label_text_color = line;
+        this.plot.yaxis[0].axis_line_color = col;
+
+        this.labels.background_fill_color = col;
+        this.labels.text_color = line;
+    }
+
+    setImageSize(s){
+        this.glyph_renderer.glyph.h = s * this.aspect;
+        this.glyph_renderer.glyph.w = s;
+        this.glyph_renderer.glyph.h.units = "screen";
+        this.glyph_renderer.glyph.w.units = "screen";
+
+        this.border_renderer.glyph.height = s * this.aspect;
+        this.border_renderer.glyph.width = s;
+        this.border_renderer.glyph.height.units = "screen";
+        this.border_renderer.glyph.width.units = "screen";
+
+        this.source.change.emit();
+    }
+    setCircleInterval(s){
+        this.interval = s;
+
+        this.update_grid(this.interval);
     }
 
     setData(a, b, urls, uuids) {
-       
-
         this.source.data.x = a;
         this.source.data.y = b;
         this.source.data.image = urls;
         this.source.data.uuids = uuids;
 
-        if (a.length > 0){
-            this.ab_max = Math.max(Math.abs(Math.min(Math.min(...a), Math.min(...b))), Math.max(Math.max(...a), Math.max(...b)))
-            this.update_grid(this.ab_max)
-        }
-
-
         this.source.change.emit();
     }
 
-    update_grid(max){
+    update_grid(interval){
         this.source_grid.data.x = [];
         this.source_grid.data.y = [];
         this.source_grid.data.radius = [];
-        
-        let step = Math.ceil(max / 20)
-        let grid_max = step * 20
-        if (grid_max > 100){
-            let step = 20
-        }else if (grid_max > 50){
-            let step = 10
-        }else{
-            let step = 5
-        }
+        this.source_grid.data.radius_label = [];
 
-        let n_steps = grid_max / step + 1
-
-        for (var i = 0; i < n_steps; i++) {
+        //in Lab color space, the ranges for a and b values are [-110, 110]
+        for (var i = parseFloat(interval); i <= 110; i = i + parseFloat(interval)) {
             this.source_grid.data.x.push(0);
             this.source_grid.data.y.push(0);
-            this.source_grid.data.radius.push(i * step);
+            this.source_grid.data.radius.push(i);
+            this.source_grid.data.radius_label.push(i.toString());
         }
-
-        
         this.source_grid.change.emit();
-
-        // this.plot.reset.emit()
     }
+
+    showScreenshotBorders(show){
+        if(show){
+            this.border_renderer.glyph.line_alpha=1.0;
+        }else{
+            this.border_renderer.glyph.line_alpha=0.0;
+        }
+    }
+
     poll(pollTime) {
         var that = this;
         this.source.change.emit();
@@ -195,4 +203,15 @@ class ColorAB {
 
         }
     }
+
+    onResize(){
+        let elem = document.getElementById(this.divName)
+        if (elem.clientHeight > elem.clientWidth){
+            this.plot.sizing_mode = "scale_width"
+        }else{
+            this.plot.sizing_mode = "scale_height"
+    }
+}
+
+
 }

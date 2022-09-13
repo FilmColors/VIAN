@@ -1,8 +1,8 @@
 import numpy as np
 from collections import namedtuple
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 from functools import partial
 
 from vian.core.visualization.basic_vis import IVIANVisualization, MatrixPlot
@@ -74,7 +74,7 @@ class CorrelationBarplot(BarPlot):
     def __init__(self, parent, naming_fields=None):
         super(CorrelationBarplot, self).__init__(parent, naming_fields=naming_fields)
         self.naming_fields['plot_name'] = "correlation_bar_plot"
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
         self.setBackgroundBrush(QColor(30, 30, 30))
@@ -119,7 +119,7 @@ class CorrelationMatrix(MatrixPlot, IVIANVisualization):
     def __init__(self, parent, title ="", naming_fields=None):
         super(CorrelationMatrix, self).__init__(parent, naming_fields=naming_fields)
         self.naming_fields['plot_name'] = "correlation_matrix_plot"
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
         self.setBackgroundBrush(QColor(30, 30, 30))
@@ -132,7 +132,7 @@ class CorrelationMatrix(MatrixPlot, IVIANVisualization):
         rect = self.scene().itemsBoundingRect()
         rect.adjust(-50, -50, 100, 100)
         self.scene().setSceneRect(rect)
-        self.fitInView(rect, Qt.KeepAspectRatio)
+        self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def set_data(self, features:List[CorrelationFeatureTuple], correlation_matrix):
         if correlation_matrix.shape[0] == 0:
@@ -201,7 +201,7 @@ class FeatureMatrixParamWidget(QWidget):
         self.setLayout(QVBoxLayout())
         self.param_list = QTreeWidget(self)
         self.layout().addWidget(self.param_list)
-        self.sl_x_scale = QSlider(Qt.Horizontal, self)
+        self.sl_x_scale = QSlider(Qt.Orientation.Horizontal, self)
         self.sl_x_scale.setRange(1, 100)
         self.sl_x_scale.setValue(10)
         self.hb_x_scale = QHBoxLayout(self)
@@ -209,7 +209,7 @@ class FeatureMatrixParamWidget(QWidget):
         self.hb_x_scale.addWidget(self.sl_x_scale)
         self.sl_x_scale.valueChanged.connect(self.on_slider_x_scale)
 
-        self.sl_img_scale = QSlider(Qt.Horizontal, self)
+        self.sl_img_scale = QSlider(Qt.Orientation.Horizontal, self)
         self.sl_img_scale.setRange(1, 100)
         self.sl_img_scale.setValue(10)
         self.hb_img_scale = QHBoxLayout(self)
@@ -244,7 +244,7 @@ class FeatureMatrixParamWidget(QWidget):
                 curr_class_itm.addChild(curr_voc_itm)
 
             itm = QTreeWidgetItem([f.name])
-            itm.setCheckState(0, Qt.Unchecked)
+            itm.setCheckState(0, Qt.CheckState.Unchecked)
 
             curr_voc_itm.addChild(itm)
             self.features.append((itm, f))
@@ -260,6 +260,6 @@ class FeatureMatrixParamWidget(QWidget):
     def on_clicked(self):
         result = []
         for f in self.features:
-            if f[0].checkState(0) == Qt.Checked:
+            if f[0].checkState(0) == Qt.CheckState.Checked:
                 result.append(f[1])
         self.onFeatureActivated.emit(result)

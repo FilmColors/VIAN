@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 import os
 
-from PyQt5.QtCore import QObject
+from PyQt6.QtCore import QObject
 
 from vian.core.data.enums import *
 from vian.core.data.log import log_info, log_warning, log_error, log_debug

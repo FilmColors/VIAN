@@ -1,15 +1,14 @@
-from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt6 import QtWidgets, QtGui
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
 
-from vian.core.data.interfaces import TimelineDataset
 from vian.core.container.project import *
 from vian.core.container.container_interfaces import ILockable
 from vian.core.gui.context_menu import open_context_menu
 from vian.core.gui.annotation_editor import AnnotationEditorPopup
 from vian.core.gui.vocabulary_selector import VocabularySelectorDialog
-
+from vian.core.data.interfaces import TimelineDataset
 
 
 class TimelineControl(QtWidgets.QWidget):
@@ -22,8 +21,6 @@ class TimelineControl(QtWidgets.QWidget):
         self.timeline =  timeline
         self.item = item
 
-        self.h_exp = 300
-        self.h_col = 100
         self.name = name
         self.groups = []
 
@@ -40,22 +37,33 @@ class TimelineControl(QtWidgets.QWidget):
         self.resize_offset = 0
         self.show()
         self.group_height = self.timeline.group_height
+        self.resize(parent.width(), self.group_height)
+        self.mainLayout = QVBoxLayout(self)
+        self.mainLayout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
 
-        self.setLayout(QGridLayout(self))
-        self.layout().setSpacing(2)
-        self.lbl_title = QLabel(self)
-        self.lbl_title.setStyleSheet("QWidget{background:transparent; margin:0pt;}")
-        self.lbl_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.layout().addWidget(self.lbl_title,0, 1, 1, 3)
+
+        self.pin_and_title = QHBoxLayout()
 
         self.btn_pin = QPushButton(create_icon("qt_ui/icons/icon_pin.png"), "", self)
-        self.btn_pin.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.btn_pin.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.btn_pin.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
-        self.layout().addWidget(self.btn_pin, 0, 0)
-
         self.btn_pin.clicked.connect(self.toggle_pin)
+        self.pin_and_title.addWidget(self.btn_pin)
 
-        self.expand = QSpacerItem(1,1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+        self.lbl_title = QLabel(self)
+        self.lbl_title.setStyleSheet("QWidget{background:transparent; margin:0pt;}")
+        self.lbl_title.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.pin_and_title.addWidget(self.lbl_title)
+
+        self.mainLayout.addLayout(self.pin_and_title)
+
+        self.lock_classification_vocb = QHBoxLayout()
+        self.mainLayout.addLayout(self.lock_classification_vocb)
+
+
+        self.setLayout(self.mainLayout)
+
+        self.expand = QSpacerItem(1,1, QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Expanding)
 
         self.bottom_line = None
         self.btn_lock = None
@@ -65,13 +73,6 @@ class TimelineControl(QtWidgets.QWidget):
         self.set_name()
         self._add_spacer()
 
-        h = 4 * QtWidgets.QDesktopWidget().fontMetrics().height()
-
-        if self.item.strip_height == -1:
-            self.resize(self.width(), h )
-        else:
-            self.resize(self.width(),h)# self.item.strip_height)
-
         if not isinstance(self.item, TimelineDataset):
             self.item.onSelectedChanged.connect(self.on_selected_changed)
 
@@ -79,8 +80,8 @@ class TimelineControl(QtWidgets.QWidget):
         if isinstance(self.item, ILockable):
             self.btn_lock = QPushButton(create_icon("qt_ui/icons/icon_locked2.png"), "", self)
             self.btn_lock.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
-            self.btn_lock.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-            self.layout().addWidget(self.btn_lock,1,0,1,1)
+            self.btn_lock.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+            self.lock_classification_vocb.addWidget(self.btn_lock)
 
             if self.item.is_locked():
                 self.btn_lock.setIcon(create_icon("qt_ui/icons/icon_locked2.png"))
@@ -92,17 +93,17 @@ class TimelineControl(QtWidgets.QWidget):
         if isinstance(self.item, Segmentation):
             self.btn_classification = QPushButton(create_icon("qt_ui/icons/icon_classification"), "", self)
             self.btn_classification.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
-            self.btn_classification.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-            self.layout().addWidget(self.btn_classification,1,1,1,1)
+            self.btn_classification.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+            self.lock_classification_vocb.addWidget(self.btn_classification)
             self.btn_classification.clicked.connect(self.toggle_classification)
 
             self.btn_vocabulary = QPushButton(create_icon("qt_ui/icons/icon_vocabulary"), "", self)
             self.btn_vocabulary.setStyleSheet("QWidget{background:transparent; border-radius:5px;}")
-            self.btn_vocabulary.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-            self.layout().addWidget(self.btn_vocabulary, 1, 3, 1, 1)
+            self.btn_vocabulary.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+            self.lock_classification_vocb.addWidget(self.btn_vocabulary)
             self.btn_vocabulary.clicked.connect(self.show_vocabulary_setup)
 
-        self.layout().addItem(self.expand,2,0)
+        self.mainLayout.addItem(self.expand)
 
     def toggle_pin(self):
         self.is_pinned = not self.is_pinned
@@ -195,7 +196,7 @@ class TimelineControl(QtWidgets.QWidget):
         super(TimelineControl, self).leaveEvent(a0)
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.button() == Qt.LeftButton:
+        if QMouseEvent.button() == Qt.MouseButton.LeftButton:
             if QMouseEvent.pos().y() > self.height() - 15:
                 self.is_resizing = True
                 self.resize_offset = self.height() - QMouseEvent.pos().y()
@@ -204,7 +205,7 @@ class TimelineControl(QtWidgets.QWidget):
                     self.item.select()
                 # self.timeline.select(self)
 
-        if QMouseEvent.button() == Qt.RightButton:
+        if QMouseEvent.button() == Qt.MouseButton.RightButton:
             context = open_context_menu(self.timeline.main_window,self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
             context.show()
 
@@ -222,7 +223,7 @@ class TimelineControl(QtWidgets.QWidget):
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255, 50))
         pen.setWidth(1)
         qp.setPen(pen)
@@ -252,13 +253,13 @@ class TimelineControl(QtWidgets.QWidget):
             gradient.setColorAt(0.0, QColor(50, 50, 50))
             gradient.setColorAt(0.5, QColor(65, 65, 65))
             gradient.setColorAt(1.0, QColor(50, 50, 50))
-            gradient.setSpread(QGradient.PadSpread)
+            gradient.setSpread(QGradient.Spread.PadSpread)
             qp.fillRect(QtCore.QRect(0, 0, self.width(), self.height()), gradient)
 
         for i, a in enumerate(self.groups):
             y = i * self.group_height + self.timeline.group_height
             text_rect = QtCore.QRect(0, y, self.width(), self.group_height)
-            qp.drawText(text_rect, Qt.AlignRight|Qt.AlignVCenter, a[1])
+            qp.drawText(text_rect, Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter, a[1])
 
         pen.setColor(QtGui.QColor(255, 255, 255, 255))
         qp.setPen(pen)
@@ -292,7 +293,7 @@ class TimelineBar(QtWidgets.QFrame):
         self.control.onHeightChanged.connect(self.on_height_changed)
         self.is_selected = False
 
-        self.setFrameStyle(QFrame.Box)
+        self.setFrameStyle(QFrame.Shape.Box)
 
         self.slices = []
         self.slices_index = dict()
@@ -376,7 +377,7 @@ class TimelineBar(QtWidgets.QFrame):
         qp = QtGui.QPainter()
         pen = QtGui.QPen()
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(20, 20, 20, 50))
         pen.setWidth(1)
         qp.setPen(pen)
@@ -529,7 +530,7 @@ class TimebarSlice(QtWidgets.QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255))
         pen.setWidth(2)
         qp.setPen(pen)
@@ -539,7 +540,7 @@ class TimebarSlice(QtWidgets.QWidget):
         gradient.setColorAt(0.0, QColor(col[0] - 20, col[1] - 20, col[2] - 20, col[3] - 20))
         gradient.setColorAt(0.5, QColor(col[0], col[1], col[2], col[3]))
         gradient.setColorAt(1.0, QColor(col[0] - 20, col[1] - 20, col[2] - 20, col[3]  - 20))
-        gradient.setSpread(QGradient.PadSpread)
+        gradient.setSpread(QGradient.Spread.PadSpread)
 
         pen.setColor(QColor(col[0], col[1], col[2], 150))
         qp.setPen(pen)
@@ -591,7 +592,7 @@ class TimebarSlice(QtWidgets.QWidget):
 
     def mousePressEvent(self, QMouseEvent):
         if not self.locked:
-            if QMouseEvent.buttons() & Qt.LeftButton:
+            if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
                 if self.timeline.is_cutting:
                     return
 
@@ -618,7 +619,7 @@ class TimebarSlice(QtWidgets.QWidget):
                     if not self.is_selected:
                         self.is_selected = True
                         modifiers = QtWidgets.QApplication.keyboardModifiers()
-                        self.item.select(multi_select=modifiers == QtCore.Qt.ShiftModifier)
+                        self.item.select(multi_select=modifiers == QtCore.Qt.KeyboardModifier.ShiftModifier)
 
                     # self.timeline.project().set_selected(None, self.item)
                     self.offset = self.mapToParent(QMouseEvent.pos())
@@ -626,7 +627,7 @@ class TimebarSlice(QtWidgets.QWidget):
                     self.curr_pos = self.pos()
                 # self.timeline.update()
 
-            if QMouseEvent.buttons() & Qt.RightButton:
+            if QMouseEvent.buttons() & Qt.MouseButton.RightButton:
                 if self.timeline.is_cutting:
                     self.timeline.abort_cutting()
                 elif self.timeline.is_merging:
@@ -719,7 +720,7 @@ class TimebarSlice(QtWidgets.QWidget):
 
                 self.timeline.move_merge_tool(QPoint(self.mapToParent(QMouseEvent.pos()).x(), 0))
 
-            elif QMouseEvent.buttons() & Qt.LeftButton:
+            elif QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
                 pos = self.mapToParent(QMouseEvent.pos())
                 target = pos - self.offset
                 tx = int(self.timeline.round_to_grid(target.x()))
@@ -803,22 +804,22 @@ class TimebarSlice(QtWidgets.QWidget):
                 # Moving the Left Sid
                 if  self.mapFromGlobal(self.cursor().pos()).x() < self.border_width:
                     self.mode = "left"
-                    self.setCursor(QtGui.QCursor(Qt.SizeHorCursor))
+                    self.setCursor(QtGui.QCursor(Qt.CursorShape.SizeHorCursor))
                     return
 
                 # Moving the Right Side
                 if  self.mapFromGlobal(self.cursor().pos()).x() > self.width() - self.border_width:
                     self.mode = "right"
-                    self.setCursor(QtGui.QCursor(Qt.SizeHorCursor))
+                    self.setCursor(QtGui.QCursor(Qt.CursorShape.SizeHorCursor))
                     return
 
                 # Moving the whole widget
                 if self.border_width <= self.mapFromGlobal(self.cursor().pos()).x() <= self.width() - self.border_width:
                     self.mode = "center"
-                    self.setCursor(QtGui.QCursor(Qt.SizeAllCursor))
+                    self.setCursor(QtGui.QCursor(Qt.CursorShape.SizeAllCursor))
                     return
                 else:
-                    self.setCursor(QtGui.QCursor(Qt.ArrowCursor))
+                    self.setCursor(QtGui.QCursor(Qt.CursorShape.ArrowCursor))
 
     def mouseDoubleClickEvent(self, a0: QtGui.QMouseEvent):
         if self.item.get_type() == SEGMENT:
@@ -846,7 +847,7 @@ class MediaObjectWidget(QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255))
         pen.setWidth(2)
         qp.setPen(pen)
@@ -867,9 +868,9 @@ class MediaObjectWidget(QWidget):
         qp.end()
 
     def mousePressEvent(self, a0: QtGui.QMouseEvent):
-        if a0.button() == Qt.LeftButton:
+        if a0.button() == Qt.MouseButton.LeftButton:
             self.media_object.preview()
-        elif a0.button() == Qt.RightButton:
+        elif a0.button() == Qt.MouseButton.RightButton:
             open_context_menu(self.parent().timeline.main_window, self.mapToGlobal(a0.pos()),
                               [self.media_object], self.media_object.project)
 
@@ -892,7 +893,7 @@ class TimebarKey(QtWidgets.QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 255, 255))
         pen.setWidth(2)
         qp.setPen(pen)
@@ -915,9 +916,9 @@ class TimelineScrubber(QtWidgets.QWidget):
         self.timeline = timeline
         self.player = player
         self.resize(10, r.height())
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        # self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TranslucentBackground)
+        # self.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
         self.is_hovered = False
         self.was_playing = False
         self.offset = 0
@@ -929,26 +930,18 @@ class TimelineScrubber(QtWidgets.QWidget):
         self.is_hovered = False
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             self.timeline.set_time_indicator_visibility(True)
             self.was_playing = self.player.is_playing()
             self.player.pause()
-            self.timeline.main_window.update_timer.stop()
             self.offset = self.mapToParent(QMouseEvent.pos())
             self.curr_pos = self.pos()
-
         else:
-            # QMouseEvent.ignore()
             self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
-        #     # self.timeline.start_selector(self.mapToParent(QMouseEvent.pos()))
-        #
-        #
-        # # if QMouseEvent.buttons() & Qt.RightButton:
-        # #     self.timeline.mousePressEvent(QMouseEvent)
 
     def mouseReleaseEvent(self, QMouseEvent):
         self.timeline.set_time_indicator_visibility(False)
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             if self.was_playing:
                 self.player.play()
                 self.was_playing = False
@@ -959,13 +952,13 @@ class TimelineScrubber(QtWidgets.QWidget):
             # self.timeline.end_selector()
 
     def mouseMoveEvent(self, QMouseEvent):
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             pos = self.mapToParent(QMouseEvent.pos())# - self.offset
             self.timeline.move_scrubber(pos.x() - self.width()/2)
             # self.move(self.curr_pos.x() + pos.x() + 5, 0)
             # self.player.set_media_time((self.curr_pos.x() + pos.x() + 5) * self.timeline.scale)
 
-        if QMouseEvent.buttons() & Qt.RightButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.RightButton:
             if self.timeline.selector is not None:
                 self.timeline.move_selector(self.mapToParent(QMouseEvent.pos()))
             else:
@@ -981,7 +974,7 @@ class TimelineScrubber(QtWidgets.QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(QtGui.QColor(255, 0, 0))
         pen.setWidth(2)
         qp.setPen(pen)
@@ -998,10 +991,10 @@ class TimelineScrubber(QtWidgets.QWidget):
 class TimelineTimemark(QtWidgets.QWidget):
     def __init__(self, parent, color = QColor(255,255,255,50)):
         super(TimelineTimemark, self).__init__(parent)
-        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         self.color = color
         self.setFixedWidth(5)
-        self.setAttribute(Qt.WA_AlwaysStackOnTop)
+        self.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
         self.show()
 
     def paintEvent(self, a0: QtGui.QPaintEvent):
@@ -1009,7 +1002,7 @@ class TimelineTimemark(QtWidgets.QWidget):
         pen = QtGui.QPen()
         qp.begin(self)
 
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(self.color)
         pen.setWidth(3)
         qp.setPen(pen)

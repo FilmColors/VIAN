@@ -1,4 +1,6 @@
 import os
+import typing
+from PyQt6.QtCore import pyqtSignal
 from pymediainfo import MediaInfo
 
 from typing import Tuple
@@ -32,6 +34,8 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
     :var fps: The float FPS
 
     """
+    onLetterBoxChanged = pyqtSignal(tuple)
+
     def __init__(self, project, movie_name="No Movie Name", movie_path="", movie_id="0_0_0", year=1800, source="",
                  duration=100, fps = 30, unique_id = -1):
         BaseProjectEntity.__init__(self, unique_id=unique_id)
@@ -47,7 +51,9 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         self.fps = fps
         # self.is_relative = False
         self.meta_data = dict()
-        self.letterbox_rect = None
+
+        # Pixel coordinates of the four square points x0 x1 w, h in storage coordinates
+        self.letterbox_rect: typing.Tuple[int, int, int, int] | None = None
 
         self.display_width = None
         self.display_height = None
@@ -56,11 +62,33 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         self.frame_height = -1
         self.parse_movie()
 
-    def set_letterbox_rect(self, rect):
+    def set_letterbox_rect(self, rect:typing.Tuple[int, int, int, int]):
+        """
+        :param tuple rect: A tuple with [left, top, width, height]
+        """
         self.letterbox_rect = rect
+        self.onLetterBoxChanged.emit(self.get_letterbox_rect())
 
-    def get_letterbox_rect(self):
-        return self.letterbox_rect
+    def get_letterbox_rect(self, as_coords=False) -> typing.Union[typing.Tuple[int, int, int, int], None]:
+        """
+        Get the letterbox rect which marks the dark borders of a frame.
+
+        :param bool as_coords: if true, returns the extends as coordinates instead of width and height. default: False
+        :return tuple: returns the letterbox rect.
+                either as Tuple[x, y, width, height]
+                ort as Tuple[x1, y1, x2, y2] if as_coords is set to True
+        """
+        if self.letterbox_rect is None:
+            return None
+
+        x, y, w, h = self.letterbox_rect
+        if w <= 0 or h <= 0:
+            return None
+
+        if as_coords:
+            return x, y, x + w, y + h
+
+        return x, y, w, h
 
     def serialize(self):
         data = dict(
@@ -72,7 +100,6 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
             source=self.source,
             duration=self.duration,
             notes=self.notes,
-            # is_relative = self.is_relative,
             meta_data = self.meta_data,
             letterbox_rect = self.letterbox_rect
         )
@@ -91,7 +118,6 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
                 setattr(self, key, value)
             except:
                 continue
-
         self.set_project(self.project)
         self.parse_movie()
         return self
