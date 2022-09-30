@@ -122,7 +122,7 @@ class HSVSpaceWidget(QWidget):
 
         qp.fillRect(self.rect(), QColor(255,255,255))
 
-        qp.setCompositionMode(QPainter.CompositionMode_Multiply)
+        qp.setCompositionMode(QPainter.CompositionMode.CompositionMode_Multiply)
         qp.fillRect(self.rect(), bw_gradient)
         qp.fillRect(self.rect(), c_gradient)
 
