@@ -1,10 +1,10 @@
 import os
 
-from PyQt5 import uic
+from PyQt6 import uic
 from enum import Enum
 
 from vian.core.gui.ewidgetbase import EDockWidget
-from PyQt5.QtWidgets import QToolBar, QWidget, QHBoxLayout
+from PyQt6.QtWidgets import QToolBar, QWidget, QHBoxLayout
 
 
 class PerspectiveManager(EDockWidget):

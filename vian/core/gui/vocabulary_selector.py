@@ -1,8 +1,8 @@
 from functools import partial
 
-from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QObject
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon
+from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal, QObject
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QIcon
 
 from vian.core.container.project import Segmentation, ScreenshotGroup, ClassificationObject, VIANProject
 from vian.core.container.experiment import Vocabulary, VocabularyWord
@@ -17,7 +17,7 @@ class VocabularySelectorDialog(EDialogWidget):
     def __init__(self, main_window, target: Segmentation, vocabulary_library: VocabularyLibrary):
         super(VocabularySelectorDialog, self).__init__(main_window, main_window)
         self.setWindowTitle("Vocabulary")
-        # self.setWindowFlag(Qt.FramelessWindowHint)
+        # self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
 
         self.setLayout(QHBoxLayout())
         self.inner = VocabularySelectorWidget(self, target, vocabulary_library)

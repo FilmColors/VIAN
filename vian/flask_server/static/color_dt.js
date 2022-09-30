@@ -4,6 +4,7 @@ class ColorDT {
         new ResizeObserver(() => {this.onResize()}).observe(document.getElementById(divName));
 
         this.boxannotations = [];
+        this.currentParameter = null;
 
         this.source = new Bokeh.ColumnDataSource({data:{
             url : [],
@@ -213,6 +214,7 @@ class ColorDT {
         this.segment_starts = segment_starts;
         this.segment_ends = segment_ends;
         this.segment_ids = segment_ids;
+        this.parameterChanged(this.currentParameter);
         this.source.change.emit();
 
 
@@ -231,6 +233,7 @@ class ColorDT {
 
         var label = "";
         var values = null;
+        this.currentParameter = value;
         switch (value){
             case "saturation":
                 values = this.source.data.sat;

@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 from vian.core.data.interfaces import *
 from vian.core.gui.ewidgetbase import *
 from vian.core.analysis.informative import select_rows

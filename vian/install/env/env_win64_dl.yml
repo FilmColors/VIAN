@@ -114,7 +114,6 @@ dependencies:
     - imageio-ffmpeg==0.3.0
     - moviepy==1.0.0
     - proglog==0.1.9
-    - python-vlc==3.0.6109
     - pyyaml==5.1
 
 

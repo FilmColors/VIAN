@@ -273,7 +273,7 @@ class SequenceProtocolExporter(IExportDevice):
                 entry["START"] = ms_to_string(segment.get_start())
                 entry["END"] = ms_to_string(segment.get_end())
 
-                entry["DURATION"] = segment.duration // 1000  # convert ms to seconds (floor)
+                entry["DURATION"] = int(segment.duration // 1000)  # convert ms to seconds (floor)
 
                 annotation = "\n".join([a.content for a in segment.get_annotations()])
                 entry["ANNOTATIONS"] = annotation

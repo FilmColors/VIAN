@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QSlider, QPushButton, QVBoxLayout, QGraphicsView, QGraphicsScene, QHBoxLayout, \
+from PyQt6.QtWidgets import QWidget, QSlider, QPushButton, QVBoxLayout, QGraphicsView, QGraphicsScene, QHBoxLayout, \
     QGraphicsLineItem, QGraphicsItem, QGraphicsEllipseItem, QGridLayout, QLabel, QSpacerItem, QSpinBox, QSizePolicy
-from PyQt5.QtCore import *
-from PyQt5.QtGui import QPen, QColor, QPainter, QPainterPath, QResizeEvent
-from PyQt5 import QtCore
+from PyQt6.QtCore import *
+from PyQt6.QtGui import QPen, QColor, QPainter, QPainterPath, QResizeEvent
+from PyQt6 import QtCore
 
 from vian.core.container.project import MovieDescriptor
 import cv2
@@ -49,7 +49,7 @@ class LetterBoxWidget(EDialogWidget):
         self.widget_controls.layout().addWidget(self.spinbox_top, 2, 1)
         self.widget_controls.layout().addWidget(self.spinbox_bottom, 3, 1)
 
-        self.pos_slider = QSlider(Qt.Horizontal, self)
+        self.pos_slider = QSlider(Qt.Orientation.Horizontal, self)
         self.pos_slider.setRange(0, 1000)
 
         self.inner.layout().addWidget(self.view)
@@ -67,7 +67,7 @@ class LetterBoxWidget(EDialogWidget):
         self.btn_detect.clicked.connect(self.on_auto)
         self.widget_controls.layout().addWidget(self.btn_detect, 4, 0, 1, 2)
 
-        self.widget_controls.layout().addItem(QSpacerItem(1,1, hPolicy=QSizePolicy.Fixed, vPolicy= QSizePolicy.Expanding), 6, 0)
+        self.widget_controls.layout().addItem(QSpacerItem(1,1, hPolicy=QSizePolicy.Policy.Fixed, vPolicy= QSizePolicy.Policy.Expanding), 6, 0)
 
         self.view.onChange.connect(self.on_view_changed)
         self.btn_apply.clicked.connect(self.on_apply)
@@ -185,7 +185,7 @@ class LetterBoxView(QGraphicsView):
     def __init__(self, parent):
         super(LetterBoxView, self).__init__(parent)
         self.setScene(QGraphicsScene())
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setMouseTracking(True)
         self.frame_pmap = None
         self.selector_right = None
@@ -202,13 +202,13 @@ class LetterBoxView(QGraphicsView):
         self.frame = frame
         pixmap = numpy_to_pixmap(frame)
         self.frame_pmap = self.scene().addPixmap(pixmap)
-        self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+        self.fitInView(self.scene().itemsBoundingRect(), Qt.AspectRatioMode.KeepAspectRatio)
         if self.selector_right is None:
             t = pixmap.size()
-            self.selector_left = LetterBoxSelector(0, -50, 0, t.height() + 50, Qt.Horizontal, view = self)
-            self.selector_right = LetterBoxSelector(0, -50, 0, t.height() + 50, Qt.Horizontal, view = self)
-            self.selector_up = LetterBoxSelector(-50, 0, t.width()+50, 0, Qt.Vertical, view = self)
-            self.selector_down = LetterBoxSelector(-50, 0, t.width()+50, 0, Qt.Vertical, view = self)
+            self.selector_left = LetterBoxSelector(0, -50, 0, t.height() + 50, Qt.Orientation.Horizontal, view = self)
+            self.selector_right = LetterBoxSelector(0, -50, 0, t.height() + 50, Qt.Orientation.Horizontal, view = self)
+            self.selector_up = LetterBoxSelector(-50, 0, t.width()+50, 0, Qt.Orientation.Vertical, view = self)
+            self.selector_down = LetterBoxSelector(-50, 0, t.width()+50, 0, Qt.Orientation.Vertical, view = self)
 
             self.scene().addItem(self.selector_right)
             self.scene().addItem(self.selector_left)
@@ -227,7 +227,7 @@ class LetterBoxView(QGraphicsView):
 
     def resizeEvent(self, event: QResizeEvent):
         super(LetterBoxView, self).resizeEvent(event)
-        self.fitInView(self.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+        self.fitInView(self.scene().itemsBoundingRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     @pyqtSlot(tuple)
     def set_rect(self, r:typing.Tuple[int, int, int, int]):
@@ -242,8 +242,8 @@ class LetterBoxSelector(QGraphicsItem):
     def __init__(self, x1, y1, x2, y2, orientation, view):
         super(LetterBoxSelector, self).__init__()
         self.setAcceptHoverEvents(True)
-        self.setFlag(QGraphicsItem.ItemIsMovable)
-        self.setFlag(QGraphicsItem.ItemSendsScenePositionChanges)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsScenePositionChanges)
         self.x1 = x1
         self.x2 = x2
         self.y1 = y1
@@ -271,10 +271,10 @@ class LetterBoxSelector(QGraphicsItem):
         self.hovered = False
 
     def itemChange(self, change: 'QGraphicsItem.GraphicsItemChange', value: typing.Any):
-        if change == QGraphicsItem.ItemPositionChange:
+        if change == QGraphicsItem.GraphicsItemChange.ItemPositionChange:
             v = value
             self.view.onChange.emit()
-            if self.orientation == Qt.Horizontal:
+            if self.orientation == Qt.Orientation.Horizontal:
 
                 # Compute the fill col
                 if self.view.frame is not None:

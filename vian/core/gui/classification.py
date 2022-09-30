@@ -3,13 +3,12 @@ from functools import partial
 import time
 
 import numpy as np
-from PyQt5 import uic
-from PyQt5.QtGui import QShowEvent, QHideEvent
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QGridLayout, \
-    QSpacerItem, QSizePolicy, QCheckBox, QPushButton, QHBoxLayout, QLabel, QAction, QDialog, QSlider, \
+from PyQt6 import uic
+from PyQt6.QtGui import QShowEvent, QHideEvent, QAction
+from PyQt6.QtCore import pyqtSignal, pyqtSlot
+from PyQt6.QtWidgets import QTabWidget, QScrollArea, QWidget, QVBoxLayout, QGridLayout, \
+    QSpacerItem, QSizePolicy, QCheckBox, QPushButton, QHBoxLayout, QLabel, QDialog, QSlider, \
     QComboBox, QFrame
-
 
 from vian.core.data.enums import SEGMENT, ANNOTATION, SCREENSHOT
 from vian.core.data.log import log_error, log_info, log_debug, log_warning
@@ -494,7 +493,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 raise e
         for g in self.tabs:
             for t in g:
-                t.widget().layout().addItem(QSpacerItem(1, 1, QSizePolicy.Preferred, QSizePolicy.Expanding))
+                t.widget().layout().addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding))
 
         if self.classification_mode == "Sequential":
             self.frame_container(self.current_container)
@@ -593,7 +592,7 @@ class ClassificationWindow(EDockWidget, IProjectChangeNotify):
                 g.finalize()
 
         for t in self.tabs:
-            t.widget().layout().addItem(QSpacerItem(1, 1, QSizePolicy.Preferred, QSizePolicy.Expanding))
+            t.widget().layout().addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding))
 
         if self.classification_mode == "Sequential":
             self.frame_container(self.current_container)
@@ -655,7 +654,7 @@ class CheckBoxGroupWidget(QWidget):
         self.btn_Class.clicked.connect(self.toggle_expand)
         self.lineEditSearchBar.textChanged.connect(self.on_search)
 
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.toggle_expand()
 
     def on_search(self):
@@ -707,7 +706,7 @@ class CheckBoxGroupWidget(QWidget):
                 r = 0
                 c += 1
                 lbl = QLabel("")
-                lbl.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+                lbl.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
                 t.addWidget(lbl)
             elif r != 0:
                 lbl = QLabel("")
@@ -716,7 +715,7 @@ class CheckBoxGroupWidget(QWidget):
 
         if t is not None:
             lbl = QLabel("")
-            lbl.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+            lbl.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
             t.addWidget(lbl)
 
     # def finalize_old(self):
@@ -766,7 +765,7 @@ class CheckBoxGroupWidget(QWidget):
     #         r += 1
     #         if r == n_rows:
     #             lbl = QLabel()
-    #             lbl.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+    #             lbl.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
     #             if c == 0:
     #                 self.vl_01.addWidget(lbl)
     #             elif c == 1:

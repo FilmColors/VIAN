@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 # from matplotlib import pyplot as plt
-from PyQt5.QtCore import QObject
-from PyQt5.QtGui import *
+from PyQt6.QtCore import QObject
+from PyQt6.QtGui import *
 from vian.core.data.computation import numpy_to_qt_image
 from random import randint
 from vian.core.node_editor.datatypes import *

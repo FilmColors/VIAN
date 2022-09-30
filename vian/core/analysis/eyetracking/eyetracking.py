@@ -218,7 +218,7 @@ class RawPointsSpatialDataset(SpatialOverlayDataset):
 
 from vian.core.data.importers import ImportDevice
 from vian.core.gui.ewidgetbase import EDialogWidget
-from PyQt5 import uic
+from PyQt6 import uic
 from vian.core.analysis.eyetracking.parser import XEyeTrackingHandler
 import glob
 

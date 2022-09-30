@@ -8,7 +8,7 @@ from .container_interfaces import BaseProjectEntity, IHasName, ITimeRange, ISele
 from vian.core.data.computation import numpy_to_qt_image, apply_mask, numpy_to_pixmap
 from .analysis import SemanticSegmentationAnalysisContainer
 from .annotation_body import Annotatable
-from PyQt5.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal
 import datetime
 from vian.core.data.computation import resize_with_aspect
 
@@ -58,7 +58,7 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         # self.display_height = display_height
 
         self.img_movie = None
-        self.set_img_movie(image)
+
 
         # TODO this is related to containers.Annotations and no longer of any use,
         #  it contained the rendered svg over the image
@@ -75,10 +75,20 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         self.annotation_is_visible = False
         self.timeline_visibility = True
 
-        self.preview_cache = None
+        self._preview_cache = None
+        self._preview_cache_letterbox = None # We keep this to keep track on the letterbox,
+        # if it changes, we clear the cache
         self.curr_size = 1.0
 
-        self.masked_cache = dict()
+        self._original_to_cache_scale = 1.0
+        self._masked_cache = dict()
+
+        #the original size of the image in the movie storage
+        self._storage_width = None
+        self._storage_height = None
+
+        self.set_img_movie(image)
+
 
     def display_width(self):
         if self.project is None:
@@ -120,22 +130,44 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         except:
             self.img_blend = np.zeros_like(self.img_movie)
 
-    def get_preview(self, scale=0.2):
+    def get_preview(self, scale=0.2, apply_letterbox = False):
         """
         Returns a resized tuple (qimage, qpixmap) from the movie-image. 
         THe Preview will be cached for fast updated
-        :param scale: 
+        :param apply_letterbox: If true, returns a cropped image
+        :param scale:
         :return: 
         """
-        if self.preview_cache is None and self.img_movie.shape[0] > 100:
-            self.preview_cache = numpy_to_qt_image(self.img_movie)
-        if self.preview_cache is None:
+        clear_cache = False
+        letterbox = self.project.movie_descriptor.get_letterbox_rect(as_coords=True)
+        if apply_letterbox and letterbox is not None:
+            clear_cache = letterbox != self._preview_cache_letterbox
+
+        if (self._preview_cache is None or clear_cache) and self.img_movie.shape[0] > 100:
+            img = self.img_movie
+            if apply_letterbox:
+                margins = letterbox
+                self._preview_cache_letterbox = margins
+                if margins is not None:
+                    x1, y1, x2, y2 = margins
+                    # If there is a difference between the display_width and the storage width, we have
+                    # to project the letterbox (in storage units) to the display width
+                    if self.display_width() is not None and self.display_height() is not None:
+                        width_scaling = (self.display_width() / self._storage_width) * (CACHE_WIDTH / self.display_width())
+                        height_scaling = (self.display_height() / self._storage_height) * (CACHE_WIDTH / self.display_width())
+
+                        x1, y1, x2, y2 = tuple(np.floor([x1 * width_scaling, y1 * height_scaling,
+                                                         x2 * width_scaling, y2 * height_scaling]).astype(int).tolist())
+                    img = img[y1:y2, x1:x2]
+            self._preview_cache = numpy_to_qt_image(img)
+
+        if self._preview_cache is None:
             return numpy_to_qt_image(self.img_movie)
-        return self.preview_cache
+        return self._preview_cache
 
     def set_classification_object(self, clobj, recompute=False, hdf5_cache=None):
-        if not recompute and clobj.unique_id in self.masked_cache:
-            result = self.masked_cache[clobj.unique_id]
+        if not recompute and clobj.unique_id in self._masked_cache:
+            result = self._masked_cache[clobj.unique_id]
         elif clobj is None or clobj.semantic_segmentation_labels[0] == "":
             result = self.img_movie
         else:
@@ -156,33 +188,46 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
             else:
                 result = cached
         if result is not None:
-            self.masked_cache[clobj.unique_id] = result
+            self._masked_cache[clobj.unique_id] = result
             self.onImageSet.emit(self, result, numpy_to_pixmap(result, cvt=cv2.COLOR_BGRA2RGBA, with_alpha=True))
         return result
 
     def get_img_movie(self, ignore_cl_obj=False):
         if not ignore_cl_obj:
             try:
-                return self.masked_cache[self.project.active_classification_object.unique_id]
+                return self._masked_cache[self.project.active_classification_object.unique_id]
             except:
                 return self.img_movie
         else:
             return self.img_movie
 
     def set_img_movie(self, img):
+        """
+        Sets the image displayed for this screenshot.
+
+        :param img:
+        :return:
+        """
         if img is None:
             self.img_movie = None
             return
 
+        # Clearing the Screenshot caches
+        self._preview_cache = None
+        self._masked_cache = dict()
+
         if self.project is not None and self.project.headless_mode:
             return
 
+        self._storage_width = img.shape[1]
+        self._storage_height = img.shape[0]
         # Resize the image to the correct display aspect
         if self.display_width() is not None and self.display_height() is not None:
             img = cv2.resize(img, (self.display_width(), self.display_height()),
                                         interpolation=cv2.INTER_CUBIC)
 
         # Resize the image to the CACHE_WIDTH (250px wide)
+
         self.img_movie = resize_with_aspect(img, width = CACHE_WIDTH)
 
         if self.receivers(self.onImageSet) > 0:
@@ -237,6 +282,8 @@ class Screenshot(BaseProjectEntity, IHasName, ITimeRange, ISelectable, ITimeline
         segment = segmentation.get_segment_of_time(self.movie_timestamp)
         if segment is not None:
             self.scene_id = segment.ID
+        else:
+            self.scene_id = 0 #0 is default if screenshot is not member of any segement
         return segment
 
     def serialize(self, bake=False):

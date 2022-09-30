@@ -16,7 +16,6 @@ If you are interested in the source code or want to contribute to VIAN, you are 
 
 ### Prerequisites
 - Download and install [Anaconda](https://www.anaconda.com/distribution/)
-- Download and install [VLC 64-bit](https://www.videolan.org/vlc/index.html)
 
 ---
 

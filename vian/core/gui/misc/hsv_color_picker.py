@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
 from vian.core.gui.ewidgetbase import EDockWidget
 from vian.core.data.log import log_error
 import numpy as np
@@ -47,7 +47,7 @@ class HSVColorPicker(QWidget):
 
         self.layout().addWidget(self.values)
         self.lbl_recent = QLabel("Recent Colors:")
-        self.lbl_recent.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.lbl_recent.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.layout().addWidget(self.lbl_recent)
         self.layout().addWidget(self.recent)
         self.current_color = (0, 0, 0)
@@ -174,7 +174,7 @@ class ValuesWidget(QWidget):
     def __init__(self, parent:HSVColorPicker):
         super(ValuesWidget, self).__init__(parent)
         self.lt = QGridLayout()
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.setLayout(self.lt)
         self.lbl_r = QLabel("R")
         self.lbl_g = QLabel("G")
@@ -221,7 +221,7 @@ class ColorField(QWidget):
         self.s = 0
         self.v = 0
         self.setFixedSize(size,size)
-        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.is_hovered = False
 
     def enterEvent(self, a0: QEvent):
@@ -236,7 +236,7 @@ class ColorField(QWidget):
         self.v = v
 
     def mousePressEvent(self, a0: QMouseEvent):
-        if a0.button() == Qt.RightButton:
+        if a0.button() == Qt.MouseButton.RightButton:
             self.colorRightClicked.emit((self.h,self.s,self.v))
         else:
             self.colorClicked.emit((self.h,self.s,self.v))
@@ -265,8 +265,8 @@ class RecentColors(QScrollArea):
         self.setWidget(QFrame(self))
         self.setWidgetResizable(True)
         self.widget().setLayout(QHBoxLayout())
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.setFixedHeight(50)
 
         self.widgets = []
@@ -302,7 +302,7 @@ class RecentColors(QScrollArea):
             w.colorRightClicked.connect(self.remove_color)
             self.widgets.append(w)
 
-        self.spacer = QSpacerItem(1,1,QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.spacer = QSpacerItem(1,1,QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.widget().layout().addItem(self.spacer)
 
 

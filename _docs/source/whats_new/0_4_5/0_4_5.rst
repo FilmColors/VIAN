@@ -45,7 +45,6 @@ Extensive List
 **************
 * Accuracy in Timeline increased, no borders should be visible now.
 * Increased stability during loading and closing of projects.
-* Moved the VLC player into it's own window, creating much more reliable Player Interface
 * Pipeline Import
 * Filemaker Data Import finished, the correct vocabularies have to be created though
 * Backups implemented

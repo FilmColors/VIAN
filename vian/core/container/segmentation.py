@@ -5,7 +5,7 @@ from vian.core.data.enums import SegmentCreationMode, SEGMENTATION, MediaObjectT
 from vian.core.container.container_interfaces import BaseProjectEntity, IHasName, ISelectable, ITimelineItem, ILockable, \
     AutomatedTextSource, ITimeRange, IClassifiable, IHasMediaObject, deprecation_serialization
 from vian.core.data.log import log_error
-from PyQt5.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal
 from .annotation_body import AnnotationBody, Annotatable
 
 
@@ -384,7 +384,7 @@ class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.ID = ID
 
         # Ensure that start and end is not an nd.array
-        self.start: int = int(start)
+        self.start: int = max(0, start)
         self.end: int = int(end)
         self.name: str = name
 
@@ -455,7 +455,7 @@ class Segment(BaseProjectEntity, ITimeRange, IHasName, ISelectable, ITimelineIte
         self.dispatch_on_changed(item=self)
 
     def get_name(self):
-        return str(self.ID)
+        return str(self.name)
 
     def set_name(self, name):
         self.project.undo_manager.to_undo((self.set_name, [name]), (self.set_name, [self.name]))

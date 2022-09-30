@@ -1,7 +1,7 @@
 from vian.core.visualization.basic_vis import IVIANVisualization
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 import numpy as np
 
 class BarPlot(QGraphicsView, IVIANVisualization):
@@ -9,7 +9,7 @@ class BarPlot(QGraphicsView, IVIANVisualization):
         QGraphicsView.__init__(self, parent)
         IVIANVisualization.__init__(self, naming_fields)
         self.naming_fields['plot_name'] = "bar_plot"
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setMouseTracking(True)
         self.setStyleSheet("QWidget:focus{border: rgb(30,30,30); } QWidget:{border: rgb(30,30,30);}")
         self.setBackgroundBrush(QColor(30, 30, 30))
@@ -86,7 +86,7 @@ class BarPlot(QGraphicsView, IVIANVisualization):
         rect = self.scene().itemsBoundingRect()
         rect.adjust(-50, -50, 100, 100)
         self.scene().setSceneRect(rect)
-        self.fitInView(rect, Qt.KeepAspectRatio)
+        self.fitInView(rect, Qt.AspectRatioMode.KeepAspectRatio)
 
     def create_title(self):
         if self.title == "":
@@ -98,22 +98,22 @@ class BarPlot(QGraphicsView, IVIANVisualization):
         t.setDefaultTextColor(QColor(200, 200, 200, 200))
 
     def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = True
             event.ignore()
-        elif event.key() == Qt.Key_F:
+        elif event.key() == Qt.Key.Key_F:
             self.frame_default()
         else:
             event.ignore()
 
     def keyReleaseEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Control:
+        if event.key() == Qt.Key.Key_Control:
             self.ctrl_is_pressed = False
         else:
             event.ignore()
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)
@@ -123,8 +123,8 @@ class BarPlot(QGraphicsView, IVIANVisualization):
 
     def wheelEvent(self, event: QWheelEvent):
         if self.ctrl_is_pressed:
-            self.setTransformationAnchor(QGraphicsView.NoAnchor)
-            self.setResizeAnchor(QGraphicsView.NoAnchor)
+            self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
+            self.setResizeAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
 
             old_pos = self.mapToScene(event.pos())
 

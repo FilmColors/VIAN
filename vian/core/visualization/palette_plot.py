@@ -2,24 +2,18 @@
 The Palette Widget can be used to display a Palette Asset
 """
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-import pickle
-import sys
-import cv2
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
+from vian.core.gui.settings import SettingsWidgetBase
 from vian.core.analysis.colorimetry.hilbert import *
-from vian.core.visualization.basic_vis import IVIANVisualization, ExportImageDialog
+from vian.core.visualization.basic_vis import IVIANVisualization
 from vian.core.data.computation import *
 from vian.core.gui.ewidgetbase import EGraphicsView, ExpandableWidget
-from vian.core.visualization.dot_plot import DotPlot
-from vian.core.data.log import log_error, log_info
 
-from random import randint
 import numpy as np
-import time
-
+import multiprocessing
 
 class PaletteWidget(QWidget):
     onReloadData = pyqtSignal()
@@ -28,68 +22,74 @@ class PaletteWidget(QWidget):
         super(PaletteWidget, self).__init__(parent)
         self.palette_tree = None
 
-        self.all_ctrls = QWidget(self)
-        self.all_ctrls.setLayout(QVBoxLayout(self.all_ctrls))
-
         self.setLayout(QVBoxLayout(self))
         self.view = PaletteView(self)
-        self.slider = QSlider(Qt.Horizontal, self.all_ctrls)
-        self.cb_mode = QComboBox(self.all_ctrls)
-        self.cb_mode.addItems(['Layer', 'Full Tree'])
-        self.lbl_mode_hint = QLabel("Layer Index:", self.all_ctrls)
-        self.lbl_depth = QLabel("0", self.all_ctrls)
-        self.lbl_depth.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.layout().addWidget(self.view)
-        self.cb_show_grid = QCheckBox("Show Grid", self.all_ctrls)
 
-        self.cb_sorting = QComboBox(self.all_ctrls)
+        self.all_ctrls = QWidget(self)
+        self.controls_layout = QFormLayout(self.all_ctrls)
+        self.all_ctrls.setLayout(self.controls_layout)
+
+        self.cb_mode = QComboBox()
+        self.cb_mode.addItems(['Layer', 'Full Tree'])
+        self.controls_layout.addRow("Mode", self.cb_mode)
+        self.cb_mode.view().setMinimumWidth(self.cb_mode.minimumSizeHint().width())
+
+        self.cb_sorting = QComboBox()
         self.cb_sorting.addItems(['Cluster', 'Frequency', "Hilbert"])
+        self.controls_layout.addRow("Sorting", self.cb_sorting)
+        self.cb_sorting.view().setMinimumWidth(self.cb_sorting.minimumSizeHint().width())
 
-        self.layout().addWidget(ExpandableWidget(self,"Controls",self.all_ctrls, popup=False))
-
-        self.hbox_slider = QVBoxLayout(self.all_ctrls)
-        self.hbox_ctrl = QVBoxLayout(self.all_ctrls)
-        self.all_ctrls.layout().addItem(self.hbox_ctrl)
-        self.all_ctrls.layout().addItem(self.hbox_slider)
-
-        self.hbox_ctrl.addWidget(QLabel("Mode: ", self.all_ctrls))
-        self.hbox_ctrl.addWidget(self.cb_mode)
-        self.hbox_ctrl.addItem(QSpacerItem(0,0,QSizePolicy.Expanding, QSizePolicy.Fixed))
-        self.hbox_ctrl.addWidget(self.cb_show_grid)
-        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
-        self.hbox_ctrl.addWidget(QLabel("Sorting: ", self.all_ctrls))
-        self.hbox_ctrl.addWidget(self.cb_sorting)
-
+        self.slider_layout = QHBoxLayout()
+        self.lbl_depth = QLabel()
+        self.lbl_depth.setFixedWidth(self.lbl_depth.fontMetrics().boundingRect('W').width()*2)  # max is 2-digit number
+        self.lbl_depth.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setValue(10)
+        self.slider_layout.addWidget(self.slider)
+        self.slider_layout.addWidget(self.lbl_depth)
+        self.controls_layout.addRow("Layer Index", self.slider_layout)
 
-        self.hbox_slider.addWidget(self.lbl_mode_hint)
-        self.hbox_slider.addWidget(self.slider)
-        self.hbox_slider.addWidget(self.lbl_depth)
+        self.cb_show_grid = QCheckBox()
+        self.controls_layout.addRow("ShowGrid", self.cb_show_grid)
 
-        self.slider.valueChanged.connect(self.draw_palette)
+        self.exportButton = QPushButton("Browse...")
+        self.exportButton.clicked.connect(self.exportButtonMethod)
+        self.controls_layout.addRow("Export Plot as Image", self.exportButton)
+
+        self.settings = SettingsWidgetBase(self.all_ctrls, parent=self)
+
+        self.slider.valueChanged.connect(self.on_settings_changed)
         self.cb_mode.currentTextChanged.connect(self.on_settings_changed)
         self.cb_show_grid.stateChanged.connect(self.on_settings_changed)
         self.cb_sorting.currentTextChanged.connect(self.on_settings_changed)
+
+    def exportButtonMethod(self):
+        pixmap = QPixmap(self.view.size())
+        self.view.render(pixmap)
+        filename = QFileDialog.getSaveFileName(self, directory= "PaletteScreenshot.png", filter="*.png *.jpg")[0]
+        pixmap.save(filename)
 
     def on_settings_changed(self):
         self.view.sorting = self.cb_sorting.currentText()
         self.view.mode = self.cb_mode.currentText()
         self.view.show_grid = self.cb_show_grid.isChecked()
+        self.view.depth = self.slider.value()
         if self.cb_mode.currentText() == "Layer":
-            self.lbl_mode_hint.setText("Layer Index:")
+            self.controls_layout.itemAt(4).widget().setText("Layer Index")
         else:
-            self.lbl_mode_hint.setText("Layer Depth:")
+            self.controls_layout.itemAt(4).widget().setText("Layer Depth")
         self.draw_palette()
+        self.lbl_depth.setText(str(self.slider.value()))
 
     def set_palette(self, tree):
+        self.view.lock.acquire()
         self.palette_tree = tree
         self.slider.setRange(0, np.unique(self.palette_tree[0]).shape[0] - 1)
         self.view.palette_layer = self.palette_tree
+        self.view.lock.release()
 
     def draw_palette(self):
-        self.lbl_depth.setText(str(self.slider.value()))
-        self.view.mode = self.cb_mode.currentText()
-        self.view.depth = self.slider.value()
         self.view.draw_palette()
         self.view.update()
 
@@ -111,10 +111,13 @@ class PaletteView(QWidget, IVIANVisualization):
         self.image = None
         self.show_grid = False
         self.sorting = "Cluster"
-        self.setAttribute(Qt.WA_OpaquePaintEvent)
+        self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent)
+        self.lock = multiprocessing.Lock()
 
     def draw_palette(self, target = None):
+        self.lock.acquire()
         if self.palette_layer is None:
+            self.lock.release()
             return
         all_layers = self.palette_layer[0]
         all_cols = self.palette_layer[1]
@@ -134,7 +137,7 @@ class PaletteView(QWidget, IVIANVisualization):
             height = t_height / self.depth
             layers = layers_unique[:self.depth]
 
-        self.image = QImage(self.size(), QImage.Format_RGBA8888)
+        self.image = QImage(self.size(), QImage.Format.Format_RGBA8888)
 
         qp = QPainter()
         pen = QPen()
@@ -147,7 +150,7 @@ class PaletteView(QWidget, IVIANVisualization):
             qp.begin(target)
             t_width = target.width()
         qp.setPen(pen)
-        # qp.setRenderHint(QPainter.Antialiasing)
+        # qp.setRenderHint(QPainter.RenderHint.Antialiasing)
         y = 0
         for i in layers:
             indices = np.where(all_layers == i)
@@ -185,6 +188,8 @@ class PaletteView(QWidget, IVIANVisualization):
             y += height
         qp.end()
 
+        self.lock.release()
+
     def paintEvent(self, a0: QPaintEvent):
         if self.image is None:
             return
@@ -196,7 +201,7 @@ class PaletteView(QWidget, IVIANVisualization):
         qp.end()
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)
@@ -208,91 +213,60 @@ class PaletteView(QWidget, IVIANVisualization):
         return image
 
 
-class PaletteControls(QWidget):
-    pass
-
-
 class PaletteLABWidget(QWidget):
     def __init__(self, parent):
         super(PaletteLABWidget, self).__init__(parent)
         self.palette_tree = None
+
         self.setLayout(QVBoxLayout(self))
         self.view = PaletteLABView(self)
+        self.layout().addWidget(self.view)
 
-        self.w_ctrls2 = QWidget(self)
-        self.w_ctrls2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
-        self.w_ctrls2.setLayout(QVBoxLayout(self.w_ctrls2))
+        self.all_ctrls = QWidget(self)
+        self.controls_layout = QFormLayout(self.all_ctrls)
+        self.all_ctrls.setLayout(self.controls_layout)
 
-        self.cb_mode = QComboBox(self.w_ctrls2)
+        self.cb_mode = QComboBox()
         self.cb_mode.addItems(['Layer', 'Full Tree'])
-        self.lbl_mode_hint = QLabel("Layer Index:", self.w_ctrls2)
-        self.cb_show_grid = QCheckBox("Show Grid", self.w_ctrls2)
+        self.controls_layout.addRow("Mode", self.cb_mode)
+        self.cb_mode.view().setMinimumWidth(self.cb_mode.minimumSizeHint().width())
 
-        self.hbox_slider = QHBoxLayout(self.w_ctrls2)
-        self.w_ctrls2.layout().addItem(self.hbox_slider)
+        self.slider_layout = QHBoxLayout()
+        self.lbl_depth = QLabel()
+        self.lbl_depth.setFixedWidth(self.lbl_depth.fontMetrics().boundingRect('W').width()*3)  # max is 3-digit number
+        self.lbl_depth.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        self.slider = QSlider(Qt.Orientation.Horizontal)
+        self.slider.setValue(10)
+        self.slider_layout.addWidget(self.slider)
+        self.slider_layout.addWidget(self.lbl_depth)
+        self.controls_layout.addRow("Layer Index", self.slider_layout)
 
-        self.slider = QSlider(Qt.Horizontal, self.w_ctrls2)
-        self.slider_size = QSlider(Qt.Horizontal, self.w_ctrls2)
-        self.slider_size.setRange(1, 100)
-        self.slider_jitter = QSlider(Qt.Horizontal, self.w_ctrls2)
-        self.slider_jitter.setRange(0, 100)
-        self.slider_scale = QSlider(Qt.Horizontal, self.w_ctrls2)
+        self.slider_scale = QSlider(Qt.Orientation.Horizontal)
         self.slider_scale.setRange(1, 30)
+        self.controls_layout.addRow("Scale", self.slider_scale)
+        self.slider_size = QSlider(Qt.Orientation.Horizontal)
+        self.slider_size.setRange(1, 100)
+        self.controls_layout.addRow("Dot Size", self.slider_size)
+        self.slider_jitter = QSlider(Qt.Orientation.Horizontal)
+        self.slider_jitter.setRange(0, 100)
+        self.controls_layout.addRow("Jitter", self.slider_jitter)
 
-        self.lbl_depth = QLabel("0", self.w_ctrls2)
-        self.lbl_depth.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-
-        self.cb_background = QComboBox(self.w_ctrls2)
+        self.cb_background = QComboBox()
         self.cb_background.addItems(['White', "Light-Gray", 'Dark-Gray', 'Black'])
         self.cb_background.setCurrentText("Dark-Gray")
+        self.controls_layout.addRow("Background", self.cb_background)
+        self.cb_background.view().setMinimumWidth(self.cb_background.minimumSizeHint().width())
 
-        self.hbox_ctrl = QVBoxLayout(self.w_ctrls2)
-
-        self.hbox_ctrl.addWidget(QLabel("Mode: ", self.w_ctrls2))
-        self.hbox_ctrl.addWidget(self.cb_mode)
-        self.hbox_ctrl.addItem(QSpacerItem(0,0,QSizePolicy.Expanding, QSizePolicy.Fixed))
-        self.hbox_ctrl.addWidget(self.cb_show_grid)
-        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
-        self.hbox_ctrl.addWidget(QLabel("Background: ", self.w_ctrls2))
-        self.hbox_ctrl.addWidget(self.cb_background)
-        self.btn_ctrls = QPushButton("Show Controls", self.w_ctrls2)
-        self.hbox_ctrl.addWidget(self.btn_ctrls)
-        self.btn_ctrls.clicked.connect(self.toggle_controls)
-
-        self.hbox_slider.addWidget(self.lbl_mode_hint)
-        self.hbox_slider.addWidget(self.slider)
-        self.hbox_slider.addWidget(QLabel("n-Merges:", self.w_ctrls2))
-        self.hbox_slider.addWidget(self.lbl_depth)
-
-        self.hbox_scale = QHBoxLayout(self.w_ctrls2)
-        self.hbox_dot_size = QHBoxLayout(self.w_ctrls2)
-        self.hbox_jitter = QHBoxLayout(self.w_ctrls2)
-
-        self.w_ctrls2.layout().addItem(self.hbox_ctrl)
-        self.w_ctrls2.layout().addItem(self.hbox_scale)
-        self.w_ctrls2.layout().addItem(self.hbox_dot_size)
-        self.w_ctrls2.layout().addItem(self.hbox_jitter)
-
-        self.hbox_scale.addWidget(QLabel("Scale:", self.w_ctrls2))
-        self.hbox_dot_size.addWidget(QLabel("Dot Size:", self.w_ctrls2))
-        self.hbox_jitter.addWidget(QLabel("Jitter:", self.w_ctrls2))
-
-        self.hbox_scale.addWidget(self.slider_scale)
-        self.hbox_dot_size.addWidget(self.slider_size)
-        self.hbox_jitter.addWidget(self.slider_jitter)
-
-        self.layout().addWidget(self.view)
-        # self.layout().addItem(self.hbox_ctrl)
-        exp = ExpandableWidget(self, "Controls", self.w_ctrls2, popup=True)
-        self.layout().addWidget(exp)
-        exp.onClicked.connect(self.draw_palette)
-
+        self.cb_show_grid = QCheckBox()
+        self.controls_layout.addRow("ShowGrid", self.cb_show_grid)
         self.cb_show_grid.setChecked(True)
-        self.slider.setValue(12)
 
-        self.slider_jitter.setValue(3)
-        self.slider_scale.setValue(2)
-        self.slider_size.setValue(2)
+        self.exportButton = QPushButton("Browse...")
+        self.exportButton.clicked.connect(self.exportButtonMethod)
+        self.controls_layout.addRow("Export Plot as Image", self.exportButton)
+
+
+        self.settings = SettingsWidgetBase(self.all_ctrls, parent=self)
 
         self.slider.valueChanged.connect(self.on_settings_changed)
         self.slider_jitter.valueChanged.connect(self.on_settings_changed)
@@ -302,12 +276,11 @@ class PaletteLABWidget(QWidget):
         self.cb_show_grid.stateChanged.connect(self.on_settings_changed)
         self.cb_background.currentTextChanged.connect(self.on_settings_changed)
 
-        self.w_ctrls2.setVisible(False)
-        self.show()
-
-    def toggle_controls(self):
-        v = not self.slider_size.isVisible()
-        self.w_ctrls2.setVisible(v)
+    def exportButtonMethod(self):
+        pixmap = QPixmap(self.view.size())
+        self.view.render(pixmap)
+        filename = QFileDialog.getSaveFileName(self, directory= "SpacePaletteScreenshot.png", filter="*.png *.jpg")[0]
+        pixmap.save(filename)
 
     def on_settings_changed(self):
         self.view.background = self.cb_background.currentText()
@@ -318,29 +291,30 @@ class PaletteLABWidget(QWidget):
         self.view.scale = self.slider_scale.value()
         self.view.depth = self.slider.value()
         if self.cb_mode.currentText() == "Layer":
-            self.lbl_mode_hint.setText("Layer Index:")
+            self.controls_layout.itemAt(2).widget().setText("Layer Index")
         else:
-            self.lbl_mode_hint.setText("Layer Depth:")
-        self.view.draw_palette()
-        self.view.update()
+            self.controls_layout.itemAt(2).widget().setText("Layer Depth")
+        self.draw_palette()
+        if not self.palette_tree is None:
+            self.lbl_depth.setText(str(np.amax(self.palette_tree[0]) - np.unique(self.palette_tree[0])[self.slider.value()]))
 
     def set_palette(self, tree):
+        self.view.lock.acquire()
         self.palette_tree = tree
         self.slider.setRange(0, np.unique(self.palette_tree[0]).shape[0] - 1)
         self.view.palette_layer = self.palette_tree
+        self.view.lock.release()
 
     def draw_palette(self):
-        if self.palette_tree is None:
-            return
-        self.lbl_depth.setText(str(np.amax(self.palette_tree[0]) - np.unique(self.palette_tree[0])[self.slider.value()]))
-        self.view.mode = self.cb_mode.currentText()
-        self.view.depth = self.slider.value()
         self.view.draw_palette()
         self.view.update()
 
     def clear_view(self):
         self.view.palette_layer = None
         self.view.update()
+
+    def resizeEvent(self, a0):
+        self.draw_palette()
 
 
 class PaletteLABView(QWidget, IVIANVisualization):
@@ -357,13 +331,16 @@ class PaletteLABView(QWidget, IVIANVisualization):
         self.show_grid = True
         self.background = "Light-Gray"
         self.jitter = 10
-        self.setAttribute(Qt.WA_OpaquePaintEvent)
+        self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent)
+        self.lock = multiprocessing.Lock()
 
     def draw_palette(self, target = None):
+        self.lock.acquire()
         if self.palette_layer is None:
+            self.lock.release()
             return
 
-        self.image = QImage(self.size(), QImage.Format_RGBA8888)
+        self.image = QImage(self.size(), QImage.Format.Format_RGBA8888)
         qp = QPainter()
         pen = QPen()
         pen.setWidthF(0.5)
@@ -377,7 +354,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
             t_width = target.width()
             t_height = target.height()
 
-        qp.setRenderHint(QPainter.Antialiasing)
+        qp.setRenderHint(QPainter.RenderHint.Antialiasing)
         if target is None:
             if self.background == "White":
                 qp.fillRect(self.rect(), QColor(self.background))
@@ -428,17 +405,20 @@ class PaletteLABView(QWidget, IVIANVisualization):
 
             color_rgb  = QColor(int(color[2]), int(color[1]), int(color[0]))
 
-            path = QPainterPath()
-
             heights = ([self.scale * (1.0 * lab[1]) - radius] * bins_to_draw[q]) + np.random.normal(0, self.jitter, bins_to_draw[q])
             widths =  ([self.scale * (1.0 * lab[2]) - radius] * bins_to_draw[q]) + np.random.normal(0, self.jitter, bins_to_draw[q])
 
+            qp.setPen(Qt.PenStyle.NoPen)
+            qp.setBrush(color_rgb)
+
             for i in range(len(heights)):
-                path.addEllipse((t_width / 2) + heights[i],
+                qp.drawEllipse((t_width / 2) + heights[i],
                                 (t_height / 2) + widths[i],
                                 radius, radius)
-                qp.fillPath(path, color_rgb)
         qp.end()
+
+        self.lock.release()
+
 
     def paintEvent(self, a0: QPaintEvent):
         if self.image is None:
@@ -451,7 +431,7 @@ class PaletteLABView(QWidget, IVIANVisualization):
         qp.end()
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)
@@ -484,10 +464,10 @@ class PaletteTimeWidget(QWidget):
         self.view = PaletteTimeView(self)
         self.scroll_area.setWidget(self.view)
         self.scroll_area.setWidgetResizable(True)
-        self.slider = QSlider(Qt.Horizontal, self)
+        self.slider = QSlider(Qt.Orientation.Horizontal, self)
         self.lbl_mode_hint = QLabel("Layer Index:", self)
         self.lbl_depth = QLabel("0", self)
-        self.lbl_depth.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.lbl_depth.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         # self.layout().addWidget(self.view)
         self.cb_show_grid = QCheckBox("Show Grid", self)
         self.hbox_slider = QHBoxLayout(self)
@@ -498,9 +478,9 @@ class PaletteTimeWidget(QWidget):
         self.layout().addItem(self.hbox_ctrl)
         self.layout().addItem(self.hbox_slider)
 
-        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
         self.hbox_ctrl.addWidget(self.cb_show_grid)
-        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.hbox_ctrl.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
         self.hbox_ctrl.addWidget(QLabel("Sorting: ", self))
         self.hbox_ctrl.addWidget(self.cb_sorting)
 
@@ -527,7 +507,6 @@ class PaletteTimeWidget(QWidget):
         self.lbl_depth.setText(str(self.slider.value()))
         self.view.depth = self.slider.value()
         self.view.draw_palette()
-        # self.view.update()
 
 
 class PaletteTimeView(EGraphicsView, IVIANVisualization):
@@ -541,7 +520,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
         self.image = None
         self.show_grid = False
         self.sorting = "Cluster"
-        self.setAttribute(Qt.WA_OpaquePaintEvent)
+        self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent)
         self.resolution = 1
 
     def draw_palette(self, target=None):
@@ -554,7 +533,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
         pen.setWidthF(0.1)
         pen.setColor(QColor(0, 0, 0, 255))
         if target is None:
-            self.image = QImage(QSize(4000, 500), QImage.Format_RGBA8888)
+            self.image = QImage(QSize(4000, 500), QImage.Format.Format_RGBA8888)
             qp.begin(self.image)
             t_width = self.width()
             # self.resize(4000, 500)
@@ -588,7 +567,7 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
                 return
             layers = [layers_unique[self.depth]]
 
-            # qp.setRenderHint(QPainter.Antialiasing)
+            # qp.setRenderHint(QPainter.RenderHint.Antialiasing)
             y = 0
             for i in layers:
                 indices = np.where(all_layers == i)
@@ -612,10 +591,10 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
             x += b_width
         qp.end()
         itm = self.scene().addPixmap(QPixmap(self.image.size()).fromImage(self.image))
-        self.fitInView(itm.boundingRect(), Qt.KeepAspectRatio)
+        self.fitInView(itm.boundingRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             menu = QMenu(self)
             a_export = menu.addAction("Export")
             a_export.triggered.connect(self.export)
@@ -628,117 +607,3 @@ class PaletteTimeView(EGraphicsView, IVIANVisualization):
 
     def get_scene(self):
         return self.scene()
-
-
-class MultiPaletteLABWidget(QWidget, IVIANVisualization):
-    def __init__(self, parent, naming_fields=None):
-        QWidget.__init__(self, parent)
-        IVIANVisualization.__init__(self, naming_fields)
-        self.naming_fields['plot_name'] = "palette_ab_plot"
-        self.dot_plot = DotPlot(self, naming_fields=naming_fields)
-        self.dot_plot.dot_size = 15
-        self.dot_plot.naming_fields['plot_name'] = "palette_ab_plot"
-        self.setLayout(QVBoxLayout())
-        self.layout().addWidget(self.dot_plot)
-        self.palette_tree = None
-        self.slider = None
-        self.spbox_depth = None
-        self.depth = 10
-
-    def get_param_widget(self, w = None):
-        if w is None:
-            w = MultiPaletteControls()
-
-        w.slider.valueChanged.connect(self.on_depth_changed)
-        w.spbox_depth.valueChanged.connect(w.slider.setValue)
-        w.slider.valueChanged.connect(w.spbox_depth.setValue)
-
-        self.slider = w.slider
-        self.on_depth_changed()
-
-        return w
-
-    def render_to_image(self, background: QColor, size: QSize):
-        self.dot_plot.font_size = self.font_size
-        self.dot_plot.grid_color = self.grid_color
-        self.draw_palette()
-        return self.dot_plot.render_to_image(background, size)
-
-    def on_depth_changed(self):
-        if self.slider is not None:
-            self.depth = self.slider.value()
-        self.draw_palette()
-
-    def set_palettes(self, palettes):
-        try:
-            self.palette_tree = np.vstack(tuple(palettes.copy()))
-        except Exception as e:
-            log_error("Exception in set_palettes()", palettes)
-            return
-        layers = self.palette_tree[:, 1]
-        if self.slider is not None:
-            self.slider.setRange(0, len(np.unique(layers)) - 1)
-            if self.spbox_depth is not None:
-                self.spbox_depth.setRange(0, len(np.unique(layers)) - 1)
-
-        if not (0 <= self.depth <= len(np.unique(layers)) - 1):
-            self.depth = len(np.unique(layers)) - 1
-        self.draw_palette()
-
-    def draw_palette(self):
-        jitter = 0.5
-        if self.palette_tree is None:
-            return
-        self.dot_plot.clear_view()
-        self.dot_plot.add_grid("AB")
-        try:
-            layer_idx = np.unique(self.palette_tree[:, 1])[self.depth]
-        except:
-            layer_idx = np.unique(np.amax(np.unique(self.palette_tree[:, 1])))
-
-        indices = self.palette_tree[:, 1]
-        indices = np.where(indices == layer_idx)
-        bins = self.palette_tree[indices[0]]
-        bins_max = np.amax(bins[:, 5])
-
-        pal = self.palette_tree[indices]
-        labs = cv2.cvtColor(np.array([pal[:, 2:5] / 255.0, pal[:, 2:5] / 255.0], dtype=np.float32), cv2.COLOR_BGR2LAB)[0]
-        chroma = lab_to_lch(labs)
-        chroma = np.amax(chroma[:, 1])
-        chroma2 = (np.ceil(chroma / 20)) * 20
-
-        self.dot_plot.set_range_scale(int((128 / chroma2) * 100))
-
-        u, indices = np.unique(labs, axis=0, return_index=True)
-        labs = labs[indices]
-        pal = pal[indices]
-
-        for i in range(labs.shape[0]):
-            lab = labs[i]
-            rgb = pal[i, 2:5]
-            n_dots = np.clip(np.nan_to_num(pal[i, 5] / bins_max * 20), 1, 20)
-            for q in range(int(n_dots)):
-                rx = np.random.normal(0, jitter)
-                ry = np.random.normal(0, jitter)
-                self.dot_plot.add_point(x=lab[1] + rx, y=-lab[2] + ry, z=lab[0], col=QColor(int(rgb[2]), int(rgb[1]), int(rgb[0])))
-
-    def get_scene(self):
-        return self.dot_plot.scene()
-
-
-class MultiPaletteControls(QWidget):
-    def __init__(self):
-        super(MultiPaletteControls, self).__init__()
-        self.setLayout(QHBoxLayout())
-        self.slider = QSlider(Qt.Horizontal, self)
-        self.slider.setRange(1, 20)
-        self.slider.setValue(10)
-
-        self.spbox_depth = QSpinBox(self)
-        self.spbox_depth.setValue(10)
-        self.spbox_depth.setRange(1, 20)
-
-        self.layout().addWidget(QLabel("Depth:", self))
-        self.layout().addWidget(self.slider)
-        self.layout().addWidget(self.spbox_depth)
-

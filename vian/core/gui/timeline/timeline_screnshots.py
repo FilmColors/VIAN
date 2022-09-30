@@ -1,7 +1,7 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtCore import *
+from PyQt6 import QtWidgets, QtCore, QtGui
+from PyQt6.QtCore import *
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot
 from vian.core.gui.timeline.timeline_base import TimelineBar
 
 from vian.core.gui.context_menu import open_context_menu
@@ -9,6 +9,7 @@ from vian.core.container.project import Screenshot
 from vian.core.gui.ewidgetbase import ImagePreviewPopup
 from vian.core.data.computation import numpy_to_pixmap
 
+from functools import partial
 
 class ScreenshotGroupBar(TimelineBar):
     def __init__(self, parent, timeline, screenshot_group, control, height=45):
@@ -46,6 +47,8 @@ class TimebarPicture(QtWidgets.QWidget):
         super(TimebarPicture, self).__init__(parent)
         self.item = screenshot
         self.item.onImageSet.connect(self.on_image_set)
+        self.item.project.movie_descriptor.onLetterBoxChanged.connect(partial(self.update))
+
         self.timeline = timeline
         self.has_classification = len(self.item.tag_keywords)
         self.item.onClassificationChanged.connect(self.on_classification_changed)
@@ -56,9 +59,6 @@ class TimebarPicture(QtWidgets.QWidget):
         self.item.onSelectedChanged.connect(self.on_selected_changed)
         self.color = (123, 86, 32, 100)
         self.pic_height = height
-        qimage, qpixmap = screenshot.get_preview()
-        self.pixmap = qpixmap
-        self.qimage = qimage
         self.size = (screenshot.get_img_movie(ignore_cl_obj = True).shape[0],
                      screenshot.get_img_movie(ignore_cl_obj = True).shape[1])
         width = self.size[1] * self.pic_height // self.size[0]
@@ -71,18 +71,29 @@ class TimebarPicture(QtWidgets.QWidget):
         self.is_selected = state
         self.update()
 
+    def resize_with_aspect(self):
+        """Computes the width of this image widget and resizes"""
+
+        qimage, _ = self.item.get_preview(apply_letterbox=True)
+        self.size = (qimage.height(),
+                     qimage.width())
+
+        width = self.size[1] * self.pic_height // self.size[0]
+        self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
+        self.resize(width, self.pic_height)
+
+
     @pyqtSlot(object, object, object)
     def on_image_set(self, screenshot, ndarray, pixmap):
-        qimage, qpixmap = screenshot.get_preview()
-        self.pixmap = qpixmap
-        self.qimage = qimage
+        # Adjust the screenshot size
+        self.resize_with_aspect()
+        # Redraw
         self.update()
 
     def on_height_changed(self, height):
         self.pic_height = height
-        width = self.size[1] * self.pic_height // self.size[0]
-        self.resize(width, self.pic_height)
-        self.img_rect = QtCore.QRect(1, 1, width, self.pic_height)
+        self.resize_with_aspect()
+
 
     @pyqtSlot(object)
     def on_classification_changed(self, keywords):
@@ -101,26 +112,31 @@ class TimebarPicture(QtWidgets.QWidget):
         pen = QtGui.QPen()
 
         qp.begin(self)
-        qp.setRenderHint(QtGui.QPainter.Antialiasing)
+        qp.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
         pen.setColor(col)
         pen.setWidth(w)
         qp.setPen(pen)
 
-        qp.drawImage(self.img_rect, self.qimage)
+        qimage, _ = self.item.get_preview(apply_letterbox=True)
+
+        if qimage.width() != self.size[0]:
+            self.resize_with_aspect()
+
+        qp.drawImage(self.img_rect, qimage)
         qp.drawRect(self.img_rect)
+
         if self.has_classification:
             pen.setColor(QtGui.QColor(0, 255, 0))
             qp.setPen(pen)
             qp.drawEllipse(QRectF(self.width() - 10, 5, 5, 5))
-
         qp.end()
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.buttons() & Qt.LeftButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.LeftButton:
             modifiers = QtWidgets.QApplication.keyboardModifiers()
-            self.item.select(multi_select=modifiers == QtCore.Qt.ShiftModifier)
+            self.item.select(multi_select=modifiers == QtCore.Qt.KeyboardModifier.ShiftModifier)
 
-        if QMouseEvent.buttons() & Qt.RightButton:
+        if QMouseEvent.buttons() & Qt.MouseButton.RightButton:
             open_context_menu(self.timeline.main_window, self.mapToGlobal(QMouseEvent.pos()), [self.item], self.timeline.project())
 
     def enterEvent(self, QEvent):

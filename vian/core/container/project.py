@@ -5,9 +5,9 @@ from typing import Union
 from threading import Lock
 from uuid import uuid4
 
-from PyQt5.QtCore import QObject
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QFileDialog, QApplication
+from PyQt6.QtCore import QObject
+from PyQt6.QtGui import QStandardItem, QStandardItemModel
+from PyQt6.QtWidgets import QFileDialog, QApplication
 from random import randint
 
 from vian.core import version
@@ -203,13 +203,13 @@ class VIANProject(QObject, IHasName, IClassifiable):
     def create_file_structure(self):
         self.reset_file_paths(self.folder, self.path)
         if not os.path.isdir(self.data_dir):
-            os.mkdir(self.data_dir)
+            os.makedirs(self.data_dir)
         if not os.path.isdir(self.results_dir):
-            os.mkdir(self.results_dir)
+            os.makedirs(self.results_dir)
         if not os.path.isdir(self.shots_dir):
-            os.mkdir(self.shots_dir)
+            os.makedirs(self.shots_dir)
         if not os.path.isdir(self.export_dir):
-            os.mkdir(self.export_dir)
+            os.makedirs(self.export_dir)
 
     def get_bake_path(self, entity, file_extension, filename_only = False):
         """
@@ -612,6 +612,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
             self.screenshots.remove(screenshot)
             self.remove_from_id_list(screenshot)
             self.sort_screenshots()
+            self.dispatch_changed()
             self.undo_manager.to_undo((self.remove_screenshot, [screenshot]),(self.add_screenshot, [screenshot]))
 
     def get_screenshots(self) -> List[Screenshot]:
@@ -1274,8 +1275,8 @@ class VIANProject(QObject, IHasName, IClassifiable):
                                                             "VIAN uses a directory System since 0.2.10,\n "
                                                             "do you want to move the Project to the new System now?")
             else:
-                answer = QMessageBox.Yes
-            if answer == QMessageBox.Yes:
+                answer = QMessageBox.StandardButton.Yes
+            if answer == QMessageBox.StandardButton.Yes:
                 try:
                     old_path = self.path
 
@@ -1822,7 +1823,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                            "as in the project, are these the same vocabularies?".format(name=v.name)
                     if is_gui():
                         state = QMessageBox.question(main_window,  "Import into Library", msg)
-                        if state == QMessageBox.Yes:
+                        if state == QMessageBox.StandardButton.Yes:
                             mode = "Update"
                         else:
                             mode = "Import"
@@ -1841,7 +1842,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
                     if is_gui():
                         state = QMessageBox.question(main_window,  "Import into Library", msg)
                         print(state)
-                        if state == QMessageBox.Yes:
+                        if state == QMessageBox.StandardButton.Yes:
                             mode = "Update"
                         else:
                             mode = "Import"

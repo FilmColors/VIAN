@@ -2,7 +2,7 @@ from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 
 from vian.core.gui.ewidgetbase import *
-from PyQt5.QtCore import QRect, Qt
+from PyQt6.QtCore import QRect, Qt
 from vian.core.data.interfaces import IConcurrentJob
 from vian.core.data.enums import *
 from vian.core.container.project import VIANProject
@@ -325,7 +325,7 @@ class ApplySegmentationWindow(QMainWindow):
     def __init__(self, parent, clusterings, frames, indices, fps, frame_resolution, cluster_range):
         super(ApplySegmentationWindow, self).__init__(parent)
         self.setWindowTitle("Apply Segmentation")
-        self.setWindowFlags(Qt.Tool)
+        self.setWindowFlags(Qt.WindowType.Tool)
         self.project = parent.project
         self.clusterings = clusterings
         self.frames = frames
@@ -338,7 +338,7 @@ class ApplySegmentationWindow(QMainWindow):
         self.w.setLayout(QVBoxLayout(self.w))
         self.view = EGraphicsView(self.w)
 
-        self.slider = QSlider(Qt.Horizontal)
+        self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(cluster_range[0], np.clip(cluster_range[1] + 1, None, len(self.clusterings) + cluster_range[0]) - 1)
         self.slider.valueChanged.connect(self.on_slider_changed)
 
@@ -359,7 +359,7 @@ class ApplySegmentationWindow(QMainWindow):
 
         self.w_buttons = QWidget(self)
         self.w_buttons.setLayout(QHBoxLayout(self.w_buttons))
-        self.w_buttons.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.w_buttons.layout().addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
         self.w_buttons.layout().addWidget(self.btn_ok)
         self.w_buttons.layout().addWidget(self.btn_cancel)
         self.btn_cancel.clicked.connect(self.close)
@@ -420,7 +420,7 @@ class ApplySegmentationWindow(QMainWindow):
 
         self.segments = segments
         rect = QRectF(self.view.scene().itemsBoundingRect().x(), self.view.scene().itemsBoundingRect().y(), 100, self.view.scene().itemsBoundingRect().height())
-        self.view.fitInView(self.view.scene().itemsBoundingRect(), Qt.KeepAspectRatio)
+        self.view.fitInView(self.view.scene().itemsBoundingRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def apply_segmentation(self):
         segmentation = self.project.create_segmentation("Auto Segmentation", dispatch=False)

@@ -6,7 +6,7 @@ from vian.core.analysis.color.palette_extraction import *
 import cv2
 import numpy as np
 from collections import namedtuple
-from PyQt5.QtCore import pyqtSlot, QObject
+from PyQt6.QtCore import pyqtSlot, QObject
 
 from vian.core.analysis.misc import preprocess_frame
 

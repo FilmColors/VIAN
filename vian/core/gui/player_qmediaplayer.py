@@ -1,22 +1,16 @@
-import sys
-import time
-import requests
+import sys, os
 from functools import partial
 import cv2
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtWidgets import QFrame, QFileDialog, QMessageBox, QMenu
-# from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-# from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt6 import QtCore, QtWidgets
+from PyQt6.QtWidgets import QFrame, QMenu
+from PyQt6.QtMultimediaWidgets import QVideoWidget
+from PyQt6.QtCore import *
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 
 from vian.core.gui.ewidgetbase import EDockWidget
-from vian.core.data.computation import parse_file_path, is_vian_light
+from vian.core.data.computation import is_vian_light
 from vian.core.data.interfaces import IProjectChangeNotify
 from vian.core.data.log import log_error, log_info, log_debug
-
-import vlc
-# from vian.core.vlc.v3_0_3 import vlc
-import os
 
 class PlayerDockWidget(EDockWidget):
     onSpacialFrequencyChanged = pyqtSignal(bool, str)
@@ -55,7 +49,7 @@ class PlayerDockWidget(EDockWidget):
         self.a_spacial_frequency_lum_var.setCheckable(True)
         self.a_spacial_frequency_lum_var.triggered.connect(partial(self.on_spacial_frequency_changed, "luminance-var"))
 
-        self.setFeatures(EDockWidget.NoDockWidgetFeatures | EDockWidget.DockWidgetClosable)
+        self.setFeatures(EDockWidget.DockWidgetFeature.NoDockWidgetFeatures | EDockWidget.DockWidgetFeature.DockWidgetClosable)
 
     @pyqtSlot(object)
     def on_spatial_datasets_changed(self, datasets):
@@ -119,8 +113,6 @@ class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
         self.movie_size = (720,480)
         self.millis_per_sample = 0
         self.fps = 24
-        self.playing = False
-        self.volume = 0
         self.mute = False
 
         self.use_user_fps = False
@@ -250,54 +242,56 @@ class VideoPlayer(QtWidgets.QFrame, IProjectChangeNotify):
         pass
 
 
-class Player_VLC(VideoPlayer):
+class Player_QMediaPlayer(VideoPlayer):
     def __init__(self, main_window):
-        super(Player_VLC, self).__init__(main_window)
+        super(Player_QMediaPlayer, self).__init__(main_window)
 
-        self.vlc_arguments = "--no-keyboard-events --no-mouse-events --no-embedded-video --repeat --quiet"
-        self.instance = vlc.Instance(self.vlc_arguments)
+        self.media_player = QMediaPlayer()
+        self.video = QVideoWidget()
+        self.media_player.setVideoOutput(self.video)
+        self.audio_output = QAudioOutput()
+        self.media_player.setAudioOutput(self.audio_output)
 
-        self.media = None
+        self.media_player.positionChanged.connect(self.positionChanged)
+        self.media_player.playbackStateChanged.connect(self.playbackStateChanged)
+        self.media_player.mediaStatusChanged.connect(self.mediaChanged)
 
-        # Create an empty vlc media player
-        self.media_player = self.instance.media_player_new()
+        self.time_update_interval = 100
+        self.update_timer = QtCore.QTimer()
+        self.update_timer.setInterval(self.time_update_interval)
+        self.update_timer.timeout.connect(self.signal_timestep_update)
 
         self.vboxlayout = QtWidgets.QVBoxLayout()
         self.setLayout(self.vboxlayout)
-
-        if sys.platform == "darwin":  # for MacOS
-            self.videoframe = QtWidgets.QMacCocoaViewContainer(0, None)
-        else:
-            self.videoframe = QtWidgets.QFrame()
+        self.vboxlayout.addWidget(self.video)
 
 
-        # self.videoframe.setParent(self)
-        self.palette = self.videoframe.palette()
-        self.palette.setColor(QtGui.QPalette.Window, QtGui.QColor(0, 0, 0))
-        self.videoframe.setPalette(self.palette)
-        self.videoframe.setAutoFillBackground(True)
-        # self.videoframe.setEnabled(True)
+    def mediaChanged(self):
+        if self.media_player.mediaStatus() is QMediaPlayer.MediaStatus.EndOfMedia:
+            self.media_player.setPosition(0)
 
-        self.vboxlayout.addWidget(self.videoframe)
+        if self.media_player.mediaStatus() is QMediaPlayer.MediaStatus.BufferedMedia or \
+                self.media_player.mediaStatus() is QMediaPlayer.MediaStatus.BufferingMedia:
+            self.set_initial_values()
 
-        self.init_ui()
+    def positionChanged(self):
+        self.timeChanged.emit(self.media_player.position())
 
-        # self.pause_timer = QtCore.QTimer()
-        # self.pause_timer.setInterval(1000)
-        # self.pause_timer.setSingleShot(True)
-        # self.pause_timer.timeout.connect(self.pause)
+    def signal_timestep_update(self):
+        self.timeChanged.emit(self.media_player.position())
+
+    def playbackStateChanged(self):
+        if self.media_player.playbackState() == QMediaPlayer.PlaybackState.PlayingState and not self.update_timer.isActive():
+            self.update_timer.start()
+        elif self.update_timer.isActive():
+            self.update_timer.stop()
+        if self.media_player.playbackState() == QMediaPlayer.PlaybackState.StoppedState:
+            self.stopped.emit()
 
     # *** EXTENSION METHODS *** #
-    def init_vlc(self):
-        pass
-        # self.vlc_instance = vlc.Instance(self.vlc_arguments)
-        # if self.media_player is None:
-        #     self.media_player = vlc.MediaPlayer()
-
-        # self.init_ui()
-
     def release_player(self):
         if self.media_player is not None:
+            self.media_player.setSource(QUrl("none")) #remove moviefile
             self.stop()
             self.videoframe.hide()
 
@@ -310,31 +304,6 @@ class Player_VLC(VideoPlayer):
 
         return frame
 
-    def init_ui(self):
-
-        # In this widget, the video will be drawn
-        # self.videoframe = QtWidgets.QFrame()
-
-        # the media player has to be 'connected' to the QFrame
-        # (otherwise a video would be displayed in it's own window)
-        # this is platform specific!
-        # you have to give the id of the QFrame (or similar object) to
-        # vlc, different platforms have different functions for this
-        if sys.platform.startswith('linux'):  # for Linux using the X Server
-            self.media_player.set_xwindow(int(self.videoframe.winId()))
-        elif sys.platform == "win32":  # for Windows
-            self.media_player.set_hwnd(int(self.videoframe.winId()))
-        elif sys.platform == "darwin":  # for MacOS
-            self.media_player.set_nsobject(int(self.videoframe.winId()))
-            # self.videoframe.setCocoaView(self.media_player.get_nsobject())
-
-            self.videoframe.setAttribute(Qt.WA_TransparentForMouseEvents, True)
-            # self.videoframe.setAttribute(Qt.WA_NativeWindow, True)
-            # self.setAttribute(Qt.WA_DontCreateNativeAncestors, True)
-
-
-            # self.setWindowFlags(Qt.ForeignWindow)
-
     def get_size(self):
         if self.media_player is not None:
             return self.media_player.video_get_size()
@@ -344,61 +313,34 @@ class Player_VLC(VideoPlayer):
     def set_initial_values(self):
         self.offset = 0
         self.start_time = 0
-        self.stop_time = self.media.get_duration()
+        self.stop_time = self.media_player.duration()
         self.duration = self.stop_time
-        self.orig_aspect_ratio = self.media_player.video_get_aspect_ratio()
-        self.aspect_ratio = self.orig_aspect_ratio
-        self.movie_size = self.media_player.video_get_size()
         self.millis_per_sample = 40
-        self.volume = 50
 
         capture = cv2.VideoCapture(self.movie_path)
         self.fps = capture.get(cv2.CAP_PROP_FPS)
         self.movie_size = (capture.get(cv2.CAP_PROP_FRAME_WIDTH), capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.main_window.project.movie_descriptor.fps = self.fps
         self.media_descriptor.set_duration(self.duration)
         self.user_fps = self.fps
 
     def get_subtitles(self):
-        subs = self.media_player.video_get_spu_description()
+        subs = self.media_player.subtitleTracks()
         return subs
 
     def set_subtitle(self, index):
-        self.media_player.video_set_spu(index)
+        self.media_player.setActiveSubtitleTrack(index)
 
     def open_movie(self, path, from_server = False):
         # create the media
 
-        # if self.vlc_instance is None:
-        self.init_vlc()
+        self.movie_path = path
+        self.media_player.setSource(QUrl.fromLocalFile(self.movie_path))
 
-        if sys.version < '3':
-            filename = str(path)
-        else:
-            filename = path
 
-        self.movie_path = filename
-        self.media = self.instance.media_new(self.movie_path)
-
-        # put the media in the media player
-        self.media_player.set_media(self.media)
-
-        # parse the metadata of the file
-        self.media.parse()
-
-        self.videoframe.show()
-
-        # Running the movie, to ensure the initial values can be read by the VLC framework
-        self.play()
-
-        # Wait for a little
-        # time.sleep(0.5)
-        self.set_initial_values()
         if from_server:
             self.new_movie_loaded = True
 
         self.set_media_time(0)
-        # self.pause_timer.start()
 
         log_info("Opened Movie", self.movie_path)
         self.movieOpened.emit()
@@ -415,37 +357,25 @@ class Player_VLC(VideoPlayer):
         if self.media_player is None:
             return
         self.media_player.play()
-        self.playing = True
         self.started.emit()
-
-        # We want to check for the fps, since VLC sometimes gets it wrong at the beginning.
-        fps = self.media_player.get_fps()
-        if fps > 0:
-            self.fps = fps
 
     def pause(self):
         if self.media_player is None:
             return
-        self.media_player.set_pause(-1)
-        self.playing = False
+        self.media_player.pause()
         self.stopped.emit()
 
     def stop(self):
         if self.media_player is None:
             return
-        # self.media_player.stop()
-        self.media_player.set_pause(-1)
-        self.playing = False
-        if self.media is not None:
-            self.media.release()
-            self.media = None
-        #self.update_timer.stop()
+        self.media_player.stop()
+        self.stopped.emit()
 
     def is_playing(self):
         """
         :return: bool
         """
-        return self.playing
+        return self.media_player.playbackState() == self.media_player.PlaybackState.PlayingState
 
     def play_interval(self, start_ms, stop_ms):
         log_debug(NotImplementedError("Method <play_interval> not implemented"))
@@ -464,6 +394,7 @@ class Player_VLC(VideoPlayer):
         log_debug(NotImplementedError("Method <set_stop_time> not implemented"))
 
     def next_frame(self):
+        return
         if self.media_player is None:
             return
         self.media_player.next_frame()
@@ -480,7 +411,7 @@ class Player_VLC(VideoPlayer):
         if self.media_player is None:
             return
 
-        self.media_player.set_time(int(time))
+        self.media_player.setPosition(int(time))
         self.timeChanged.emit(time)
 
         self.last_set_frame = time
@@ -489,67 +420,76 @@ class Player_VLC(VideoPlayer):
         if self.media_player is None:
             return 0
 
-        return self.media_player.get_time()
+        return self.media_player.position()
 
     def set_rate(self, rate):
         if self.media_player is None:
-            return 1.0
-        self.media_player.set_rate(float(rate))
+            return
+        self.media_player.setPlaybackRate(float(rate))
 
     def get_rate(self):
         if self.media_player is None:
             return 1.0
-        return self.media_player.get_rate()
+        return self.media_player.playbackRate()
 
     def is_frame_rate_auto_detected(self):
+        return
         if self.get_rate() != 0.0:
             return True
         return False
 
     def get_media_duration(self):
+        return
         if self.media_player is None:
             return 0
         return self.media.get_duration()
 
     def set_volume(self, volume):
-        if self.media_player is None:
+        if self.audio_output is None:
             return
-        self.media_player.audio_set_volume(volume)
+        self.audio_output.setVolume(volume/100.0)
 
     def get_volume(self):
-        if self.media_player is None:
+        if self.audio_output is None:
             return 0
-        return self.media_player.audio_get_volume()
+        return self.audio_output.getVolume()*100
 
     def set_sub_volume(self, volume):
+        return
         if self.media_player is None:
             return
         return self.media_player.audio_set_volume(volume)
 
     def get_sub_volume(self):
+        return
         return self.get_volume()
 
     def set_mute(self, mute):
-        if self.media_player is None:
+        if self.audio_output is None:
             return
-        self.media_player.audio_set_mute(bool(mute))
+        self.audio_output.setMuted(bool(mute))
 
     def get_mute(self):
-        if self.media_player is None:
+        if self.audio_output is None:
             return 0
-        return self.media_player.audio_get_mute()
+        return self.audio_output.isMuted()
 
     def get_source_width(self):
+        return
         if self.media_player is None:
             return 0
         return self.media_player.video_get_size()[0]
 
     def get_source_height(self):
+        return
         if self.media_player is None:
             return 0
         return self.media_player.video_get_size()[1]
 
     def get_aspect_ratio(self):
+        log_debug(NotImplementedError("Method <get_aspect_ratio> not implemented"))
+        return
+        '''
         if self.media_player is None:
             return 4/3
 
@@ -557,6 +497,7 @@ class Player_VLC(VideoPlayer):
         if t is None:
             return float(4)/3
         return t
+        '''
 
     def set_aspect_ratio(self, ratio):
         log_debug(NotImplementedError("Method <set_aspect_ratio> not implemented"))
@@ -593,9 +534,9 @@ class Player_VLC(VideoPlayer):
 
     def frame_step(self, backward = False):
         if backward:
-            self.set_media_time(self.media_player.get_time() - (1000 / self.fps))
+            self.set_media_time(self.media_player.position() - (1000 / self.fps))
         else:
-            self.set_media_time(self.media_player.get_time() + (1000 / self.fps))
+            self.set_media_time(self.media_player.position() + (1000 / self.fps))
 
     def on_closed(self):
         self.release_player()

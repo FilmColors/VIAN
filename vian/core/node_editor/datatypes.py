@@ -1,7 +1,7 @@
-from PyQt5 import QtGui
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6 import QtGui
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from functools import partial
 
@@ -19,7 +19,7 @@ class DataType(object):
         # self.name.move(0,0)
         # self.name.resize(self.width(), self.height() / 2.0)
         # self.name.setAttribute(Qt.WA_TranslucentBackground)
-        # self.name.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
+        # self.name.setAlignment(Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
         # self.show()
 
     def set_value(self, value):

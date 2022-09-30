@@ -2,9 +2,9 @@ from functools import partial
 from typing import Dict, List
 
 from uuid import uuid4
-from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QObject
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon
+from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal, QObject
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QIcon
 
 
 from vian.core.container.experiment import Vocabulary, VocabularyWord
@@ -70,7 +70,7 @@ class VocabularyTreeView(QWidget):
 
         self.tree = CollectionTreeWidget(self)
         self.tree.itemChanged.connect(self.on_item_check_changed)
-        self.tree.setSelectionMode(self.tree.ExtendedSelection)
+        self.tree.setSelectionMode(self.tree.SelectionMode.ExtendedSelection)
         self.tree.onContextMenu.connect(self.context_menu)
         self.layout().addWidget(self.tree)
 
@@ -180,7 +180,7 @@ class VocabularyTreeView(QWidget):
         if not self.mode == self.MODE_EDITING:
             return
 
-        if QMouseEvent.buttons() == Qt.RightButton:
+        if QMouseEvent.buttons() == Qt.MouseButton.RightButton:
 
             menu = QMenu(self.tree)
             a_new = menu.addAction("New Collection")
@@ -226,7 +226,7 @@ class CollectionTreeWidget(QTreeWidget):
 
     def mousePressEvent(self, QMouseEvent):
         super(CollectionTreeWidget, self).mousePressEvent(QMouseEvent)
-        if QMouseEvent.buttons() == Qt.RightButton:
+        if QMouseEvent.buttons() == Qt.MouseButton.RightButton:
             self.onContextMenu.emit(QMouseEvent, self.mapToParent(QMouseEvent.pos()))
 
 
@@ -242,9 +242,9 @@ class CollectionItem(QTreeWidgetItem):
         self.items = dict()
 
         if self.mode == VocabularyTreeView.MODE_EDITING:
-            self.setFlags(Qt.ItemIsEditable| Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            self.setFlags(Qt.ItemFlag.ItemIsEditable| Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
         else:
-            self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            self.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
 
         self.recreate_vocabularies()
 
@@ -258,13 +258,13 @@ class CollectionItem(QTreeWidgetItem):
     def set_check_status(self, vocabularies:List[Vocabulary]):
         uuids = [v.unique_id for v in vocabularies]
         for k, itm in self.items.items():
-            itm.setCheckState(0, Qt.Checked if k in uuids else Qt.Unchecked)
+            itm.setCheckState(0, Qt.CheckState.Checked if k in uuids else Qt.CheckState.Unchecked)
 
     def get_check_state(self, result):
         for k, itm in self.items.items():
             result.append(dict(
                 vocabulary=itm.vocabulary,
-                state = itm.checkState(0) == Qt.Checked
+                state = itm.checkState(0) == Qt.CheckState.Checked
             ))
         return result
 
@@ -279,9 +279,9 @@ class VocabularyItem(QTreeWidgetItem):
         self.mode = mode
 
         if self.mode == VocabularyTreeView.MODE_EDITING:
-            self.setFlags(Qt.ItemIsEditable| Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            self.setFlags(Qt.ItemFlag.ItemIsEditable| Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
         else:
-            self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            self.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
 
         if show_words:
             self.recreate_words()
@@ -336,7 +336,7 @@ class WordsList(QListWidget):
 
     def mousePressEvent(self, QMouseEvent):
         super(WordsList, self).mousePressEvent(QMouseEvent)
-        if QMouseEvent.buttons() == Qt.RightButton:
+        if QMouseEvent.buttons() == Qt.MouseButton.RightButton:
 
             if self.vocabulary is None:
                 return
@@ -366,7 +366,7 @@ class WordEditor(QWidget):
         self.layout().addWidget(QLabel( "Category"), 2, 0)
         self.layout().addWidget(QLabel( "Complexity Group"), 3, 0)
         self.layout().addWidget(QLabel( "Complexity Level"), 4, 0)
-        self.layout().addItem(QSpacerItem(10, 10, QSizePolicy.Fixed, QSizePolicy.Expanding), 5, 0)
+        self.layout().addItem(QSpacerItem(10, 10, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding), 5, 0)
 
         self.lineEdit_TermEn = QLineEdit(self)
         # self.lineEdit_TermDE = QLineEdit(self)

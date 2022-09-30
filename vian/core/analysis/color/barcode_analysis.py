@@ -15,8 +15,8 @@ from typing import List
 from vian.core.data.computation import ms_to_frames, numpy_to_pixmap
 from vian.core.container.project import *
 from vian.core.gui.ewidgetbase import EGraphicsView
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import *
 from vian.core.data.interfaces import IAnalysisJob, ParameterWidget, VisualizationTab
 
 BARCODE_MODE_BOTH = 0

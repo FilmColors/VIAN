@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QScrollArea, QFrame, QGridLayout, QCompleter, QPushButton
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QEvent
-from PyQt5.QtGui import QPixmap, QMouseEvent, QPainter, QColor, QPen
+from PyQt6.QtWidgets import QMainWindow, QWidget, QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QScrollArea, QFrame, QGridLayout, QCompleter, QPushButton
+from PyQt6.QtCore import pyqtSlot, pyqtSignal, Qt, QEvent
+from PyQt6.QtGui import QPixmap, QMouseEvent, QPainter, QColor, QPen
 
 from vian.core.container.project import Segment, VIANProject, Screenshot, UniqueKeyword, Annotatable
 
@@ -14,8 +14,8 @@ class SearchWindow(QMainWindow):
         super(SearchWindow, self).__init__(parent)
         self.main_window = parent
         self.project = None
-        self.setAttribute(Qt.WA_AlwaysStackOnTop)
-        self.setWindowFlags(Qt.Popup|Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
+        self.setWindowFlags(Qt.WindowType.Popup|Qt.WindowType.FramelessWindowHint)
 
         self.central = QWidget(self)
         self.central.setLayout(QVBoxLayout(self))
@@ -29,7 +29,7 @@ class SearchWindow(QMainWindow):
 
         self.w_result = ResultWidget(self, self)
         self.central.layout().addWidget(self.w_result)
-        self.w_result.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
+        self.w_result.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding))
         self.setCentralWidget(self.central)
 
         self.project = VIANProject()
@@ -122,9 +122,9 @@ class SearchWindow(QMainWindow):
                 self.keyword_mapping["Keyword:" + k.get_full_name()] = k
 
         self.completer = QCompleter(self.keyword_mapping.keys())
-        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
-        self.completer.setFilterMode(Qt.MatchContains)
-        self.completer.setCompletionMode(QCompleter.PopupCompletion)
+        self.completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.completer.setFilterMode(Qt.MatchFlag.MatchContains)
+        self.completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
         self.line_edit_input.setCompleter(self.completer)
 
         self.line_edit_input.setFocus()
@@ -145,7 +145,7 @@ class ResultWidget(QWidget):
 
         self.span = QWidget(self.list)
         self.list.layout().addWidget(self.span)
-        self.span.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.span.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         self.hovered = False
         self.entries = []

@@ -137,7 +137,7 @@ class ColorPaletteAnalysis(IAnalysisJob):
     def get_preview(self, analysis: IAnalysisJobAnalysis):
         view = PaletteView(None)
         view.depth = 10
-        image = QImage(QSize(1024,256), QImage.Format_RGBA8888)
+        image = QImage(QSize(1024,256), QImage.Format.Format_RGBA8888)
         view.palette_layer = analysis.get_adata()['tree']
         view.draw_palette(image)
         pixmap = QPixmap().fromImage(image)

@@ -5,13 +5,15 @@ from functools import partial
 import json
 import platform
 import requests
+import webbrowser
 
 import numpy as np
 
-from PyQt5.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
-from PyQt5.QtWidgets import QLabel
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings, QWebEngineProfile, QWebEnginePage
-from PyQt5 import QtGui
+from PyQt6.QtCore import QThread, QObject, pyqtSlot, pyqtSignal, QUrl
+from PyQt6.QtWidgets import QLabel
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWebEngineCore import QWebEngineSettings, QWebEngineProfile, QWebEnginePage
+from PyQt6 import QtGui
 from flask import Flask, render_template, send_file, url_for, jsonify, request, make_response
 
 from vian.core.data.interfaces import IAnalysisJob
@@ -267,11 +269,10 @@ class FlaskServer(QObject):
     onAnalyseColorPalette = pyqtSignal(list)
     def __init__(self, parent):
         super(FlaskServer, self).__init__(parent)
-        self.app = app
 
     @pyqtSlot()
     def run_server(self):
-        self.app.run(port=VIAN_PORT)
+        app.run(host='127.0.0.1', port=VIAN_PORT)
 
     def on_loaded(self, project):
         global _server_data
@@ -320,30 +321,17 @@ class WebPage(QWebEnginePage):
 
 class FlaskWebWidget(EDockWidget):
     def __init__(self, main_window):
-        super(FlaskWebWidget, self).__init__(main_window, False)
+        super(FlaskWebWidget, self).__init__(main_window, limit_size=False)
         self.setWindowTitle("Bokeh Visualizations")
 
-        # On High Sierra and earlier QWebEngine crashes on load,
-        # it's a miracle, apple sucks, for f**** sake
-        # maybe I'm wrong and coded this shitty, no idea really,
-        # there is a resolved issue on QT tracker
-        # In a year or two, High sierra is gone anyway...
-        self.mac_disable_web = False
-        try:
-            if int(platform.mac_ver()[0].split(".")[1])<=13:
-                self.mac_disable_web = True
-        except Exception as e:
-            print(e)
-        if not self.mac_disable_web:
-            self.view = QWebEngineView(self)
-            self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, False)
-            self.view.setPage(WebPage())
-            self.view.reload()
-            self.view.settings().setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
-            self.setWidget(self.view)
-        else:
-            self.setWidget(QLabel("Sorry, VIAN on OSX High Sierra and below does not support the visualization. \n "
-                                  "Please watch them in your browser by clicking 'Open in Browser' on top"))
+
+        self.view = QWebEngineView(self)
+        self.view.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, False)
+        self.view.setPage(WebPage())
+        self.view.reload()
+        self.view.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
+        self.setWidget(self.view)
+
         self.a_open_browser = self.inner.menuBar().addAction("Open in Browser")
         self.a_open_browser.triggered.connect(self.on_browser)
 
@@ -353,17 +341,18 @@ class FlaskWebWidget(EDockWidget):
 
 
     def on_browser(self):
-        import webbrowser
-
-        webbrowser.open(self.url)
+        if sys.platform == 'darwin':
+            os.system(f"open \"\" {self.url}")
+        else:
+            webbrowser.open(self.url)
 
     def set_url(self, url):
         self.url = url
-        if not self.mac_disable_web:
-            QWebEngineProfile.defaultProfile().clearAllVisitedLinks()
-            QWebEngineProfile.defaultProfile().clearHttpCache()
-            self.view.setUrl(QUrl(url))
-            self.view.reload()
+
+        QWebEngineProfile.defaultProfile().clearAllVisitedLinks()
+        QWebEngineProfile.defaultProfile().clearHttpCache()
+        self.view.setUrl(QUrl(url))
+        self.view.reload()
 
     def set_settingsURL(self, getSettingsURL, setSettingsURL):
         self.getSettingsURL = getSettingsURL
@@ -374,8 +363,7 @@ class FlaskWebWidget(EDockWidget):
         super(FlaskWebWidget, self).showEvent(a0)
 
     def reload(self):
-        if not self.mac_disable_web:
-            self.view.reload()
+        self.view.reload()
 
     def get_settings(self):
         if self.getSettingsURL == None:
@@ -491,4 +479,4 @@ def summary():
 
 if __name__ == '__main__':
     app.debug = True
-    app.run()
+    app.run(host='0.0.0.0', port=VIAN_PORT)

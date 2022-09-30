@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout, QFrame
+from PyQt6.QtWidgets import QWidget, QLabel, QHBoxLayout, QFrame
 
 from vian.core.gui.misc.flow_layout import FlowLayout
 

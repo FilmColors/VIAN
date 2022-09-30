@@ -4,6 +4,7 @@
 name: macOS - Build_and_upload_VIAN
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
     tags:
@@ -12,6 +13,7 @@ on:
     branches: [ master ]
     tags:
       - "v*.*.*"
+
 jobs:
   build_application:
 
@@ -31,7 +33,7 @@ jobs:
         with:
           requirements: requirements.txt
       - run: unzip vian/install/three.zip -d vian/flask_server/static
-      - run: pip install pyinstaller
+      - run: pip install pyinstaller==4.10
       - run: pyinstaller main.spec
         working-directory: vian
       - run: |

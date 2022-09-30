@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QCompleter, QLineEdit, QVBoxLayout, QHBoxLayout, QWidget, QScrollArea
-from PyQt5.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QCompleter, QLineEdit, QVBoxLayout, QHBoxLayout, QWidget, QScrollArea
+from PyQt6.QtCore import pyqtSignal
 
 from vian.core.gui.ewidgetbase import MultiItemTextInput, QLabel
 

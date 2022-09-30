@@ -7,7 +7,7 @@ SVGAnnotations are by now deprecated.
 
 
 import cv2
-from PyQt5.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal
 from vian.core.data.computation import numpy_to_qt_image
 from vian.core.container.media_objects import FileMediaObject, DataMediaObject
 from vian.core.data.enums import AnnotationType, MediaObjectType, ANNOTATION, ANNOTATION_LAYER

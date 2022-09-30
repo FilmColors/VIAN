@@ -1,10 +1,10 @@
 import os
 from typing import Optional
-from PyQt5.QtWidgets import QWidget, QSplitter, QVBoxLayout, QTabWidget, \
+from PyQt6.QtWidgets import QWidget, QSplitter, QVBoxLayout, QTabWidget, \
     QHBoxLayout, QPushButton, QLabel, QLineEdit, QSpacerItem, QSizePolicy, \
     QFileDialog, QMessageBox, QFrame, QStackedWidget, QGridLayout, QDialog, QComboBox
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5 import uic
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6 import uic
 
 from vian.core.gui.ewidgetbase import EDockWidget, EditableListWidget
 from vian.core.gui.misc.filmography_widget import FilmographyWidget2
@@ -21,7 +21,7 @@ class CorpusDockWidget(EDockWidget):
     def __init__(self, main_window):
         super(CorpusDockWidget, self).__init__(main_window, False)
         self.setWindowTitle("Corpus")
-        self.w = QSplitter(Qt.Horizontal, self)
+        self.w = QSplitter(Qt.Orientation.Horizontal, self)
         self.in_template_mode = False
         self.last_project = None
 
@@ -286,7 +286,7 @@ class CorpusGeneralWidget(QWidget):
         self.w_corpus.layout().addWidget(self.w_name)
 
         self.templateStack = QStackedWidget(self)
-        self.templateStack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        self.templateStack.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.lt_actions.addWidget(self.templateStack)
         self.template_widget_manage = QWidget(self.templateStack)
         self.template_widget_edit = QWidget(self.templateStack)
@@ -308,7 +308,7 @@ class CorpusGeneralWidget(QWidget):
         self.btn_CloseTemplate = QPushButton("Close Template", self)
         self.template_widget_edit.layout().addWidget(self.btn_CloseTemplate, 0, 1)
 
-        self.layout().addItem(QSpacerItem(1,1,QSizePolicy.Preferred, QSizePolicy.Expanding))
+        self.layout().addItem(QSpacerItem(1,1,QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding))
         self.corpus = None
         self.setEnabled(False)
 

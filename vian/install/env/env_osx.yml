@@ -116,7 +116,6 @@ dependencies:
   - normality==0.6.1
   - python-dateutil==2.7.3
   - python-editor==1.0.3
-  - python-vlc==3.0.6109
   - sqlalchemy==1.2.12
 prefix: /Users/gaudenz/anaconda/envs/vian-osx
 

@@ -5,10 +5,10 @@ import time
 from typing import TYPE_CHECKING
 
 from functools import partial
-from PyQt5 import QtCore, QtGui, uic, QtWidgets
-from PyQt5.QtCore import Qt, QPoint, QRectF, pyqtSlot
-from PyQt5.QtGui import QFont, QColor, QKeySequence
-from PyQt5.QtWidgets import *
+from PyQt6 import QtCore, QtGui, uic, QtWidgets
+from PyQt6.QtCore import Qt, QPoint, QRectF, pyqtSlot
+from PyQt6.QtGui import QFont, QColor, QKeySequence, QAction
+from PyQt6.QtWidgets import *
 from vian.core.data.enums import *
 from collections import namedtuple
 from vian.core.gui.perspectives import Perspective
@@ -49,14 +49,14 @@ class WidgetsToolbar(EToolBar):
         self.addSeparator()
         self.a_cl_obj = self.addAction(create_icon("qt_ui/icons/icon_classification_object.png"), "Select Classification Object")
 
-        self.a_outliner.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_O))
-        self.a_timeline.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_T))
-        self.a_player_controls.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_P))
-        self.a_analyses.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_A))
-        self.a_classification.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_C))
-        self.a_query.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_Q))
-        self.a_upload.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_U))
-        self.a_inspector.setShortcut(QKeySequence(Qt.Key_Alt + Qt.Key_I))
+        self.a_outliner.setShortcut(QKeySequence(Qt.Modifier.ALT | Qt.Key.Key_O))
+        self.a_timeline.setShortcut(QKeySequence(Qt.Modifier.ALT | Qt.Key.Key_T))
+        self.a_player_controls.setShortcut(QKeySequence(Qt.Modifier.ALT | Qt.Key.Key_P))
+        self.a_analyses.setShortcut(QKeySequence(Qt.Modifier.ALT | Qt.Key.Key_A))
+        self.a_classification.setShortcut(QKeySequence(Qt.Modifier.ALT | Qt.Key.Key_C))
+        self.a_query.setShortcut(QKeySequence(Qt.Modifier.ALT | Qt.Key.Key_Q))
+        self.a_upload.setShortcut(QKeySequence(Qt.Modifier.ALT | Qt.Key.Key_U))
+        self.a_inspector.setShortcut(QKeySequence(Qt.Modifier.ALT | Qt.Key.Key_I))
 
         self.a_vocabulary.triggered.connect(self.main_window.create_vocabulary_manager)
         self.a_setup.triggered.connect(self.main_window.create_experiment_editor)
