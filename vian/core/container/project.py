@@ -242,9 +242,21 @@ class VIANProject(QObject, IHasName, IClassifiable):
         dir_path = os.path.dirname(baked_filepath)
         out_dir = os.path.join(dir_path, self.name + "_baked")
 
+        if os.path.exists(out_dir):
+            shutil.rmtree(out_dir)
+
         os.makedirs(out_dir)
+
+        if os.path.exists(os.path.join(out_dir, "bake")):
+            shutil.rmtree(os.path.join(out_dir, "bake"))
         shutil.copytree(os.path.join(dir_path, "bake"), os.path.join(out_dir, "bake"))
+
+        if os.path.exists(os.path.join(out_dir, "data")):
+            shutil.rmtree(os.path.join(out_dir, "data"))
+        if not self.hdf5_manager.h5_file is None:
+            self.hdf5_manager.h5_file.close()
         shutil.copytree(os.path.join(dir_path, "data"), os.path.join(out_dir, "data"))
+
         shutil.copy2(baked_filepath, os.path.join(out_dir, os.path.basename(baked_filepath)))
 
         archive_name = shutil.make_archive(out_dir, "zip", out_dir)
