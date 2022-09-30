@@ -780,9 +780,6 @@ def detect_letterbox(movie_path, n_samples=100) -> dict:
         # We search for the first pixel from each border which is > 0
         left = thresh[thresh.shape[0] // 2].tolist().index(1.0)
         right = thresh[thresh.shape[0] // 2][::-1].tolist().index(1.0)
-        top = thresh[:, thresh.shape[1] // 2].tolist().index(1.0)
-        bottom = thresh[:, thresh.shape[1] // 2][::-1].tolist().index(1.0)
-
-        bottom = thresh.shape[0] - bottom
-        right =  thresh.shape[1] - right
+        top = thresh[:, thresh.shape[0] // 2].tolist().index(1.0)
+        bottom = thresh[:, thresh.shape[0] // 2][::-1].tolist().index(1.0)
         return dict(left=left, right=right, top=top, bottom=bottom)
