@@ -7,24 +7,11 @@ visualizing color in film.
 
 ## VIAN for Film Scholars
 This page hosts the source code of VIAN and is therefore directed towards developers who are interested in VIAN. 
-If you are interested in the desktop application, please visit 
-[this page](http://ercwebapp.westeurope.cloudapp.azure.com/vian) 
-to download VIAN for users. 
+If you are interested in the desktop application, download VIAN from 
+[the github releases page](https://github.com/FilmColors/VIAN/releases). 
 
 ## VIAN for Developers
 If you are interested in the source code or want to contribute to VIAN, you are correct here. 
-
-### Prerequisites
-- Download and install [Anaconda](https://www.anaconda.com/distribution/)
-
----
-
-***Note***
-
-    You can also install VIAN with a another python 3 distribution than anaconda, however
-    this is not tested yet, so no guarantees. 
-    
----
 
 
 ```conda env create -f requirements.yml```
@@ -33,34 +20,37 @@ If you are interested in the source code or want to contribute to VIAN, you are 
 ### Setting up the development environment
 1. Clone this repository on your computer
 2. Download the models from [OneDrive](https://1drv.ms/f/s!Avol1nnS24kLldQ6sI0KucWUrWWF6g) and copy it into the VIAN/data directory
-3. cd to the root of the VIAN directory
+3. cd to the root of the VIAN directory ```cd path/to/my/VIAN/```
+4. Install the corresponding environment (see [below](#step4) for details)
+5. Run VIAN ```python vian/main.py```
 
-    ```cd path/to/my/VIAN/```
 
-4. Install the corresponding environment:
+-----
+###<a name="step4"></a>Details for step 4
 
-First we run the build.py file to setup the directory.
+First, we run the build.py file to setup the directory (in vian directory): ```python build.py```
 
-```python build.py```
+Then, we create an environment. It needs to be activated and the dependencies installed:
 
-<b>macOS:</b>
-```conda env create -f install/env/env_osx_dl.yml``` 
-
-<b>Windows:</b>
-```conda env create -f install/env/env_win64_dl.yml``` 
-
-After the installation is complete, you can start VIAN by activating the new environment
-and run main.py
-
-<b>macOS:</b>
+<b>macOS (Intel):</b>
 ````
+python -m venv venv
+source venv/bin/activate
+python -m pip install requirements.txt
+````
+
+<b>macOS (M1):</b>
+
+As not all packages are available via pip, we use a conda environment (e.g. [mambaforge](https://github.com/mamba-org/mamba)). 
+````
+conda env create -f environment-macos.yml
 conda activate vian-osx
-python main.py
 ````
 
 <b>Windows:</b>
 ````
-conda activate vian-win
-python main.py
+python -m venv venv
+venv/Scripts/activate
+python -m pip install requirements.txt
 ````
 
