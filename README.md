@@ -21,12 +21,12 @@ If you are interested in the source code or want to contribute to VIAN, you are 
 1. Clone this repository on your computer
 2. Download the models from [OneDrive](https://1drv.ms/f/s!Avol1nnS24kLldQ6sI0KucWUrWWF6g) and copy it into the VIAN/data directory
 3. cd to the root of the VIAN directory ```cd path/to/my/VIAN/```
-4. Install the corresponding environment (see below for details)
+4. Install the corresponding environment (see [below](#step4) for details)
 5. Run VIAN ```python vian/main.py```
 
 
 -----
-###Details for step 4
+### <a name="step4"></a>Details for step 4
 
 First, we run the build.py file to setup the directory (in vian directory): ```python build.py```
 
