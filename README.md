@@ -26,7 +26,8 @@ If you are interested in the source code or want to contribute to VIAN, you are 
 
 
 -----
-###Details for step 4<a name="step4"></a>
+<a name="step4"></a>
+###Details for step 4
 
 First, we run the build.py file to setup the directory (in vian directory): ```python build.py```
 
