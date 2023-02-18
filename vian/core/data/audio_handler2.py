@@ -41,6 +41,9 @@ class AudioHandler(QObject):
         self.audio_samples = None   #type: np.ndarray
         self.audio_volume = None    #type: np.ndarray
 
+        self._videoclip = None
+        self._audioclip = None
+
         self.project = None
         self.export_audio = True
 
@@ -145,4 +148,5 @@ class AudioHandler(QObject):
                         callback(i / len(segments))
             except Exception as e:
                 log_error(e)
-            self._videoclip.close()
+            if self._videoclip is not None:
+                self._videoclip.close()

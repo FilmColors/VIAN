@@ -2345,7 +2345,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     return
             else:
                 dialog = QMessageBox.information(self, "Export Segments", "You first have to select some segments to export.")
-                dialog.show()
         pass
 
     def import_experiment(self):
