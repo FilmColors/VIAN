@@ -13,6 +13,10 @@ Visualization and MultimediaLab
 """
 
 import os
+import os
+# Platform binaries will be installed the first run.
+os.system("static_ffmpeg -version")  # static_ffmpeg is an alias for this tools ffmpeg.
+os.system("static_ffprobe -version")
 
 # Comment this out for the full VIAN Version
 #os.environ['VIAN_LIGHT'] = "1"
