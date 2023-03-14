@@ -17,14 +17,11 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
         uic.loadUi(path,self)
 
         self.main_window = main_window
-        self.is_clicked = False
         self.is_connected = False
-        self.slider_is_hidden = False
         self.fast_forward = True
 
         self.duration = 0
 
-        self.btn_HideSlider.clicked.connect(self.on_hide_slider)
         self.btn_play.clicked.connect(self.on_play)
         self.btn_ToStart.clicked.connect(self.on_to_start)
         self.btn_FastBackwards.clicked.connect(self.on_fast_backward)
@@ -32,10 +29,6 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
         self.btn_ToEnd.clicked.connect(self.on_to_end)
 
         self.sl_volume.valueChanged.connect(self.on_volume_change)
-        self.sl_position.valueChanged.connect(self.on_position_change)
-
-        self.sl_position.sliderPressed.connect(self.on_mouse_press)
-        self.sl_position.sliderReleased.connect(self.on_mouse_release)
 
         self.comboBox_Subs.currentIndexChanged.connect(self.on_subs_changed)
 
@@ -53,7 +46,6 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
         self.initial_values_timer.setInterval(1000)
         self.initial_values_timer.timeout.connect(self.update_movie)
 
-        self.on_hide_slider()
         self.subs = []
 
         self.fast_step_timer = QtCore.QTimer()
@@ -67,10 +59,6 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
 
     @QtCore.pyqtSlot(int)
     def on_timestep_update(self, time):
-        if not self.is_clicked:
-            d = np.clip(self.main_window.player.duration, 1, None)
-            position = float(time) / d
-            self.sl_position.setValue(position * 10000)
 
         self.lbl_position_time.setText(ms_to_string(time))
         self.lbl_position_frame.setText(str(int(float(time) / 1000 * self.main_window.player.get_fps())))
@@ -110,30 +98,9 @@ class PlayerControls(EDockWidget, ITimeStepDepending):
         else:
             self.fast_step_timer.stop()
 
-    def on_hide_slider(self):
-        if self.slider_is_hidden:
-            self.slidercontainer.show()
-            self.slider_is_hidden = False
-            self.btn_HideSlider.setText("Hide Slider")
-        else:
-            self.slidercontainer.hide()
-            self.slider_is_hidden = True
-            self.btn_HideSlider.setText("Show Slider")
-
-    def on_position_change(self, position):
-        if not self.is_connected:
-            if self.is_clicked:
-                self.main_window.player.set_media_time(int(float(position) / 10000.0 * self.main_window.player.duration))
-
     def on_volume_change(self, Volume):
         if not self.is_connected:
             self.main_window.player.set_volume(Volume)
-
-    def on_mouse_press(self):
-        self.is_clicked = True
-
-    def on_mouse_release(self):
-        self.is_clicked = False
 
     def on_play(self):
         self.btn_FastBackwards.setChecked(False)

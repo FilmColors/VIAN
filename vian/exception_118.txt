@@ -1,0 +1,30 @@
+118, Babes in the woodsIndex (400) out of range for (0-399)Traceback (most recent call last):
+  File "/Users/Gaudenz/Documents/code/VIAN-Web2/backend/reupload.py", line 81, in bulk_upload
+    preprocess(project_file, out_progress)
+  File "/Users/Gaudenz/Documents/code/VIAN-Web2/backend/scripts/upload_project.py", line 86, in preprocess
+    run_analysis(vian_proj, ColorPaletteAnalysis(), vian_proj.screenshots, clobjs, progress_callback=on_progress)
+  File "/Users/Gaudenz/Documents/code/VIAN/vian/core/analysis/analysis_utils.py", line 56, in run_analysis
+    analysis.modify_project(project, r)
+  File "/Users/Gaudenz/Documents/code/VIAN/vian/core/analysis/color/palette_analysis.py", line 132, in modify_project
+    super(ColorPaletteAnalysis, self).modify_project(project, result, main_window)
+  File "/Users/Gaudenz/Documents/code/VIAN/vian/core/data/interfaces.py", line 293, in modify_project
+    result.set_target_container(project.get_by_id(result.target_container))
+  File "/Users/Gaudenz/Documents/code/VIAN/vian/core/container/analysis.py", line 197, in set_target_container
+    self.target_container.add_analysis(self)
+  File "/Users/Gaudenz/Documents/code/VIAN/vian/core/container/container_interfaces.py", line 117, in add_analysis
+    analysis.set_project(self.project)
+  File "/Users/Gaudenz/Documents/code/VIAN/vian/core/container/analysis.py", line 60, in set_project
+    self.set_adata(self.data)
+  File "/Users/Gaudenz/Documents/code/VIAN/vian/core/container/analysis.py", line 341, in set_adata
+    self.project.hdf5_manager.dump(data, self.a_class().dataset_name, self.unique_id)
+  File "/Users/Gaudenz/Documents/code/VIAN/vian/core/container/hdf5_manager.py", line 113, in dump
+    self.h5_file[dataset_name][pos] = d
+  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+  File "/Users/Gaudenz/Documents/code/VIAN-Web2/backend/venv/lib/python3.8/site-packages/h5py/_hl/dataset.py", line 909, in __setitem__
+    selection = sel.select(self.shape, args, dataset=self)
+  File "/Users/Gaudenz/Documents/code/VIAN-Web2/backend/venv/lib/python3.8/site-packages/h5py/_hl/selections.py", line 82, in select
+    return selector.make_selection(args)
+  File "h5py/_selector.pyx", line 272, in h5py._selector.Selector.make_selection
+  File "h5py/_selector.pyx", line 151, in h5py._selector.Selector.apply_args
+IndexError: Index (400) out of range for (0-399)

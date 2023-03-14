@@ -242,15 +242,26 @@ class VIANProject(QObject, IHasName, IClassifiable):
         dir_path = os.path.dirname(baked_filepath)
         out_dir = os.path.join(dir_path, self.name + "_baked")
 
+        if os.path.exists(out_dir):
+            shutil.rmtree(out_dir)
+
         os.makedirs(out_dir)
+
+        if os.path.exists(os.path.join(out_dir, "bake")):
+            shutil.rmtree(os.path.join(out_dir, "bake"))
         shutil.copytree(os.path.join(dir_path, "bake"), os.path.join(out_dir, "bake"))
+
+        if os.path.exists(os.path.join(out_dir, "data")):
+            shutil.rmtree(os.path.join(out_dir, "data"))
+        if not self.hdf5_manager.h5_file is None:
+            self.hdf5_manager.h5_file.close()
         shutil.copytree(os.path.join(dir_path, "data"), os.path.join(out_dir, "data"))
+
         shutil.copy2(baked_filepath, os.path.join(out_dir, os.path.basename(baked_filepath)))
 
         archive_name = shutil.make_archive(out_dir, "zip", out_dir)
         shutil.rmtree(out_dir)
         return archive_name
-
 
     def get_all_containers(self, types = None):
         result = []
@@ -531,11 +542,17 @@ class VIANProject(QObject, IHasName, IClassifiable):
     def add_screenshot(self, screenshot, group = 0) -> Screenshot:
         """
         Adds a screenshot instance to the project.
+        If
 
         :param screenshot: the instance to add
         :param group: the group
         :return: returns the given screenshot instance
         """
+
+        # Ensure screenshot is not placed outside frame count
+        if self.movie_descriptor.frame_count is not None and screenshot.frame_pos > self.movie_descriptor.frame_count:
+            raise ValueError(f"Screenshot with frame index {screenshot.frame_pos} is out-of-bound")
+
         self.screenshots.append(screenshot)
         screenshot.set_project(self)
 
@@ -697,6 +714,7 @@ class VIANProject(QObject, IHasName, IClassifiable):
         """
 
         analysis.set_project(self)
+
         self.analysis.append(analysis)
 
         # if the analysis has no target, it is global, thus we have to check such an analysis has
@@ -1068,8 +1086,11 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for c in project.segmentation:
             segmentations.append(c.serialize())
 
-        for d in project.analysis:
-            analyses.append(d.serialize(bake=bake))
+        for idx, d in enumerate(project.analysis):
+            try:
+                analyses.append(d.serialize(bake=bake))
+            except Exception as e:
+                print(idx, d.analysis_job_class)
 
         for e in project.screenshot_groups:
             screenshot_groups.append(e.serialize())
@@ -1280,12 +1301,20 @@ class VIANProject(QObject, IHasName, IClassifiable):
             pass
         if has_file:
             self.hdf5_manager = HDF5Manager()
+
+            # If the file did not exist before, we should not set the hdf5_indices
+            file_existed = os.path.isfile(self.hdf5_path)
             self.hdf5_manager.set_path(self.hdf5_path)
-            try:
-                self.hdf5_manager.set_indices(my_dict['hdf_indices'])
-            except Exception as e:
-                print("Exception during hdf5_manager.set_indices(): ", e)
-                self.hdf5_manager.initialize_all()
+
+            if self.hdf5_indices_loaded != None:
+                self.hdf5_manager.set_indices(self.hdf5_indices_loaded)
+
+            # try:
+            #     if os.path.isfile(file_existed):
+            #         self.hdf5_manager.set_indices(my_dict['hdf_indices'])
+            # except Exception as e:
+            #     print("Exception during hdf5_manager.set_indices(): ", e)
+            #     self.hdf5_manager.initialize_all()
         else:
             print("No HDF5 File")
 
@@ -1295,17 +1324,42 @@ class VIANProject(QObject, IHasName, IClassifiable):
         self.vocabularies = []
         for v in my_dict['vocabularies']:
             voc = Vocabulary("voc").deserialize(v, self)
-            self.add_vocabulary(voc)
-
-        # If the vocabularies are merged by name, we have to update the unique ids in the keywords later
+            try:
+                self.add_vocabulary(voc)
+            except ValueError as e:
+                logging.exception(e)
+                continue
+        # If the vocabularies are merged by name,
+        # we have to update the unique ids in the keywords later
 
         for a in my_dict['annotation_layers']:
             new = AnnotationLayer().deserialize(a, self)
             self.add_annotation_layer(new)
 
+        delete_out_of_bounds_screenshots = None
         for i, b in enumerate(my_dict['screenshots']):
-            new = Screenshot().deserialize(b, self)
-            self.add_screenshot(new)
+            try:
+                new = Screenshot().deserialize(b, self)
+                self.add_screenshot(new)
+            except ValueError as e:
+                logging.warning(f"Could not load Screenshot due to {e}")
+
+                # Ask the user on how to proceed
+                if delete_out_of_bounds_screenshots is None:
+                    if is_gui():
+                        timestamp = deprecation_serialization(serialization, ['start_ms', 'movie_timestamp'])
+                        state = QMessageBox.question(main_window,
+                                                     "Error in Loading Project",
+                                                     f"Screenshot at {timestamp} is positioned outside given movie."
+                                                     f"Continue loading and remove all Screenshots outside movie?")
+                        delete_out_of_bounds_screenshots = state == QMessageBox.Yes
+                    else:
+                        delete_out_of_bounds_screenshots = True
+
+                if delete_out_of_bounds_screenshots:
+                    continue
+                else:
+                    raise e
 
         for c in my_dict['segmentation']:
             new = Segmentation().deserialize(c, self)
@@ -1362,7 +1416,30 @@ class VIANProject(QObject, IHasName, IClassifiable):
             if d is not None:
                 try:
                     t = deprecation_serialization(d, ['vian_serialization_type', 'analysis_container_class'])
+
+                    def get_all_subclasses(cls):
+                        all_subclasses = []
+
+                        for subclass in cls.__subclasses__():
+                            all_subclasses.append(subclass)
+                            all_subclasses.extend(get_all_subclasses(subclass))
+
+                        return all_subclasses
+
+                    allowed_types = ["AnalysisContainer"]
+                    allowed_types += [c.__name__ for c in get_all_subclasses(AnalysisContainer)]
+
+                    if t not in allowed_types:
+                        raise ValueError(f"Analysis  with vian_serialization_type {t} cannot be parsed by VIAN. "
+                                         f"Values may be {allowed_types}.")
+
                     new = eval(t)().deserialize(d, self)
+
+                    if isinstance(new, FileAnalysis):
+                        # Check if the File actually exists, if not, we remove this analysis
+                        if new.get_adata(self.data_dir) is None:
+                            raise ValueError(f"FileAnalysis {new.unique_id} could not be loaded. "
+                                             f"Are the corresponding files in the project/data directory? Skipping...")
 
                     if new is None:
                         continue
@@ -2085,6 +2162,18 @@ class VIANProject(QObject, IHasName, IClassifiable):
         for c in clobjs:
             result += c.get_vocabularies()
         return result
+
+    def clear_analyses(self):
+        """Clears all analyses, and cleans up the complete project """
+        for a in self.analysis:
+            self.id_list.pop(a.unique_id)
+
+        for k, item in self.id_list.items():
+            if isinstance(item, BaseProjectEntity):
+                item.connected_analyses = []
+
+        self.hdf5_manager.clear()
+        self.analysis = []
 
     #endregion
 

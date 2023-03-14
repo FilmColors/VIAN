@@ -343,6 +343,8 @@ class UserSettings():
         new_paths = []
         new_names = []
         for i, q in enumerate(self.recent_files_path):
+            if q is None:
+                continue
             if os.path.isfile(q):
                 new_names.append(self.recent_files_name[i])
                 new_paths.append(self.recent_files_path[i])

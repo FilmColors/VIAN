@@ -64,6 +64,9 @@ class ColorPaletteAnalysis(IAnalysisJob):
         bin_mask = None
         if semseg is not None:
             name, labels = self.target_class_obj.semantic_segmentation_labels
+            if labels is None or len(labels) == 0:
+                print("no labels given, return")
+                return
             mask = semseg.get_adata()
             bin_mask = labels_to_binary_mask(mask, labels)
             bin_mask = preprocess_frame(bin_mask, self.max_width, mode=cv2.INTER_NEAREST)

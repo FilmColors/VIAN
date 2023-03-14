@@ -52,8 +52,10 @@ class AnalysisContainer(BaseProjectEntity, IHasName, ISelectable):
     def set_project(self, project):
         BaseProjectEntity.set_project(self, project)
 
-        # The data is only set when the container is created,
-        # else it should already be in the SQLite Database
+        # set_adata
+        # this store the data depending on the subclass of AnalysisContainer
+        # In case of IAnalysisJobAnalysis it's HDF5
+        # In case of FileAnalysis it's a file in the data/ directory of the project
         if self.data is not None:
             self.set_adata(self.data)
 
@@ -362,19 +364,26 @@ class FileAnalysis(IAnalysisJobAnalysis):
                  target_classification_object=None):
         super(FileAnalysis, self).__init__(name, results, analysis_job_class, parameters, container,
                                            target_classification_object)
-        self._file_path = None
+
+    def _file_path(self, data_dir):
+        return os.path.join(data_dir, str(self.unique_id))
 
     def set_adata(self, d):
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
-        self._file_path = os.path.join(self.project.data_dir, str(self.unique_id))
-        self.a_class().to_file(d, self._file_path)
+        self.a_class().to_file(d, self._file_path(self.project.data_dir))
 
-    def get_adata(self):
+    def get_adata(self, data_dir=None):
+        """
+        :param data_dir: Allows the injection of a directory to look for. Default: project.data_dir is used.
+
+        """
         if self.a_class is None:
             self.a_class = get_analysis_by_name(self.analysis_job_class)
-        self._file_path = os.path.join(self.project.data_dir, str(self.unique_id))
-        return self.a_class().from_file(self._file_path)
+        if data_dir is None:
+            data_dir = self.project.data_dir
+
+        return self.a_class().from_file(self._file_path(data_dir))
 
     def save(self, file_path):
         if self.a_class is None:

@@ -349,6 +349,14 @@ class ScreenshotsManagerWidget(QGraphicsView, IProjectChangeNotify):
         # Drawing the New Selection Frames
         self.draw_selection_frames()
 
+
+        # Check if no images are visible and give hint in UI
+        if len(self.images_segmentation) == 0 or not any([img.isVisible() for segm in self.images_segmentation for img in segm.segm_images]):
+            cap = self.add_caption(self.current_available_size.width(), y, "No Screenshots available")
+            cap.setPos(self.current_available_size.width()/2 - cap.boundingRect().width()/2, 0)
+            cap1 = self.add_caption(self.current_available_size.width(), y, "Create Screenshot with {key} or adjust settings to make them visible.".format(key="⌘F" if sys.platform.startswith('darwin') else "Ctrl+F"))
+            cap1.setPos(self.current_available_size.width() / 2 - cap1.boundingRect().width() / 2, 0 + cap.boundingRect().height())
+
     def add_line(self, x1, y1, x2, y2):
         p1 = QtCore.QPointF(x1, y1)
         p2 = QtCore.QPointF(x2, y2)

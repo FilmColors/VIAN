@@ -139,12 +139,19 @@ def to_cluster_tree(Z, labels:List, colors, n_merge_steps = 1000, n_merge_per_lv
 def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, image_size = 400.0, seeds_model = None,
                   n_pixels = 200, out_path = "", n_merge_per_lvl = 10, plot = False, mask_inverse = False, normalization_lower_bound = 100.0,
                   seeds_input_width = 600):
+    """
+    :param frame: uint8 image
+    :param mask: A uint label mask according to the semantic segmentation output. Each number indicates a predicted class
+    :param mask_index: The label to compute the palette for
+    :mask_inverse: If true, all labels but mask_index are used for the computation
+    """
     if seeds_input_width < frame.shape[0]:
         rx = seeds_input_width / frame.shape[0]
         frame = cv2.resize(frame, None, None, rx, rx, cv2.INTER_CUBIC)
     if seeds_model is None:
         seeds_model = PaletteExtractorModel(frame, n_pixels=n_pixels, num_levels=8)
     labels = seeds_model.forward(frame, 200).astype(np.uint8)
+
     if out_path != "":
         cv2.imwrite("../../results/seeds_"+out_path+str(n_pixels)+".jpg", cv2.cvtColor(seeds_model.labels_to_avg_color_mask(frame, labels), cv2.COLOR_LAB2BGR))
 
@@ -156,12 +163,16 @@ def color_palette(frame, mask = None, mask_index = None, n_merge_steps = 100, im
     frame_bgr = cv2.cvtColor(frame_bgr.astype(np.float32) / 255, cv2.COLOR_BGR2LAB)
 
     if mask is not None:
+        # Resize the mask to the image dimensions
         mask = cv2.resize(mask, (labels.shape[1], labels.shape[0]), None, cv2.INTER_NEAREST)
 
         if mask_inverse:
             labels[np.where(mask == mask_index)] = 255
         else:
             labels[np.where(mask != mask_index)] = 255
+
+        #if np.where(labels == 255)[0].shape[0] == 0:
+        #    raise ValueError(f"The given mask does not contain any pixels with the label {mask_index}.")
 
         bins = np.unique(labels)
         bins = np.delete(bins, np.where(bins==255))

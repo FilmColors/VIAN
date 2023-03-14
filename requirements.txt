@@ -1,7 +1,7 @@
 tensorflow
 keras
 sqlalchemy
-opencv-contrib-python-headless
+opencv-contrib-python-headless==4.5.5.62
 requests
 PyQt6
 PyQt6-WebEngine

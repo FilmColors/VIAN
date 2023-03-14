@@ -17,7 +17,6 @@ from vian.core.container.project import VIANProject
 from vian.core.container.hdf5_manager import HDF5_FILE_LOCK
 from scipy.signal import savgol_filter
 
-
 class AudioHandler(QObject):
     """
     Handles reading audio data from the movie file.
@@ -33,13 +32,16 @@ class AudioHandler(QObject):
     audioProcessed = pyqtSignal(object)
     audioExtracted = pyqtSignal(str)
 
-    def __init__(self, resolution = 0.1, callback=None):
+    def __init__(self, resolution=0.1, callback=None):
         super(AudioHandler, self).__init__()
         self.resolution = resolution
         self.callback = callback
 
-        self.audio_samples = None   #type: np.ndarray
-        self.audio_volume = None    #type: np.ndarray
+        self.audio_samples = None  # type: np.ndarray
+        self.audio_volume = None  # type: np.ndarray
+
+        self._videoclip = None
+        self._audioclip = None
 
         self.project = None
         self.export_audio = True
@@ -65,7 +67,6 @@ class AudioHandler(QObject):
             self.audioExtractingEnded.emit()
 
     def on_extraction_progress(self, flt):
-        print("Progress",flt)
         self.audioExtractingProgress.emit(flt)
 
     @pyqtSlot()
@@ -75,9 +76,11 @@ class AudioHandler(QObject):
         project_audio_path = os.path.join(self.project.data_dir, "audio.mp3")
         if not os.path.isfile(project_audio_path):
             print("Extracting Audio from Movie")
-            ffmpeg_convert(input = self.project.movie_descriptor.get_movie_path(),
-                           output=project_audio_path,
-                           callback=self.on_extraction_progress)
+            ffmpeg_convert(
+                input=self.project.movie_descriptor.get_movie_path(),
+                output=project_audio_path,
+                callback=self.on_extraction_progress
+            )
 
         print("Storing Audio in HDF5")
         y, sr = librosa.load(project_audio_path)
@@ -107,8 +110,11 @@ class AudioHandler(QObject):
             for i in range(int(self._audioclip.duration / self.resolution)):
                 arr[i] = self._audioclip.get_frame(i / (1.0 / self.resolution))
                 if callback is not None and i % 100 == 0:
-                    callback("Audio Extraction:\t" + str(
-                        round(i / int(self._audioclip.duration / self.resolution) * 100, 2)) + "%")
+                    callback(
+                        "Audio Extraction:\t" + str(
+                            round(i / int(self._audioclip.duration / self.resolution) * 100, 2)
+                        ) + "%"
+                        )
         except Exception as e:
             print(e)
             return None
@@ -126,23 +132,17 @@ class AudioHandler(QObject):
 
         with HDF5_FILE_LOCK:
             try:
-                bitrate = 3.0
-                self._read(self.project.movie_descriptor.get_movie_path())
                 for i, s in enumerate(segments):
-                    clip = self._videoclip.subclip(s[0] / 1000, s[1] / 1000)
+                    t_start = s[0] / 1000
+                    t_end = s[1] / 1000
                     name = os.path.join(directory, s[2] + ".mp4")
-                    if sys.platform == "darwin":
-                        clip.write_videofile(name,
-                                             codec='libx264',
-                                             audio_codec='aac',
-                                             bitrate=str(bitrate * 10 ** 6))
-                    else:
-                        clip.write_videofile(name,
-                                             codec="libx264",
-                                             bitrate=str(bitrate * 10 ** 6))
-                    clip.close()
+                    os.system(
+                        f"static_ffmpeg -y -ss {t_start} -i \"{self.project.movie_descriptor.get_movie_path()}\" -to {t_end} -c "
+                        f"copy -copyts \"{name}\""
+                    )
                     if callback is not None:
                         callback(i / len(segments))
             except Exception as e:
                 log_error(e)
-            self._videoclip.close()
+            if self._videoclip is not None:
+                self._videoclip.close()

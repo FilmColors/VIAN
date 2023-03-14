@@ -60,12 +60,32 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
 
         self.frame_width = -1
         self.frame_height = -1
+        self.frame_count: typing.Union[None, int] = None
         self.parse_movie()
+
 
     def set_letterbox_rect(self, rect:typing.Tuple[int, int, int, int]):
         """
-        :param tuple rect: A tuple with [left, top, width, height]
+        Can either be a tuple with (x1, y1, x2, y2) or a dictionary with
+        dict(left:int, right:int, top:int, bottom:int)
+        or a dictionary with
+        dict(left:int, right:int, width:int, height:int)
+        :param rect:
+        :return:
         """
+        if isinstance(rect, dict):
+            left, top = rect['left'], rect['top']
+
+            if "right" in rect:
+                width =  rect['right'] - rect['left']
+            else:
+                width = rect['width']
+            if "bottom" in rect:
+                height = rect['bottom'] - rect['top']
+            else:
+                height = rect['height']
+            rect = (left, top, width, height)
+
         self.letterbox_rect = rect
         self.onLetterBoxChanged.emit(self.get_letterbox_rect())
 
@@ -163,11 +183,13 @@ class MovieDescriptor(BaseProjectEntity, ISelectable, IHasName, ITimeRange, Auto
         if os.path.isfile(self.get_movie_path()):
             cap = cv2.VideoCapture(self.get_movie_path())
             self.fps = cap.get(cv2.CAP_PROP_FPS)
+            self.frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
             self.display_width, self.display_height = self.get_frame_dimensions()
         else:
             self.fps = 30
             self.display_height = None
             self.display_width = None
+            self.frame_count = None
 
     def get_frame_dimensions(self) -> Tuple[int, int]:
         """

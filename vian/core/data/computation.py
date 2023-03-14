@@ -771,10 +771,12 @@ def detect_letterbox(movie_path, n_samples=100) -> dict:
     variance -= np.amin(variance)
     variance /= np.amax(variance)
     ret, thresh = cv2.threshold(variance, 0.1, 1, cv2.THRESH_BINARY)
+
+
+
     if np.mean(thresh) == 1.0:
         return dict(left=0, right=0, top=0, bottom=0)
     else:
-
         # We search for the first pixel from each border which is > 0
         left = thresh[thresh.shape[0] // 2].tolist().index(1.0)
         right = thresh[thresh.shape[0] // 2][::-1].tolist().index(1.0)
