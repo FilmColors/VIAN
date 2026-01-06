@@ -16,7 +16,7 @@ requirements = [
     'pandas',
     'librosa',
     'pysrt',
-    'bokeh==2.2.1',
+    'bokeh==3.8.2',
     'matplotlib',
     'pymediainfo',
     'XlsxWriter',
